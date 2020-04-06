@@ -1,0 +1,62 @@
+
+<html>
+  <head>
+   <title>WWOU - Roles</title>
+    <%- include("partials/header") %>
+  </head>
+  <body>
+    <%- include("partials/navbar", {"user": user}) %>
+    <div class="rolesdiv container">
+    <h1 class="center fredoka" id="title">
+      List of Werewolf Utopium roles
+    </h1>
+    <% for (role in roles) { %>
+      <div class="gridblock row">
+    <figure class="center col" onClick("show<%- roles[role].cleanname %>()")></figure>
+      <img src="<%- roles[role].emoji %>" style="padding-top: <%- roles[role].padtop %>; padding-left: <%- roles[role].padleft %>">
+      <figcaption class="fredoka"><%- roles[role].name %></figcaption>
+    </figure>
+      </div>
+    <% } %>
+    </div>
+    <% for (role in roles) { %>
+    <div
+      class="modal fade"
+      id="<%- roles[role].cleanname %>"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="<%- roles[role].cleanname %>title"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="<%- roles[role].cleanname %>title"><%- roles[role].name %></h5>
+            <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Dismiss"
+                    >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <%- roles[role].desc %>
+          </div>
+          <div class="modal-footer">
+            <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                    >
+              Join our server
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+    <%- include("partials/footer") %>
+  </body>
+</html>
