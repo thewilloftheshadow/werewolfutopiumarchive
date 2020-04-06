@@ -1,0 +1,76 @@
+
+<html>
+  <head>
+   <title>WWOU - Roles</title>
+    <%- include("partials/header") %>
+    <script>
+      <% for (role in roles) { %>
+      function show<%- roles[role].cleanname %>(){$('#<%- roles[role].cleanname %>').modal('show')};                                            
+      <% } %>
+    </script>
+  </head>
+  <body>
+    <%- include("partials/navbar", {"user": user}) %>
+    <div class="rolesdiv container">
+    <h1 class="center fredoka" id="title">
+      List of Werewolf Utopium roles
+    </h1>
+    <% for (role in roles) { %>  
+      <p
+         href="#" class="fredoka roleitem"
+         id="p<%- roles[role].cleanname %>"
+         onclick="show<%- roles[role].cleanname %>()")
+         style="font-size:1.5em"
+       ><img src="<%- roles[role].emoji %>" style="max-height:1.75em;max-width:1.75em"> <%- roles[role].name %></p>
+    <% } %>
+    </div>
+    <% for (role in roles) { %>
+    <div
+      class="modal fade"
+      id="<%- roles[role].cleanname %>"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="<%- roles[role].cleanname %>title"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="<%- roles[role].cleanname %>title">
+              <img src="<%- roles[role].emoji %>" width="50"> <%- roles[role].name %>
+            </h5>
+            <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Dismiss"
+                    >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p><%- roles[role].desc %></p>
+            <p><b>Role Tags</b><br /><%- roles[role].tags ? roles[role].tags.join(', ') : "None" %></p>
+            <p>
+              <b>Team:</b><br><%- roles[role].team %><br><b>Aura:</b><br><%- roles[role].aura %>
+            </p>
+            <p>
+              <% role %>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                    >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+    <%- include("partials/footer") %>
+  </body>
+</html>
