@@ -13,8 +13,15 @@ module.exports = {
   name: "create",
   run: async (client, message, args, shared) => {
     // if (!players.get(`${message.author.id}.custom`))
-    if (!client.guilds.cache.get('522638136635817986').members.cache.get(message.author.id).roles.cache.find(r => r.name == 'ww cc') &&
-        !players.get(`${message.author.id}.inventory.${"custom maker"}`))
+    if (
+      !client.guilds.cache
+        .get("522638136635817986")
+        .members.cache.get(message.author.id)
+        .roles.cache.find(
+          r => r.name == "ww cc" || ["βTester Helper","Developer"].includes(r.name)
+        ) &&
+      !players.get(`${message.author.id}.inventory.${"custom maker"}`)
+    )
       return await message.author.send("You cannot create custom games!")
     
     if (players.get(`${message.author.id}.prompting`)) 
@@ -56,44 +63,64 @@ module.exports = {
         .setTitle("Custom Game Setup")
         .setDescription(
           `Select roles for your custom game by inputting their names or aliases.\n` +
-          "You have 30 seconds for each role. Type `end` to end your selection."
+          "You have 30 seconds for each role. Type `back` to remove your last selection."
         )
     )
     
+    let messagesSince = 0
     for (var i = 0; i < 16; i++) {
       let inputRole = await rolePrompt.channel
         .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
         .catch(() => {})
       
-      if (i < 4 && !inputRole)
+      if (!inputRole)
         return await message.author.send(
           new Discord.MessageEmbed()
             .setColor("RED")
             .setTitle("Prompt timed out.")
         )
-      else if (!inputRole || (inputRole.first().content.toLowerCase() == "end" && i >= 4))
-        break;
-      else if (inputRole.first().content.toLowerCase() == "end" && i < 4) {
-        return await message.author.send(
-          new Discord.MessageEmbed()
-            .setColor("RED")
-            .setTitle("You cannot create a game with less than 4 roles!")
-        )
-      }
       inputRole = inputRole.first().content.replace(/(_|\s+)/g, " ")
-      
-      let role = Object.values(roles).find(data => data.name.toLowerCase().startsWith(inputRole.toLowerCase()) || (data.abbr && data.abbr.includes(inputRole.toLowerCase())))
-      if (!role) {
-        await message.author.send("Unknown role.")
-        i--; continue;
+      messagesSince++
+      if (inputRole.toLowerCase() == "back") {
+        if (i == 0) {
+          await message.channel.send("uhhh wot?")
+          i--
+          continue;
+        }
+        currentGame.originalRoles.pop()
+        i -= 2
       }
-      if (role.oneOnly && currentGame.originalRoles.indexOf(role) !== -1)
-        return await message.author.send(
-          new Discord.MessageEmbed()
-            .setColor("RED")
-            .setTitle(`Input invalid: there can only be one ${role} in each game!`)
+      else {
+        let role = Object.values(roles).find(
+          data =>
+            data.name.toLowerCase().startsWith(inputRole.toLowerCase()) ||
+            (data.abbr && data.abbr.includes(inputRole.toLowerCase()))
         )
-      currentGame.originalRoles.push(role.name)
+        if (!role) {
+          await message.author.send("Unknown role.")
+          i--; continue;
+        }
+        if (role.oneOnly && currentGame.originalRoles.indexOf(role.name) !== -1) {
+          await message.author.send(
+            new Discord.MessageEmbed()
+              .setColor("RED")
+              .setTitle(`There can only be one ${fn.getEmoji(client, role.name)} ${role.name} in each game!`)
+          )
+          i--
+          continue;
+        }
+        currentGame.originalRoles[i] = role.name
+      }
+      let editEmbed = rolePrompt.embeds[0]
+      if (!i) editEmbed.fields = [{name: "Roles", value: ""}]
+      editEmbed.fields[0].value = currentGame.originalRoles.map(role => `${fn.getEmoji(client, role)} ${role}`).join('\n')
+      if (!editEmbed.fields[0].value.length) delete editEmbed.fields
+      if (messagesSince && messagesSince % 5 == 0) {
+        await rolePrompt.delete()
+        rolePrompt = await message.author.send(editEmbed)
+      } else {
+        await rolePrompt.edit(editEmbed)
+      }
     }
     
     await message.author.send(
@@ -128,20 +155,61 @@ module.exports = {
       let usedGCs = games.get('quick').filter(x => x.mode == 'custom').map(x => x.gameID.toLowerCase())
       // console.log(usedGCs)
       
-      if (!client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => ["βTester Helper","Developer"].includes(r.name)) && gcInput.toLowerCase().match(/^betatest\_.*?$/i))
+      if (
+        !client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(message.author.id)
+          .roles.cache.find(r =>
+            ["βTester Helper", "Developer"].includes(r.name)
+          ) &&
+        gcInput.toLowerCase().match(/^betatest\_.*?$/i)
+      )
         await gcPrompt.channel.send("You cannot create a beta test game!")
-      else if (!client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => r.name == "Developer") && gcInput.toLowerCase().match(/^devtest\_.*?$/i))
+      else if (
+        client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(message.author.id)
+          .roles.cache.find(r => r.name == "βTester Helper") &&
+        !client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(message.author.id)
+          .roles.cache.find(r => r.name == "ww cc") &&
+        !players.get(`${message.author.id}.inventory.${"custom maker"}`) &&
+        gcInput.toLowerCase().match(/^betatest\_.*?$/i)
+      )
+        return await gcPrompt.channel.send(
+          "Ahem. You don't have Custom Maker Item, do you?\nOr did you put in the wrong format? `BetaTest_X`"
+        )
+      else if (
+        !client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(message.author.id)
+          .roles.cache.find(r => r.name == "Developer") &&
+        gcInput.toLowerCase().match(/^devtest\_.*?$/i)
+      )
         await gcPrompt.channel.send("You cannot create a developer test game!")
-      else if (parseInt(gcInput) != gcInput && gcInput.match(/^[a-z0-9\_]{3,15}$/i) && !usedGCs.includes(gcInput.toLowerCase()))
+      else if (
+        parseInt(gcInput) != gcInput &&
+        gcInput.match(/^[a-z0-9\_]{3,15}$/i) &&
+        !usedGCs.includes(gcInput.toLowerCase())
+      )
         currentGame.gameID = gcInput
       else if (parseInt(gcInput) == gcInput)
-        await gcPrompt.channel.send("You cannot have an integral number as your game code.")
+        await gcPrompt.channel.send(
+          "You cannot have an integral number as your game code."
+        )
       else if (gcInput.length < 3)
-        await gcPrompt.channel.send("Your game code must be at least 3 characters long.")
+        await gcPrompt.channel.send(
+          "Your game code must be at least 3 characters long."
+        )
       else if (gcInput.length > 15)
-        await gcPrompt.channel.send("Your game code must be at most 15 characters long.")
+        await gcPrompt.channel.send(
+          "Your game code must be at most 15 characters long."
+        )
       else if (!gcInput.match(/^[a-z0-9\_]{3,15}$/i))
-        await gcPrompt.channel.send("Your game code must only include alphanumerical characters and underscores.")
+        await gcPrompt.channel.send(
+          "Your game code must only include alphanumerical characters and underscores."
+        )
       else if (usedGCs.includes(gcInput.toLowerCase()))
         await gcPrompt.channel.send("Your game code has been taken.")
     }

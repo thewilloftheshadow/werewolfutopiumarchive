@@ -9,6 +9,9 @@ border-radius: 10  border-radius: 106.rolesdiv {
 body {
   font-family: 'Open Sans', sans-serif;
 }
+.padtop {
+  padding-top: 50px;
+}
 .bold{
   font-weight: 900;
 }
@@ -98,12 +101,13 @@ figure {
 [data-theme="dark"] .bg-black {
   background-color: #eee !important;
 }
-/* .accordion .card-header:after {
+
+.addccordion .dcard-header:after {
   font-family: 'FontAwesome';  
   content: "\f068";
   float: right; 
 }
-.accordion .card-header.collapsed:after {
+.addccordion .dcard-header.collapsed:after {
   /* symbol for "collapsed" panels */
   content: "\f067"; 
-} */
+} 

@@ -40,10 +40,10 @@ module.exports = {
       }
     }
     
-    if(inv.talisman){
+    if(inv && inv.talisman){
       let allt = ""
       for(let t in inv.talisman) allt += `${fn.getEmoji(client, t)} ${t} - ${inv.talisman[t]}\n`
-      embeds[0].addField("Talismans:",allt)
+      embeds[0].addField("Talismans:", allt)
     }
     
     for (var [x, embed] of embeds.entries()) {

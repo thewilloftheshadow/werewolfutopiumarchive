@@ -9,19 +9,26 @@ module.exports = {
     if (!args.length) return await message.author.send("You did not specify a role.")
     
     let targetRole = args.join(' ')
-    let role = Object.entries(roles).find(([name, data]) => name.toLowerCase().startsWith(targetRole.toLowerCase()) || (data.abbr && data.abbr.includes(targetRole.toLowerCase())))
+    let role = Object.values(roles).find(
+      data =>
+        data.name.toLowerCase().startsWith(targetRole.toLowerCase()) ||
+         (data.abbr && data.abbr.includes(targetRole.toLowerCase()))
+    )
+    console.log(role)
+    
     if (!role) return await message.author.send("Unknown role.")
-    role = role[0]
     let rolecmdobj = client.commands.filter((cmd) => cmd.gameroles && cmd.gameroles.includes(role)).array()
     let rolecmds = []
     rolecmdobj.forEach(cmd => {
       rolecmds.push(cmd.name)
     })
+    console.log(role)
+    if (!role) return await message.author.send("Unknown role.")
     
     let embed = new Discord.MessageEmbed()
-        .setTitle(`${role}`)
-        .setThumbnail(fn.getEmoji(client, role).url)
-        .setDescription(`${roles[role].desc}${roles[role].aura ? `\n\nAura: ${roles[role].aura}` : ""}${roles[role].team ? `\nTeam: ${roles[role].team}` : ""}`);
+        .setTitle(`${role.name}`)
+        .setThumbnail(fn.getEmoji(client, role.name).url)
+        .setDescription(`${role.desc}${role.aura ? `\n\nAura: ${role.aura}` : ""}${role.team ? `\nTeam: ${role.team}` : ""}`);
     if (rolecmds.length)
       embed.addField("Action Commands", `${rolecmds.map(c => `\`w!${c}\``).join(', ')}`)
     

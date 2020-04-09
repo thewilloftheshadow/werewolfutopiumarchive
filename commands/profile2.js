@@ -7,8 +7,8 @@ const players = new db.table("Players"),
 const fn = require('/app/util/fn')
 
 module.exports = {
-  name: "profile2",
-  aliases: ["p2"],
+  name: "profilelink",
+  aliases: ["p2","profile2","plink"],
   run: async (client, message, args) => {
     let target
     if (!args[0]) target = message.author

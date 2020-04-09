@@ -316,7 +316,7 @@ client.on('message', async message => {
       .setColor(0x888888)
       .setTitle("AFK Members")
       .setDescription(
-        afkmentions.map(x => `**<@${x}> (${nicknames.get(x)})** | ${players.get(`${x}.afk`)}`).slice(0, 10).join('\n') +
+        afkmentions.map(x => `**<@${x}> (${nicknames.get(x) ? nicknames.get(x) : client.users.cache.get(x).username})** | ${players.get(`${x}.afk`)}`).slice(0, 10).join('\n') +
         (afkmentions.length > 10 ? `\nand ${afkmentions.length-10} more...` : "")
       )
   )

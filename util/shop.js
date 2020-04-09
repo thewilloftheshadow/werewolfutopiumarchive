@@ -41,7 +41,7 @@ module.exports = {
     emoji: "rose bouquet"
   },
   "custom maker": {
-    price: 1000,
+    price: 2000,
     name: "Custom Maker",
     description:
       "Buy this to be able to make custom games to play with your friends!",

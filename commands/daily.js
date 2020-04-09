@@ -89,7 +89,7 @@ module.exports = {
       { weight: player.streak, item: "master lootbox", possibleValues: [1] }
     ]
     let bonusItem = items[wrg(items.map(x => x.weight))]
-    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse)]
+    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse())]
     
     console.log(bonusItem, bonusItemAmt)
     
@@ -100,12 +100,13 @@ module.exports = {
     players.set(message.author.id, player)
     await message.channel.send(
       new Discord.MessageEmbed()
-        .setTitle("Daily Reward for " + message.author.tag)
+        .setTitle(`Daily Reward for ${nicknames.get(message.author.id)}`)
         .setThumbnail(fn.getEmoji(client, "Daily").url)
         .setDescription(
           `You received ${base} ${fn.getEmoji(client, "Coin")}.\n` +
           (bonus ? `**${player.streak}-day streak bonus** | ${bonus} ${fn.getEmoji(client, "Coin")}\n` : "") +
-          (booster ? `**Booster 25% bonus** | ${Math.round((base + bonus) * 0.25)} ${fn.getEmoji(client, "Coin")}` : "")
+          (booster ? `**Booster 25% bonus** | ${Math.round((base + bonus) * 0.25)} ${fn.getEmoji(client, "Coin")}\n` : "") +
+          `You now have ${player.coins} ${fn.getEmoji(client, "Coin")}.`
         )
     )
   }
