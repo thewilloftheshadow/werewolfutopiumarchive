@@ -233,6 +233,30 @@ const gameEmbed = (client, game) => {
 const death = (client, game, number, suicide = false) => {
   let deadPlayer = game.players.find(p => p.number == number)
   
+  // DOPPEL TAKE ROLE
+  game.running = "doppelganger taking new role"
+  let doppels = game.players.filter(p => p.alive && p.role == "Doppelganger" && p.selection == deadPlayer.number)
+  for (var doppel of doppels) {
+    doppel.role = deadPlayer.role
+    getUser(client, doppel.id).send(
+      new Discord.MessageEmbed()
+        .setTitle("Welp.")
+        .setThumbnail(getEmoji(client, deadPlayer.role))
+        .setDescription(
+          `**${deadPlayer.number} ${nicknames.get(deadPlayer.id)} ${getEmoji(
+            client,
+            deadPlayer.role
+          )}** has died and you have taken their role. You are now a${[
+            "A",
+            "E",
+            "I",
+            "O",
+            "U"
+          ].includes(deadPlayer.role[0])} ${deadPlayer.role}!`
+        )
+    )
+  }
+  
   game.running = "start death module"
   
   if (!suicide || suicide == "corr") {
@@ -313,10 +337,12 @@ const death = (client, game, number, suicide = false) => {
     }
 
     // SECT SUICIDE
-    game.running = "avenge for sect"
-    if (!deadPlayer.alive && !deadPlayer.suicide && deadPlayer.role == "Sect Leader" && deadPlayer.sectSuicided) {
+    game.running = "suicide for sect"
+    if (!deadPlayer.alive && !deadPlayer.suicide && deadPlayer.role == "Sect Leader" && !deadPlayer.sectSuicided) {
       let sectLeader = game.players.find(p => p.role == "Sect Leader")
       let sectMembers = game.players.filter(p => p.alive & p.sect)
+      
+      sectLeader.sectSuicided = true
 
       for (var sectMember of sectMembers) {
         sectMember.alive = false
@@ -405,6 +431,24 @@ const createTalisman = async (client, role) => {
   return attachment
 }
 
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+const randomString = (len) => {
+  let buf = []
+  , chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  , charlen = chars.length;
+  
+  for (var i = 0; i < len; ++i) {
+    buf.push(chars[getRandomInt(0, charlen - 1)]);
+  }
+  
+  return buf.join('');
+};
+
 module.exports = {
   time: time,
   utcTime: utcTime,
@@ -427,5 +471,7 @@ module.exports = {
   addWin: addWin,
   death: death,
   gameEmbed: gameEmbed,
-  createTalisman: createTalisman
+  createTalisman: createTalisman,
+  getRandomInt: getRandomInt,
+  randomString: randomString
 }

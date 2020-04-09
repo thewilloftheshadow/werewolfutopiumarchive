@@ -636,7 +636,7 @@ let roles = {
   // WEREWOLF CLASSIC ROLES
   "Amulet of Protection Holder": {
     desc: "You are a regular villager, but you cannot be killed by the werewolves.",
-    abbr: ['aph', 'aoph'],
+    abbr: ['aph', 'aoph', 'amulet'],
     aura: "Good",
     team: "Village",
     tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.TO_BE_TESTED

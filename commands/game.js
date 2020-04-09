@@ -37,8 +37,9 @@ module.exports = {
                   }${
                     p.id == message.author.id || p.roleRevealed
                       ? ` ${fn.getEmoji(client, p.roleRevealed || p.role)}`
-                      : roles[gamePlayer.role].team == "Werewolves" &&
-                        roles[p.role].team == "Werewolves"
+                      : (roles[gamePlayer.role].team == "Werewolves" &&
+                        roles[p.role].team == "Werewolves" && gamePlayer.role !== "Sorcerer") ||
+                        (gamePlayer.role == "Sorcerer" && p.role == "Sorcerer") || (gamePlayer.role == "Mason" && p.role == "Mason")
                       ? ` ${fn.getEmoji(client, p.role)}`
                       : gamePlayer.couple && p.couple
                       ? ` ${fn.getEmoji(client, p.roleRevealed || p.initialRole)} ${fn.getEmoji(client, "Cupid Lovers")}`

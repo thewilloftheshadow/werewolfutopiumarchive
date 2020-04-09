@@ -2,7 +2,7 @@
 <html>
   <head>
    <title>WWOU - Profile for <%- player.nickname %></title>
-    <%- include("partials/header") %>
+    <%- include("partials/header", {title: player.nickname + "'s Profile on Werewolf Utopium", desc: null}) %>
   </head>
   <body>
     <%- include("partials/navbar", {"user": user}) %>

@@ -30,12 +30,12 @@ module.exports = {
       if (isNaN(target) || target > game.players.length || target < 1)
         return await message.author.send("Invalid target.") 
     } else {
-      let r = message.mentions.members.first() || client.users.cache.get(args[0])
+      let r = message.mentions.users.first() || await client.users.fetch(args[0]).cact
       if(!r) return await message.channel.send("Unable to find that user.")
     }
     await r.send(
       new Discord.MessageEmbed()
-      .setTitle("Congrats!")
+      .setTitle("Roses for you")
       .setDescription(
         `You were given a rose by ${r}!`
       )

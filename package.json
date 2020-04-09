@@ -26,10 +26,8 @@
     "express-session": "^1.16.1",
     "passport": "^0.4.1",
     "probe-image-size": "^5.0.0",
-    "ejs-lint": "^1.0.1",
     "canvas": "^2.6.1",
-    "weighted-random": "^0.1.0",
-    "passport-remember-me-session": "^1.0.0"
+    "weighted-random": "^0.1.0"
   },
   "scripts": {
     "start": "node index.js"

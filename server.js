@@ -1,14 +1,14 @@
-const express = require("express")
-const app = express()
-const ejs = require("ejs")
-const path = require("path")
-const Strategy = require("passport-discord").Strategy
-const html = require("html")
-const http = require("http")
-const session = require("express-session")
-const passport = require("passport")
+const express = require("express");
+const app = express();
+const ejs = require("ejs");
+const path = require("path");
+const Strategy = require("passport-discord").Strategy;
+const html = require("html");
+const http = require("http");
+const session = require("express-session");
+const passport = require("passport");
 const probe = require('probe-image-size');
-
+const cmd = require("node-cmd");
 
 app.use(
   require("express-session")({
@@ -22,6 +22,7 @@ app.use(
   })
 )
 
+
 passport.serializeUser((user, done) => {
   done(null, user)
 })
@@ -29,6 +30,8 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((obj, done) => {
   done(null, obj)
 })
+
+
 
 passport.use(
   new Strategy(
@@ -47,12 +50,18 @@ passport.use(
   )
 )
 
-app.use(express.static(path.join(__dirname, "/public")))
-app.use(require("cookie-parser")())
-app.use(require("body-parser").urlencoded({ extended: true }))
-app.use(passport.initialize())
-app.use(passport.session())
-app.set('view engine', 'ejs');
+
+function issueToken(user) {
+  let token = fn.randomString(64);
+  authdb.set("tokens."+token, user.id)
+  return token;
+}
+
+function useToken(token) {
+  let uid = authdb.get("tokens."+token)
+  authdb.delele("tokens."+token)
+  return uid;
+}
 
 const Discord = require("discord.js"),
       fs = require("fs"),
@@ -66,25 +75,43 @@ const config = require("/app/util/config"),
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
-      nicknames = new db.table("Nicknames")
+      nicknames = new db.table("Nicknames"),
+      authdb = new db.table("authdb")
 
 const roles = require("/app/util/roles")
 
 app.use(express.static(path.join(__dirname, "/public")))
 app.use(require("cookie-parser")())
 app.use(require("body-parser").urlencoded({ extended: true }))
+app.use(passport.initialize())
+app.use(passport.session())
+app.set('view engine', 'ejs');
 
 module.exports = client => {
   client.on("ready", async () => {
-    try {
       app.get("*", (req, res) => {
-        if (req.hostname.includes("werewolf-utopium.glitch.me")) {
-          res.redirect("https://werewolf-utopium.tk" + req.url)
-        } else {
-          req.next()
+        try { //redirect to custom domain
+          if (req.hostname.includes("werewolf-utopium.glitch.me")) {
+            res.redirect("https://werewolf-utopium.tk" + req.url)
+          } else {
+            req.next()
+          }
+        } catch (e) {}
+        
+        if(req.user) authdb.set(req.user.id, req.user) // Store all user info
+        if(req.user && !req.cookies.remember_me){ //logged in but no rm cookie
+          let token = issueToken(req.user)
+          res.cookie('remember-me', token, {secure: true, httpOnly: true})
+        }
+        if(!req.user && req.cookies.remember_me){ //not logged in but rm cookie
+          let uid = useToken(req.cookies.remember_me)
+          if(uid) req.user = authdb.get(uid)
+          res.clearCookie('remember_me');
+          let token = issueToken(req.user)
+          res.cookie('remember-me', token, {secure: true, httpOnly: true})
         }
       })
-    } catch (e) {}
+    
     
     app.get("/", (req, res) => {
       let pass = { user: null, player: null }
@@ -159,13 +186,27 @@ module.exports = client => {
     )
     
     app.get("/logout", (req, res) => {
+      res.clearCookie('remember_me');
       req.logout()
       res.redirect("/")
     })
     
     app.get("/info", checkAuth, (req, res) => {
       console.log(req.user)
-      res.json({})
+      res.sendStatus(200)
+    })
+    
+    app.get("/json.sqlite", async(req, res) => {
+      if(!req.user) res.redirect("/")
+      if (!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
+      res.sendFile("/app/json.sqlite")
+    })
+    
+    app.get("/restart", async(req, res) => {
+      if(!req.user) res.redirect("/")
+      if(!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
+      cmd.run("refresh")
+      res.sendStatus(200)
     })
     
     for (let role in roles) {
@@ -206,7 +247,6 @@ module.exports = client => {
       pass.tags = tags
       res.render(__dirname + "/views/roles.ejs", pass)
     })
-    
     
 
     function checkAuth(req, res, next) {

@@ -32,7 +32,7 @@ module.exports = {
     allGamesPlayed.push(...player.loses)
     
     return await message.channel.send(
-      new Discord.MessageEmbed()
+      new Discord.MessageEmbed({fields: []})
         .setAuthor(`User Profile | ${nicknames.get(target.id) ? nicknames.get(target.id).replace(/\\_/g, "_") : `\* ${target.username}`}`)
         .setThumbnail(target.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))
         .addField("Coins", player.coins, true)

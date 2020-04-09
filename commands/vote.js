@@ -38,10 +38,12 @@ module.exports = {
         let vote = parseInt(args[0])
         if (isNaN(vote) || vote > game.players.length || vote < 1)
           return await message.author.send("Invalid vote.")
-        if (game.players[vote-1].role.toLowerCase().includes("wolf")) 
+        if (game.players[vote-1].team == "Werewolf") 
           return await message.author.send("You cannot vote a fellow werewolf.")
         if (!game.players[vote-1].alive) 
           return await message.author.send("You cannot vote a dead player.")
+        if (!game.players[vote-1].role == "Sorcerer") 
+          return await message.author.send("You cannot vote the Sorcerer.")
         gamePlayer.vote = vote
         
         fn.broadcastTo(
@@ -93,8 +95,6 @@ module.exports = {
         return await message.author.send("You cannot vote a dead player.")
       if (vote == gamePlayer.number) 
         return await message.author.send("You cannot vote yourself.")
-      if(game.players[vote-1].role === "Sorcerer")
-        return await message.author.send("You cannot vote the sorcerer!")
       game.players[gamePlayer.number-1].vote = vote
       fn.broadcastTo(
         client, game.players.filter(p => !p.left),

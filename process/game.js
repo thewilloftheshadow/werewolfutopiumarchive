@@ -588,7 +588,7 @@ module.exports = client => {
                   "Serial Killer"
                 ].includes(attackedPlayer.role) ||
                 (attackedPlayer.role == "Red Lady" &&
-                  attackedPlayer.visitedTonight)
+                  attackedPlayer.visitedTonight && !game.frenzy)
               ) {
                 game.running = "cannot kill solo or rl visiting others"
                 fn.broadcastTo(
@@ -610,23 +610,50 @@ module.exports = client => {
                 } else {
                   game.running = "kill attacked player for frenzy"
                   game.lastDeath = game.currentPhase
-                  attackedPlayer.alive = false
-                  attackedPlayer.killedBy = kww.number
-                  if (game.config.deathReveal)
-                    attackedPlayer.roleRevealed = attackedPlayer.role
-                  fn.broadcastTo(
-                    client,
-                    game.players.filter(p => !p.left).map(p => p.id),
-                    `The werewolves killed **${
-                      attackedPlayer.number
-                    } ${nicknames.get(attackedPlayer.id)}${
-                      game.config.deathReveal
-                        ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
-                        : ""
-                    }**.`
-                  )
+                  if (attackedPlayer.role == "Cursed") {
+                    game.running = "convert cursed from ww frenzy"
+                    attackedPlayer.role = "Werewolf"
+                    game.lastDeath = game.currentPhase
+                    fn.getUser(client, attackedPlayer.id).send(
+                      new Discord.MessageEmbed()
+                        .setTitle(
+                          "<:Fellow_Werewolf:660825937109057587> Converted!"
+                        )
+                        .setDescription(
+                          "You have been bitten! You are a <:Werewolf:658633322439639050> Werewolf now!"
+                        )
+                    )
+                    fn.broadcastTo(
+                      client,
+                      wolves,
+                      `**${attackedPlayer.number} ${nicknames.get(
+                        attackedPlayer.id
+                      )}** is the <:Cursed:659724101258313768> Cursed and is turned into a <:Werewolf:658633322439639050> Werewolf!`
+                    )
+                  }
+                  else {
+                    attackedPlayer.alive = false
+                    attackedPlayer.killedBy = wolves.filter(p => p.alive)[
+                      Math.floor(
+                        Math.random() * wolves.filter(p => p.alive).length
+                      )
+                    ].number
+                    if (game.config.deathReveal)
+                      attackedPlayer.roleRevealed = attackedPlayer.role
+                    fn.broadcastTo(
+                      client,
+                      game.players.filter(p => !p.left).map(p => p.id),
+                      `The werewolves killed **${
+                        attackedPlayer.number
+                      } ${nicknames.get(attackedPlayer.id)}${
+                        game.config.deathReveal
+                          ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
+                          : ""
+                      }**.`
+                    )
 
-                  game = fn.death(client, game, attackedPlayer.number)
+                    game = fn.death(client, game, attackedPlayer.number)
+                  }
                 }
 
                 game.running = "protect from ww attack"
@@ -935,7 +962,7 @@ module.exports = client => {
               }
               if (
                 roles[attackedPlayer.role].team !== "Village" ||
-                attackedPlayer.headhunter || attackedPlayer.sect
+                attackedPlayer.headhunter || attackedPlayer.sect || attackedPlayer.role === "Amulet of Protection Holder"
               ) {
                 fn.broadcastTo(
                   client,
@@ -953,7 +980,7 @@ module.exports = client => {
                 if (attackedPlayer.protectors.find()) fn.broadcastTo(
                   client, game.players.filter(p => !p.left && (roles[p.role].tag & tags.ROLE.SEEN_AS_WEREWOLF)),
                   `Kitten Wolf tried to convert **${attackedPlayer.number} ${nicknames.get(attackedPlayer.id)}**!` +
-                  ` They were either not a villager, protected or a Headhunter's target.`
+                  ` They were either not a villager, they were protected or they are the Headhunter's target.`
                 )
 
                 for (var x of attackedPlayer.protectors) {
@@ -984,7 +1011,7 @@ module.exports = client => {
                     )
                     attackedPlayer.role = "Werewolf"
                     fn.getUser(client, attackedPlayer.id).send(
-                      `You were scratched by the kitten wolf. You are now a werewolf!` +
+                      `You were scratched by the Kitten Wolf. You are now a werewolf!` +
                         `Check out who your teammates are in \`w!game\`.`
                     )
 
@@ -1121,7 +1148,7 @@ module.exports = client => {
             // SPIRIT SEER RESULTS
             game.running = "give spirit seer results"
             let spzs = game.players.filter(
-              p => p.alive && p.role == "Spirit Seer" && p.usedAbilityTonight
+              p => p.alive && p.role == "Spirit Seer" && p.usedAbilityTonight && p.usedAbilityTonight.length
             )
             for (var spz of spzs) {
               let targets = spz.usedAbilityTonight.map(
@@ -1131,7 +1158,7 @@ module.exports = client => {
               if (targets[0].killedTonight || targets[1].killedTonight)
                 fn.getUser(client, spz.id).send(
                   new Discord.MessageEmbed()
-                    .setTitle("There was blood...")
+                    .setTitle("They had an evil soul...")
                     .setThumbnail(fn.getEmoji(client, "Spirit Seer Killed").url)
                     .setDescription(
                       `**${targets[0].number} ${nicknames.get(
@@ -1180,7 +1207,7 @@ module.exports = client => {
 
                 fn.getUser(client, sheriff.id).send(
                   new Discord.MessageEmbed()
-                    .setTitle("You guys were up for something...")
+                    .setTitle("There was blood...")
                     .setThumbnail(fn.getEmoji(client, "Sheriff Suspect").url)
                     .setDescription(
                       one
@@ -1380,24 +1407,24 @@ module.exports = client => {
               let doused = arso.usedAbilityTonight
                 .map(p => game.players[p - 1])
                 .filter(p => p.alive)
-              // let douseRL = (player) => {
-              //   for (var rl of game.players.filter(p => p.alive && p.role == "Red Lady" && p.usedAbilityTonight == player.number))
-              //   if (!arso.doused) arso.doused = []
-              //   arso.doused.push(dousedPlayer.number)
-              //   game.lastDeath = game.currentPhase
-              //   fn.getUser(client, arso.id).send(
-              //     new Discord.MessageEmbed()
-              //       .setTitle("Medium Rare")
-              //       .setThumbnail(fn.getEmoji(client, "Arsonist Douse").url)
-              //       .setDescription(
-              //         `**${dousedPlayer.number} ${nicknames.get(
-              //           dousedPlayer.id
-              //         )}** has been doused with gasoline!`
-              //       )
-              //   )
-              // }
+              let douseRL = (player) => {
+                for (var rl of game.players.filter(p => p.alive && p.role == "Red Lady" && p.usedAbilityTonight == player.number)) {
+                  if (!arso.doused) arso.doused = []
+                  arso.doused.push(rl.number)
+                  game.lastDeath = game.currentPhase
+                  fn.getUser(client, arso.id).send(
+                    new Discord.MessageEmbed()
+                      .setTitle("Medium Rare")
+                      .setThumbnail(fn.getEmoji(client, "Arsonist Douse").url)
+                      .setDescription(
+                        `**${rl.number} ${nicknames.get(rl.id)}** has been doused with gasoline!`
+                      )
+                  )
+                }
+              }
               for (var dousedPlayer of doused) {
                 if (!arso.doused) arso.doused = []
+                if (dousedPlayer.role == "Red Lady" && dousedPlayer.usedAbilityTonight) continue;
                 arso.doused.push(dousedPlayer.number)
                 game.lastDeath = game.currentPhase
                 fn.getUser(client, arso.id).send(
@@ -1410,7 +1437,7 @@ module.exports = client => {
                       )}** has been doused with gasoline!`
                     )
                 )
-                
+                douseRL(dousedPlayer)
               }
             }
 
@@ -1424,17 +1451,17 @@ module.exports = client => {
                 new Discord.MessageEmbed()
                   .setTitle("Rrrrrrr")
                   .setDescription(
-                    "You have been bitten by zombies and is now one!"
+                    "You have been bitten by zombies and are now one of them!"
                   )
                   .setThumbnail(fn.getEmoji(client, "Zombie").url)
               )
               bit.bitten = false
             }
             let zombies = game.players.filter(
-              p => p.alive && p.role == "Zombie" && p.usedAbilityTonight
+              p => p.alive && p.role == "Zombie"
             )
             fn.broadcastTo(
-              game,
+              client,
               zombies,
               new Discord.MessageEmbed()
                 .setTitle("New FRRrrrrriends")
@@ -1446,13 +1473,13 @@ module.exports = client => {
                 .setThumbnail(fn.getEmoji(client, "Zombie").url)
             )
             game.running = "bite by zomb"
-            for (var zombie of zombies) {
+            for (var zombie of zombies.filter(z => z.usedAbilityTonight)) {
               let bit = game.players[zombie.usedAbilityTonight - 1]
               bit.bitten = true
             }
             bitten = game.players.filter(p => p.bitten && p.alive)
             fn.broadcastTo(
-              game,
+              client,
               zombies,
               new Discord.MessageEmbed()
                 .setTitle("BRAINS")
@@ -1595,11 +1622,16 @@ module.exports = client => {
               delete corr.glitched
             }
           }
+
+          let alive = game.players.filter(p => p.alive),
+              aliveRoles = alive.map(p => p.role)
           
           game.running = "test for tie"
           if (
             game.lastDeath + 9 == game.currentPhase ||
-            !game.players.filter(p => p.alive).length
+            !alive.length ||
+            (alive.length == 2 && aliveRoles.includes("Amulet of Protection Holder") &&
+             roles[aliveRoles.filter(r => !r == "Amulet of Protection Holder")[0]].tag & tags.ROLE.SEEN_AS_WEREWOLF)
           ) {
             game.running = "tie end"
             game.currentPhase = 999
@@ -1680,16 +1712,13 @@ module.exports = client => {
             continue;
           }
 
-          let alive = game.players.filter(p => p.alive),
-            aliveRoles = alive.map(p => p.role)
-
           game.running = "test for soul collector win conditions"
           if (
             alive.find(
               p =>
                 p.role == "Soul Collector" &&
                 p.alive &&
-                game.players.filter(p => p.boxed).length ==
+                game.players.filter(p => p.boxed).length >=
                   Math.round(game.players.length / 4)
             )
           ) {

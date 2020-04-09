@@ -117,8 +117,41 @@ module.exports = {
     if (reaction.id == fn.getEmoji(client, "red_tick").id) return await m.edit(new Discord.MessageEmbed().setDescription("Purchase canceled"))
     
     
-    if(item.itemid != "talisman") players.add(message.author.id+".inventory."+item.itemid, am)
+    if(!["talisman", "private channel"].includes(item.itemid)) players.add(message.author.id+".inventory."+item.itemid, am)
     if(item.itemid === "talisman") players.add(message.author.id+".inventory."+item.itemid+"."+role.name, am)
+    
+    if(item.itemid === "private channel"){
+      if(message.guild.id === "522638136635817986") return players.add(message.author.id+".inventory."+item.itemid, am)
+      let namePrompt = await message.author.send(
+        new Discord.MessageEmbed()
+        .setTitle("Private Channel Setup")
+        .setDescription(
+          `Select a name for your new channel.`
+        )
+      )
+      let nameInput = await namePrompt.channel
+      .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
+      .catch(() => {})
+      if (!nameInput)
+        return await message.author.send(
+          new Discord.MessageEmbed()
+          .setColor("RED")
+          .setTitle("Prompt timed out.")
+        )
+      name = nameInput.first().content
+      let newchan = client.guilds.get("522638136635817986").channels.create(name.replace(/[^a-z0-9-]/g, '').toLowerCase(), {
+        type: 'text',
+        parent: "664378730503995402",
+        permissionOverwrites: [
+          {
+            id: message.author.id,
+            allow: ['VIEW_CHANNEL', 'MANAGE_CHANNEL'],
+          },
+          {id: message.guild.id, deny: ['VIEW_CHANNEL']}
+        ],
+      })
+    }
+    
     players.subtract(message.author.id+".coins", price) 
     message.channel.send(`Success! You have purchased ${am} ${role ? role.name + " " : ""}${item.name}${am > 1 ? "s" : ""}`)
     await m.edit(

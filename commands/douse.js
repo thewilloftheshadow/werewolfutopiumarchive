@@ -38,40 +38,49 @@ module.exports = {
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your actions.")
     
-    let targetA = parseInt(args[0]),
-        targetB = parseInt(args[1])
-    if (isNaN(targetA) || targetA > game.players.length || targetA < 1 ||
-       isNaN(targetB) || targetB > game.players.length || targetB < 1)
-      return await message.author.send("Invalid target.")
-    if (!game.players[targetA-1].alive || !game.players[targetB-1].alive)
-      return await message.author.send("You cannot douse dead players!")
-    if (targetA == targetB) 
-      return await message.author.send("You need to select **__two different targets__** for our ability to work!")
-    if (targetA == gamePlayer.number || targetB == gamePlayer.number)
-      return await message.react(fn.getEmoji(client, "harold"))
+    if (args.length == 2 && args[0] == args[1])
+      return await message.author.send("You must select different targets!")
     
-    let targetPlayerA = game.players[targetA-1],
-        targetPlayerB = game.players[targetB-1]
+    let successfulDouses = []
     
-    if ((gamePlayer.doused || []).includes(targetPlayerA.number))
-      return await message.author.send(`You doused **${game.players[targetA-1]} ${nicknames.get(game.players[targetA-1])}** already!`) 
-    if ((gamePlayer.doused || []).includes(targetPlayerB.number))
-      return await message.author.send(`You doused **${game.players[targetB-1]} ${nicknames.get(game.players[targetB-1])}** already!`)
+    for (var target of args) {
+      target = parseInt(target)
+      if (isNaN(target) || target > game.players.length || target < 1) {
+        await message.author.send("Invalid target.")
+        continue;
+      }
+      let targetPlayer = game.players[target-1]
+      if (!targetPlayer.alive) {
+        await message.author.send(`**${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** is already dead!`)
+        continue;
+      }
+      if ((gamePlayer.doused || []).includes(targetPlayer.number)) {
+        await message.author.send(`You doused **${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** already!`)
+        continue;
+      }
+      if (gamePlayer.number == targetPlayer.number) {
+        await message.react(fn.getEmoji(client, "harold"))
+        continue;
+      }
+      if (targetPlayer.role == "President") {
+        await message.channel.send("You cannot douse the President!")
+        continue;
+      }
+      successfulDouses.push(targetPlayer)
+    }
     
-    if (targetPlayerA.role == "President" || targetPlayerB.role == "President")
-      return await message.author.send("You cannot douse the President!")
+    if (!successfulDouses.length) return undefined;
     
     message.author.send(
     	new Discord.MessageEmbed()
         .setTitle(`Doused Players`)
         .setThumbnail(fn.getEmoji(client, "Arsonist Doused").url)
         .setDescription(
-          `You have doused **${targetA} ${nicknames.get(targetPlayerA.id)}** and **${targetB} ${nicknames.get(targetPlayerB.id)}**!`
+          `You have doused ${successfulDouses.map(x => `**${x.number} ${nicknames.get(x.id)}**`).join(' and ')}!`
         )
     )
     
-    gamePlayer.usedAbilityTonight = [targetA, targetB]
-
+    gamePlayer.usedAbilityTonight = successfulDouses
     
     QuickGames[index] = game
     games.set("quick", QuickGames)
