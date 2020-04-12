@@ -23,7 +23,7 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
-    if (!["Junior Werewolf","Avenger","Loudmouth"].includes(gamePlayer.role))
+    if (!["Junior Werewolf","Avenger"].includes(gamePlayer.role))
       return await message.author.send("You do not have this ability!")
     if (!gamePlayer.alive)
       return await message.author.send("You are dead and can no longer use your abilities.")
