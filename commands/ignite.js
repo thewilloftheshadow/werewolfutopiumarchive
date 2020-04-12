@@ -38,6 +38,8 @@ module.exports = {
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your actions.")
 
+    if (!gamePlayer.doused.length)
+      return await message.author.send("You have not doused anyone yet! Use the `w!douse` command first!")
     let dousedPlayers = gamePlayer.doused.map(p => game.players[p-1]).filter(p => p.alive)
 
     if (!dousedPlayers.length)

@@ -1,5 +1,5 @@
 module.exports = {
-  lootbox: {
+  "lootbox": {
     price: 50,
     name: "Lootbox",
     description: "Just a common lootbox with ordinary stuff",
@@ -23,7 +23,7 @@ module.exports = {
     unavaliable: true,
     emoji: "master lootbox"
   },
-  rose: {
+  "rose": {
     price: 25,
     name: "Rose",
     description: "A single rose, given out of love (and coins)",

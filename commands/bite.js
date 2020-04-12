@@ -51,6 +51,7 @@ module.exports = {
     if (targetPlayer.role == "Zombie") 
       return await message.channel.send("You can't bite other zombies!") 
     
+    
     gamePlayer.killedTonight = true
     gamePlayer.usedAbilityTonight = targetPlayer.number
     

@@ -59,7 +59,7 @@ function issueToken(user) {
 
 function useToken(token) {
   let uid = authdb.get("tokens."+token)
-  authdb.delele("tokens."+token)
+  authdb.delete("tokens."+token)
   return uid;
 }
 
@@ -86,9 +86,27 @@ app.use(require("body-parser").urlencoded({ extended: true }))
 app.use(passport.initialize())
 app.use(passport.session())
 app.set('view engine', 'ejs');
+app.use(function (req, res, next) {
+  if(req.user) authdb.set(req.user.id, req.user) // Store all user info
+  if(req.user && !req.cookies.rememberme){ //logged in but no rm cookie
+    console.log(req.cookies)
+    let token = issueToken(req.user)
+    res.clearCookie('remember-me');
+    res.cookie('rememberme', token, {secure: true, httpOnly: true, maxAge: 604800000})
+  }
+  if(!req.user && req.cookies.rememberme){ //not logged in but rm cookie
+    let uid = useToken(req.cookies.rememberme)
+    req.user = authdb.get(uid)
+    res.clearCookie('rememberme');
+    res.clearCookie('remember-me');
+    let token = issueToken(req.user)
+    res.cookie('rememberme', token, {secure: true, httpOnly: true, maxAge: 604800000})
+  }
+  next()
+})
 
 module.exports = client => {
-  client.on("ready", async () => {
+  client.on("ready", async () => {    
       app.get("*", (req, res) => {
         try { //redirect to custom domain
           if (req.hostname.includes("werewolf-utopium.glitch.me")) {
@@ -97,19 +115,6 @@ module.exports = client => {
             req.next()
           }
         } catch (e) {}
-        
-        if(req.user) authdb.set(req.user.id, req.user) // Store all user info
-        if(req.user && !req.cookies.remember_me){ //logged in but no rm cookie
-          let token = issueToken(req.user)
-          res.cookie('remember-me', token, {secure: true, httpOnly: true})
-        }
-        if(!req.user && req.cookies.remember_me){ //not logged in but rm cookie
-          let uid = useToken(req.cookies.remember_me)
-          if(uid) req.user = authdb.get(uid)
-          res.clearCookie('remember_me');
-          let token = issueToken(req.user)
-          res.cookie('remember-me', token, {secure: true, httpOnly: true})
-        }
       })
     
     
@@ -186,7 +191,7 @@ module.exports = client => {
     )
     
     app.get("/logout", (req, res) => {
-      res.clearCookie('remember_me');
+      res.clearCookie('rememberme');
       req.logout()
       res.redirect("/")
     })

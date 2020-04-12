@@ -80,7 +80,7 @@ module.exports = {
         )
     )
     
-    gamePlayer.usedAbilityTonight = successfulDouses
+    gamePlayer.usedAbilityTonight = successfulDouses.map(x => x.number)
     
     QuickGames[index] = game
     games.set("quick", QuickGames)

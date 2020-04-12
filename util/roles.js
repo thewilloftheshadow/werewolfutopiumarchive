@@ -115,7 +115,19 @@ let roles = {
     day : "You can once protect a player from being lynched by the village (`w!protect [player]`).",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
-  }, 
+  },
+  "Forger": {
+    desc: "You can forge two shields and then a sword." +
+          " Forging takes one day and each new item must be given to another player before forging the next one." +
+          " Each shield will save a player once from being attacked at night. The sword can be used to kill another player.",
+    aura: "Unknown",
+    team: "Village",
+    abbr: ["forg"],
+    cat : "Regular Villager",
+    // nite: "",
+    tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+  },
   "Fortune Teller": {
   	desc: "You have two cards which you can give to other players at night." +
           " These players can use these cards to reveal their roles.",
@@ -165,6 +177,17 @@ let roles = {
     day : "Select a player to put in jail during the next night (`w!jail [player]`).",
     tag : tags.ROLE.VILLAGER | tags.ROLE.STRONG_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE | tags.ROLE.ONE_ONLY
+  },
+  "Loudmouth": {
+    desc: "You can select a player who's role will be revealed when you are killed.",
+    aura: "Good",
+    team: "Village",
+    abbr: ["lm"],
+    cat : "Regular Villager",
+    day : "Select a player to be revealed when you are killed (`w!reveal [player]`).",
+    nite: "Select a player to be revealed when you are killed (`w!reveal [player]`).",
+    tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
   },
   "Marksman": {
  		desc: "At night you can mark a player as your target." +
@@ -397,6 +420,17 @@ let roles = {
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   },
+  "Shadow Wolf": {
+    desc: "Once per game you can double your team's votes during the day, while hiding all votes.",
+    aura: "Evil",
+    team: "Werewolves",
+    abbr: ["shadow"],
+    cat : "Werewolf",
+    day : "You can double your team's votes while hiding all votes (`w!shade`).",
+    nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+  },
   "Sorcerer": {
     desc: "Each night you can select a player to uncover their role." +
           " You cannot vote or talk with the werewolves at night.",
@@ -419,6 +453,17 @@ let roles = {
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+  },
+  "Wolf Pacifist": {
+    desc: "Once per game you can reveal the role of a player to everybody and prevent anybody from voting during that day.",
+    aura: "Evil",
+    team: "Werewolves",
+    abbr: ["wwp","wolf paci","ww paci","wpaci","wp","paci wolf","pww"],
+    cat : "Werewolf",
+    day : "You can reveal the role of a player (`w!reveal [player]`) and prevent anybody from voting during that day.",
+    nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Wolf Seer": {
     desc: "Each night you can select a player to uncover their role." +
@@ -484,6 +529,17 @@ let roles = {
   
   // Solo killing roles
   
+  "Accomplice": {
+    desc: "The Bandit can convert another player to be their accomplice at night." +
+          " As an Accomplice, you and the Bandit can select a player to kill at night. If the vote is a draw, your vote wins." +
+          " You win if all alive players belong to your team.",
+    aura: "Unknown",
+    team: "Bandits",
+    abbr: ["band","bd"],
+    cat : "Killer",
+    tag : tags.ROLE.SOLO_KILLER |
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+  },
   "Arsonist": {
   	desc: "Each night you can either select two players to douse with gasoline, or ignite all doused players which kills them." + // alias: w!burn
           " You cannot be killed by the werewolves." + 
@@ -497,6 +553,18 @@ let roles = {
     tag : tags.ROLE.SOLO_KILLER |
           tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   }, 
+  "Bandit": {
+    desc: "Find an Accomplice by converting a player at night. Together you can kill one player each night." +
+          " If your Accomplice dies you can select a new one. You cannot be killed by the werewolves." +
+          " You win if all alive players belong to your team.",
+    aura: "Unknown",
+    team: "Bandits",
+    abbr: ["band","bd"],
+    oneOnly: true,
+    cat : "Killer",
+    tag : tags.ROLE.SOLO_KILLER |
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE | tags.ROLE.ONE_ONLY
+  },
   "Bomber": {
   	desc: "At night you can place a bomb which will explode during the following night." +
           " You cannot be killed by the werewolves. You win if you are the last player alive.",
@@ -704,7 +772,7 @@ let roles = {
     abbr: ["bob", "builder"],
     aura: "Good",
     team: "Village",
-    tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.UNAVAILABLE
+    tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.TO_BE_TESTED
   },
   "Naughty Boy": {
     desc: "Once during the game, you can select two players to have their roles switched. This ability comes into action the next night.",
