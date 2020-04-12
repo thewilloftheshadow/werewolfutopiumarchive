@@ -46,6 +46,7 @@ module.exports = async (client, game) => { try {
         thisPlayer.health = 1; break;
       case "Medium": case "Jailer": case "Priest": case "Flower Child": 
       case "Werewolf Berserk": case "Kitten Wolf": case "Guardian Wolf":
+      case "Pacifist": case "Wolf Pacifist":
         thisPlayer.abil1 = 1; break;
       case "Gunner": case "Marksman":
       case "Nightmare Werewolf":
@@ -133,8 +134,10 @@ module.exports = async (client, game) => { try {
                     p.id == thisPlayer.id ||
                     p.roleRevealed
                       ? ` ${fn.getEmoji(client, p.roleRevealed || p.role)}`
-                      : roles[thisPlayer.role].team == "Werewolves" &&
-                        roles[p.role].team == "Werewolves"
+                      : (roles[thisPlayer.role].team == "Werewolves" &&
+                        roles[p.role].team == "Werewolves") && thisPlayer.role !== "Sorcerer" ||
+                        (thisPlayer.role == "Sorcerer" && p.role == "Sorcerer") ||
+                        (thisPlayer.role == "Mason" && p.role == "Mason")
                       ? ` ${fn.getEmoji(client, p.role)}`
                       : ""
                   }${p.left ? " *off*" : ""}${

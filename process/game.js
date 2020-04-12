@@ -411,7 +411,7 @@ module.exports = client => {
                         game.players.filter(p => !p.left),
                         `The werewolves killed **${
                           protector.number
-                        } ${fn.getUser(client, protector.id)}${
+                        } ${nicknames.get(protector.id)}${
                           game.config.deathReveal
                             ? ` ${fn.getEmoji(client, protector.role)}`
                             : ""
@@ -509,7 +509,7 @@ module.exports = client => {
                     game.players.filter(p => !p.left),
                     `The serial killer stabbed **${
                       attackedPlayer.number
-                    } ${fn.getUser(client, attackedPlayer.id)}${
+                    } ${nicknames.get(attackedPlayer.id)}${
                       game.config.deathReveal
                         ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
                         : ""
@@ -579,14 +579,7 @@ module.exports = client => {
                 game.running = "ignore ww kill for kww conversion"
               }
               if (
-                [
-                  "Arsonist",
-                  "Bomber",
-                  "Cannibal",
-                  "Corruptor",
-                  "Illusionist",
-                  "Serial Killer"
-                ].includes(attackedPlayer.role) ||
+                roles[attackedPlayer.role].cat == "Killer" ||
                 (attackedPlayer.role == "Red Lady" &&
                   attackedPlayer.visitedTonight && !game.frenzy)
               ) {
@@ -1473,8 +1466,13 @@ module.exports = client => {
                 .setThumbnail(fn.getEmoji(client, "Zombie").url)
             )
             game.running = "bite by zomb"
+            let cannotBite = []
             for (var zombie of zombies.filter(z => z.usedAbilityTonight)) {
               let bit = game.players[zombie.usedAbilityTonight - 1]
+              if (["Cursed","President","Doppelganger"].includes(bit.role) || bit.sect ||
+                 bit.headhunter || (bit.team !== "Villager" && !(roles[bit.role].tag & tags.ROLE.SOLO_VOTING))) {
+                cannotBite.push(bit)
+              }
               bit.bitten = true
             }
             bitten = game.players.filter(p => p.bitten && p.alive)
@@ -1484,9 +1482,12 @@ module.exports = client => {
               new Discord.MessageEmbed()
                 .setTitle("BRAINS")
                 .setDescription(
-                  `${bitten
-                    .map(b => nicknames.get(b.id))
-                    .join(", ")} are now bitten!`
+                  (bitten.length ? `${bitten
+                    .map(b => `**${b.number} ${nicknames.get(b.id)}**`)
+                    .join(", ")} are now bitten!\n` : "") +
+                  (cannotBite.length ? `${cannotBite
+                    .map(c => `**${c.number} ${nicknames.get(c.id)}**`)
+                    .join(", ")} cannot be bitten!` : "")
                 )
                 .setThumbnail(fn.getEmoji(client, "Zombie Bitten").url)
             )

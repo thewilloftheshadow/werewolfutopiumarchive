@@ -42,7 +42,7 @@ module.exports = (client, game) => {
           new Discord.MessageEmbed()
             .setTitle("❗ You have been inactive for 2.5 minutes.")
             .setDescription(
-              "Please respond `w!` within 30 seconds to show your activity.\n" +
+              "Please respond within 30 seconds to show your activity.\n" +
               "You will be kicked from the game if you fail to do so."
             )
         )
@@ -94,7 +94,7 @@ module.exports = (client, game) => {
         new Discord.MessageEmbed()
           .setTitle("❗ You have been inactive for 1.5 minutes.")
           .setDescription(
-            "Please respond `w!` within 30 seconds to show your activity.\n" +
+            "Please respond within 30 seconds to show your activity.\n" +
             "You will be considered as suicided if you fail to do so."
           )
       }

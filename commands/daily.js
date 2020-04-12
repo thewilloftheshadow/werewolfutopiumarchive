@@ -108,6 +108,7 @@ module.exports = {
           (booster ? `**Booster 25% bonus** | ${Math.round((base + bonus) * 0.25)} ${fn.getEmoji(client, "Coin")}\n` : "") +
           `You now have ${player.coins} ${fn.getEmoji(client, "Coin")}.`
         )
+        .setFooter("Remember to come back and claim your daily reward tomorrow for streak bonus!")
     )
   }
 }

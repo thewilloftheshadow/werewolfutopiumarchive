@@ -41,7 +41,8 @@ module.exports = {
       new Discord.MessageEmbed()
         .setColor(0x888888)
         .setTitle("AFK")
-        .setDescription(`${message.author} is now AFK for **${reason}**.\nYour AFK will be automatically cancelled once the bot sees any of your messages.`)
+        .setDescription(`${message.author} is now AFK for **${reason}**.`)
+        .setFOoter("Your AFK will be automatically cancelled once the bot sees any of your messages.")
     )
   }
 }

@@ -28,6 +28,6 @@ module.exports = {
     if (!player)
       return await message.channel.send(`${fn.getEmoji(client, "red_tick")} Target not found.`)
     
-    message.channel.send("Here's a link to your personal profile on the bot's website:\nhttps://werewolf-utopium.glitch.me/profile/"+nicknames.get(target.id))
+    message.channel.send(`Here's a link to ${target == message.author ? "your" : nicknames.get(target.id)+"'s"} personal profile on the bot's website:\nhttps://werewolf-utopium.glitch.me/profile/${nicknames.get(target.id)}`)
   }
 }

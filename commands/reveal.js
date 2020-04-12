@@ -22,7 +22,7 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
-    if (gamePlayer.role == "Pacifist" && args.length) {
+    if (gamePlayer.role.includes("Pacifist") && args.length) {
       if (!gamePlayer.alive)
         return await message.author.send("You are dead. You can no longer reveal a player's role!")
       if (gamePlayer.revealed)

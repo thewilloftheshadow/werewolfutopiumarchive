@@ -42,7 +42,7 @@ module.exports = {
           return await message.author.send("You cannot vote a fellow werewolf.")
         if (!game.players[vote-1].alive) 
           return await message.author.send("You cannot vote a dead player.")
-        if (!game.players[vote-1].role == "Sorcerer") 
+        if (game.players[vote-1].role == "Sorcerer") 
           return await message.author.send("You cannot vote the Sorcerer.")
         gamePlayer.vote = vote
         
@@ -51,16 +51,14 @@ module.exports = {
           game.players.filter(
             p =>
               roles[p.role].team == "Werewolves" &&
-              gamePlayer.role !== "Sorcerer" &&
+              p.role !== "Sorcerer" &&
               !p.jailed &&
               !p.left
           ),
-          `${fn.getEmoji(client, "Voting Werewolf")} ${gamePlayer.number} ${nicknames.get(message.author.id)}${
-            gamePlayer.roleRevealed
-              ? ` ${client.emojis.cache.find(
-                  e => e.name == gamePlayer.role.replace(/ /g, "_")
-                )}`
-              : ""
+          `${fn.getEmoji(client, "Voting Werewolf")} ${gamePlayer.number} ${nicknames.get(message.author.id)} ${
+            client.emojis.cache.find(
+              e => e.name == gamePlayer.role.replace(/ /g, "_")
+            )
           } voted to kill ${vote} ${nicknames.get(game.players[vote - 1].id)}${
             game.players[vote - 1].roleRevealed
               ? ` ${client.emojis.cache.find(
