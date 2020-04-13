@@ -36,27 +36,29 @@ module.exports = {
     if(item.name === "Talisman"){
       m.edit(new Discord.MessageEmbed().setTitle("Choose a role").setDescription("What role do you want your talisman to be?").setThumbnail(fn.getEmoji(client, "Talisman").url))
       //message.channel.send("What role do you want your talisman to be?")
-    let inputRole = await message.channel
-      .awaitMessages(msg => msg.author.id == message.author.id, {
-        time: 30 * 1000,
-        max: 1,
-        errors: ["time"]
-      })
-      .catch(() => {})
+      let inputRole = await message.channel
+        .awaitMessages(msg => msg.author.id == message.author.id, {
+          time: 30 * 1000,
+          max: 1,
+          errors: ["time"]
+        })
+        .catch(() => {})
 
-    if (!inputRole) return await m.edit(new Discord.MessageEmbed().setDescription("Timed out, please try again."))
-    inputRole.first().delete()
-    inputRole = inputRole.first().content.replace(/(_|\s+)/g, " ")
+      if (!inputRole) return await m.edit(new Discord.MessageEmbed().setDescription("Timed out, please try again."))
+      inputRole.first().delete()
+      inputRole = inputRole.first().content.replace(/(_|\s+)/g, " ")
 
-    role = Object.values(roles).find(
-      data =>
-        data.name.toLowerCase().startsWith(inputRole.toLowerCase()) ||
-        (data.abbr && data.abbr.includes(inputRole.toLowerCase()))
-    )
+      role = Object.values(roles).find(
+        data =>
+          data.name.toLowerCase().startsWith(inputRole.toLowerCase()) ||
+          (data.abbr && data.abbr.includes(inputRole.toLowerCase()))
+      )
     }
     
-    if (!role && item.name === "Talisman") return await m.edit(new Discord.MessageEmbed().setDescription("Unknown role, please use the buy command again."))
-    
+    if (!role && item.name === "Talisman")
+      return await m.edit(
+        new Discord.MessageEmbed().setDescription("Unknown role.")
+      )    
 
     let price = item.price * am
     let attachment = role ? (await fn.createTalisman(client, role.name)) : null
@@ -112,9 +114,9 @@ module.exports = {
     ).catch(() => {})
     await m.reactions.removeAll()
     if (!reactions)
-      return await m.edit(new Discord.MessageEmbed().setDescription("Timed out, please try again"))
+      return await m.edit(new Discord.MessageEmbed().setDescription("Timed out, please try again."))
     let reaction = reactions.first().emoji
-    if (reaction.id == fn.getEmoji(client, "red_tick").id) return await m.edit(new Discord.MessageEmbed().setDescription("Purchase canceled"))
+    if (reaction.id == fn.getEmoji(client, "red_tick").id) return await m.edit(new Discord.MessageEmbed().setDescription("Purchase cancelled."))
     
     
     if(!["talisman", "private channel"].includes(item.itemid)) players.add(message.author.id+".inventory."+item.itemid, am)

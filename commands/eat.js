@@ -9,12 +9,13 @@ const games = new db.table("Games"),
 const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
-/*
+
 module.exports = {
   name: "eat", 
   gameroles: ["Cannibal"],
   aliases: ["munch"], //lmao this is the best alias ever -shadow
   run: async (client, message, args, shared) => {
+    /*
     let player = players.get(message.author.id)
     if (!player.currentGame)
     return await message.author.send("You are not currently in a game!\nDo `w!quick` to join a Quick game.") 
@@ -32,8 +33,9 @@ module.exports = {
       return await message.author.send("You are currently jailed and cannot use your abilities.")
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your abilities.")
+      */
   } 
 } 
-*/
+
 
 

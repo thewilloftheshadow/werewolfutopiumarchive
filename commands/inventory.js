@@ -33,7 +33,7 @@ module.exports = {
     let i = 1
     for (let invitem in inv) {
       let item = shop[invitem]
-      if(item.itemid != "talisman"){
+      if(item.itemid != "talisman" && inv[invitem] != 0){
       if (i % 10 == 0) embeds.push(new Discord.MessageEmbed().setTitle(`Inventory for ${name}`).setDescription("").setColor(0x7289da))
         embeds[embeds.length - 1].description += `${fn.getEmoji(client, item.emoji ? item.emoji : item.name) ? fn.getEmoji(client, item.emoji ? item.emoji : item.name) : ""}${item.name} - ${inv[invitem]}\n`
       i += 1
@@ -42,7 +42,9 @@ module.exports = {
     
     if(inv && inv.talisman){
       let allt = ""
-      for(let t in inv.talisman) allt += `${fn.getEmoji(client, t)} ${t} - ${inv.talisman[t]}\n`
+      for(let t in inv.talisman){
+        if(inv.talisman[t] != 0) allt += `${fn.getEmoji(client, t)} ${t} - ${inv.talisman[t]}\n`
+      }
       embeds[0].addField("Talismans:", allt)
     }
     

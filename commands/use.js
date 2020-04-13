@@ -23,10 +23,10 @@ module.exports = {
   run: async (client, message, args, shared) => {
     let input
     if(!["rose", "bouquet", "talisman"].includes(args[0])){
-    let am = parseInt(args[args.length - 1], 10)
-    if (!Number.isNaN(am)) args.pop()
-    else am = 1
-    input = args.join(" ")
+      let am = parseInt(args[args.length - 1], 10)
+      if (!Number.isNaN(am)) args.pop()
+      else am = 1
+      input = args.join(" ")
     } else {
       input = args[0]
     }
@@ -36,7 +36,7 @@ module.exports = {
     if(rb < 1) return await message.channel.send(`You do not have any ${item.name}s.`)
     
     let abcde = args.slice(1).join(" ")
-    const commandName = args[0].toLowerCase()
+    const commandName = args.join(" ").toLowerCase()
     const command = commands.get(commandName) || commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName))
     if (!command) return await message.author.send("Sorry! That item is not able to be used right now.")
     await command.run(client, message, abcde)

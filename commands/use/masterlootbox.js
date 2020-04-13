@@ -19,16 +19,17 @@ let numArray = (start, int, cnt) => {
 }
 
 module.exports = {
-  name: "lootbox",
+  name: "master lootbox",
+  aliases: ["mlb","master lb","masterlb"],
   run: async (client, message, args, shared) => {
     let am = parseInt(args[0], 10)
     if (!isNaN(am)) args.pop()
     else am = 1
-    let item = shop["lootbox"]
+    let item = shop["master lootbox"]
     let rb = players.get(message.author.id+".inventory."+item.itemid)
-    if(rb < 1) return await message.channel.send(`You do not have any lootboxes.`)
+    if(rb < 1) return await message.channel.send(`You do not have any Master Lootboxes.`)
     let player = players.get(message.author.id)
-    players.subtract(message.author.id+".inventory.lootbox", 1)
+    players.subtract(message.author.id+".inventory.master lootbox", 1)
     
     let items = [
       {
@@ -56,9 +57,9 @@ module.exports = {
     let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse().map(x => Math.pow(x,2)))]
     
     let embed = new Discord.MessageEmbed()
-      .setTitle("Lootbox")
-      .setThumbnail(fn.getEmoji(client, "Lootbox").url)
-      .setFooter(`${nicknames.get(message.author.id)} has ${players.get(message.author.id+".inventory.lootbox")} lootboxes left.`)
+      .setTitle("Master Lootbox")
+    .setThumbnail(fn.getEmoji(client, "Master Lootbox").url)
+    .setFooter(`${nicknames.get(message.author.id)} has ${players.get(message.author.id+".inventory.master lootbox")} master lootboxes left.`)
     
     switch (bonusItem.item) {
       case "talisman":
@@ -69,19 +70,19 @@ module.exports = {
         embed
           .attachFiles([talisman])
           .setThumbnail(`attachment://${talisman.name}`)
-          .setDescription(`${nicknames.get(message.author.id)} has received a ${selectedRole} Talisman from a lootbox.`)
+          .setDescription(`${nicknames.get(message.author.id)} has received a ${selectedRole} Talisman from a master lootbox.`)
         break;
       case "coin":
         players.add(message.author.id+".coins", bonusItemAmt)
-        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Coin")} from a lootbox.`)
+        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Coin")} from a master lootbox.`)
         break;
       case "rose":
         players.add(message.author.id+".inventory.rose", bonusItemAmt)
-        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Rose")} from a lootbox.`)
+        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Rose")} from a master lootbox.`)
         break;
       case "bouquet":
         players.add(message.author.id+".inventory.rose bouquet", bonusItemAmt)
-        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Rose Bouquet")} from a lootbox.`)
+        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Rose Bouquet")} from a master lootbox.`)
         break;
     }
     
