@@ -34,31 +34,6 @@ module.exports = {
     )
       booster = true
     
-    if (moment(player.lastDaily).add(20, "h") >= moment()) {
-      let diff = moment(player.lastDaily)
-        .add(20, "h")
-        .diff(moment(), "seconds")
-      let diffclaim = moment()
-        .diff(moment(player.lastDaily), "seconds")
-      let rdmmsgs = [
-        `You cannot collect daily rewards for another **${Math.floor(diff / 60 / 60) % 24}h ${Math.floor(diff / 60) %
-        60}m ${diff % 60}s**.`,
-        `How is it "daily" if you claim it **${Math.floor(diffclaim / 60 / 60) % 24}h ${Math.floor(diffclaim / 60) %
-        60}m ${diffclaim % 60}s** after you last claimed?`,
-        `Hmm... You need to wait for another **${Math.floor(diff / 60 / 60) % 24}h ${Math.floor(diff / 60) %
-        60}m ${diff % 60}s** to claim your next daily reward!`
-      ]
-      return await message.channel.send(
-        rdmmsgs[Math.floor(rdmmsgs.length*Math.random())]
-      )
-    }
-    
-    if (moment(player.lastDaily || 0).add(48, "h") <= moment())
-      player.streak = 0
-    
-    let base = 10
-    let bonus = Math.round(Math.pow(5*player.streak, 4/5))
-    
     // EXPERIMENTAL
     let items = [
       {
@@ -89,9 +64,35 @@ module.exports = {
       { weight: player.streak, item: "master lootbox", possibleValues: [1] }
     ]
     let bonusItem = items[wrg(items.map(x => x.weight))]
-    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse())]
+    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse().map(x => Math.pow(x,2)))]
     
     console.log(bonusItem, bonusItemAmt)
+    console.log(`You've won ${bonusItemAmt} ${bonusItem.item}s!`)
+    
+    if (moment(player.lastDaily).add(20, "h") >= moment()) {
+      let diff = moment(player.lastDaily)
+        .add(20, "h")
+        .diff(moment(), "seconds")
+      let diffclaim = moment()
+        .diff(moment(player.lastDaily), "seconds")
+      let rdmmsgs = [
+        `You cannot collect daily rewards for another **${Math.floor(diff / 60 / 60) % 24}h ${Math.floor(diff / 60) %
+        60}m ${diff % 60}s**.`,
+        `How is it "daily" if you claim it **${Math.floor(diffclaim / 60 / 60) % 24}h ${Math.floor(diffclaim / 60) %
+        60}m ${diffclaim % 60}s** after you last claimed?`,
+        `Hmm... You need to wait for another **${Math.floor(diff / 60 / 60) % 24}h ${Math.floor(diff / 60) %
+        60}m ${diff % 60}s** to claim your next daily reward!`
+      ]
+      return await message.channel.send(
+        rdmmsgs[Math.floor(rdmmsgs.length*Math.random())]
+      )
+    }
+    
+    if (moment(player.lastDaily || 0).add(48, "h") <= moment())
+      player.streak = 0
+    
+    let base = 10
+    let bonus = Math.round(Math.pow(5*player.streak, 4/5))
     
     player.coins += Math.round((base + bonus) * (booster ? 1.25 : 1))
     
