@@ -33,7 +33,7 @@ module.exports = {
     let item = shop[input]
     if(!item) return message.channel.send(`${fn.getEmoji(client, "red_tick")} Invalid item.`)
     let rb = players.get(message.author.id+".inventory."+item.itemid)
-    if(rb < 1) return await message.channel.send(`You do not have any ${item.name}${item.name.endsWith("x") ? "e" : ""}s.`)
+    if(rb < 1) return await message.channel.send(`You do not have any ${item.name}${item.plural}s.`)
     
     let abcde = args.slice(1).join(" ")
     const commandName = args.join(" ").toLowerCase()
