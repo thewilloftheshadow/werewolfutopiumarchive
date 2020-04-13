@@ -24,8 +24,8 @@ module.exports = {
     if (!item)
       return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} Invalid item`))
     
-    if (item.unavaliable && ![ "336389636878368770", "439223656200273932" ].includes(message.author.id))
-      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} That item is currently unavaliable to purchase`))
+    if (item.unavailable && ![ "336389636878368770", "439223656200273932" ].includes(message.author.id))
+      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} That item is currently unavailable to purchase`))
     
     if (item.name === "Custom Maker" && players.get(`${message.author.id}.inventory.${item.itemid}`))
       return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have the Custom Maker item!`))
@@ -89,7 +89,7 @@ module.exports = {
         .setDescription(
           `Are you sure you want to purchase ${am} ${
             role ? role.name + " " : ""
-          }${item.name}${am > 1 ? "s" : ""} for ${price} ${fn.getEmoji(
+          }${item.name}${am > 1 ? item.plural : ""} for ${price} ${fn.getEmoji(
             client,
             "Coin"
           )}?\nYou currently have ${player.coins} ${fn.getEmoji(
@@ -155,14 +155,14 @@ module.exports = {
     }
     
     players.subtract(message.author.id+".coins", price) 
-    message.channel.send(`Success! You have purchased ${am} ${role ? role.name + " " : ""}${item.name}${am > 1 ? "s" : ""}`)
+    // message.channel.send(`Success! You have purchased ${am} ${role ? role.name + " " : ""}${item.name}${am > 1 ? "s" : ""}`)
     await m.edit(
       new Discord.MessageEmbed()
         .setTitle("Success!")
         .setDescription(
-          `Success! You have purchased ${am} ${role ? role.name + " " : ""}${
+          `You have purchased ${am} ${role ? role.name + " " : ""}${
             item.name
-          }${am > 1 ? "s" : ""}`
+          }${am > 1 ? item.plural : ""}.`
         )
         .setThumbnail(
           item.name === "Talisman"

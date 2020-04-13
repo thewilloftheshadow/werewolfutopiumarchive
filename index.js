@@ -169,8 +169,15 @@ client.on('message', async message => {
   if (message.content.toLowerCase().startsWith('w!') || message.content.toLowerCase() == "w!") return;
   
   let pastMessages = (await message.channel.messages.fetch({ limit: 30 })).filter(m => m.author.id == message.author.id).first(6)
-  if (pastMessages.length == 6 && new Date(pastMessages[pastMessages.length-1].createdTimestamp + 5000) >= new Date())
-    return await message.channel.send("Your message is not sent for the following reason: **You are sending messages too fast!**")
+  if (pastMessages.length == 6 && new Date(pastMessages[pastMessages.length-1].createdTimestamp + 5000) >= new Date()) {
+    await message.channel.send("Your message is not sent for the following reason: **You are sending messages too fast.**")
+    client.channels.cache.get("699144758525952000").send(
+      new Discord.MessageEmbed()
+        .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
+        .addField("Reason", "Sending messages too fast")
+    )
+    return undefined
+  }
 
   let input = message.cleanContent
   input = input.replace(/\\?\|\\?\|(?:.|\s)*?\\?\|\\?\|/g, "$1")
@@ -185,10 +192,40 @@ client.on('message', async message => {
       .replace(/^\\?>\s*/gm, "")
       .replace(/\\?<(?:#|@|@&)[^\s]*?>/g, "")
       .replace(/(https?:\/\/)?((([^.,\/#!$%\^&\*;:{}=\-_`~()\[\]\s])+\.)+([^.,\/#!$%\^&\*;:{}=\-_`~()\[\]\s])+|localhost)(:\d+)?(\/[^\s]*)*/gi, "")
-      .split(/\n/g)
   
-  if (input.length > 5)
-    return await message.channel.send("Your message is not sent for the following reason: **Potential spam or raid.**")
+  let bwlA = ["fuck","fuk","fak","fck","shit","shat","sex","s3x","horny","ass",
+              "pussy","arse","penis","vagina","viagra","dick","cock","dicc","fucc",
+              "cocc","nigg","niga","masterbate","anal","anus","jerk off","jack off",
+              "jerkoff","jackoff","corona","piss","semen","a\\$\\$","n1g","c0c",
+              "c0rona","cor0na"] // filter regardless
+  let bwlB = ["nig","cum"] // filter if individual word 
+  let censor = "*************".split('').join("*******************************") // censor characters
+  // let beforePC = input
+  // input = input.replace(new RegExp(`(?<=[^\\s]*?(?:${bwlA.join('|')})[^\\s]*?)[^\\s]`,"gi"), "*")
+  //   .replace(new RegExp(`(${bwlA.join('|')}|${bwlB.map(x => `\\b${x}\\b`).join('|')})`,"gi"), x => censor.substring(0, x.length))
+  // if (beforePC !== input) {
+  //   await message.channel.send("You are auto-warned for the following reason: **Please refrain from using profanity!**")
+  //   client.channels.cache.get("699144758525952000").send(
+  //     new Discord.MessageEmbed()
+  //       .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
+  //       .setDescription(message.content)
+  //       .addField("Reason", "Profanity")
+  //   )
+  // }
+      
+  input = input.split(/\n/g)
+  
+  if (input.length > 5) {
+    await message.channel.send("Your message is not sent for the following reason: **Too many lines in one message.**")
+    client.channels.cache.get("699144758525952000").send(
+      new Discord.MessageEmbed()
+        .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
+        // .setDescription(message.content)
+        .addField("Reason", "Too many lines in one message")
+    )
+    return undefined
+  }
+  
   //console.log(input)
   for (var i = 0; i < input.length; i++) {
     var content = input[i]

@@ -54,12 +54,13 @@ module.exports = {
       },
     ]
     let bonusItem = items[wrg(items.map(x => x.weight))]
-    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse().map(x => Math.pow(x,2)))]
+    let possibleValues = fn.deepClone(bonusItem.possibleValues)
+    let bonusItemAmt = bonusItem.possibleValues[wrg(possibleValues.reverse().map(x => Math.pow(x,2)))]
     
     let embed = new Discord.MessageEmbed()
       .setTitle("Apprentice Lootbox")
-    .setThumbnail(fn.getEmoji(client, "Apprentice Lootbox").url)
-    .setFooter(`${nicknames.get(message.author.id)} has ${players.get(message.author.id+".inventory.apprentice lootbox")} apprentice lootboxes left.`)
+      .setThumbnail(fn.getEmoji(client, "Apprentice Lootbox").url)
+      .setFooter(`${nicknames.get(message.author.id)} has ${players.get(message.author.id+".inventory.apprentice lootbox")} apprentice lootboxes left.`)
     
     switch (bonusItem.item) {
       case "talisman":
