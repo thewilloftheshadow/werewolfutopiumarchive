@@ -6,6 +6,16 @@
     <script>
     function nouser(){$('#nouser').modal('show')};
     </script>
+    <style>
+      @media only screen and (min-width: 577px) {
+        imglogo {
+          float: right;
+        }
+        txtlogo {
+          text-aligh: left;
+        }
+      }
+    </style>
   </head>
   <% if(player){ %>
   <body>
@@ -16,13 +26,13 @@
     
     <div class="container">
       <div class="row logo vertcenter center">
-        <div class="col-sm-12 col-md-5">
+        <div class="imglogo col-sm-12 col-md-5" style="">
         <img
           class="roundimg animated fadeIn rotateIn slow"
           src="https://cdn.discordapp.com/avatars/657960787993690122/f245efe58e1f4f75caab0b84e2a990b4.png"
         />
         </div>
-        <h1 class="col-sm-12 col-md-7 opensans animated fadeIn slow" style="font-weight:900;">
+        <h1 class="txtlogo opensans animated fadeIn slow col-sm-12 col-md-7" style="font-weight:900;">
           Werewolf Utopium
         </h1>
       </div>

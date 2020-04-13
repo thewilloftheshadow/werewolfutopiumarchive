@@ -20,6 +20,7 @@ let numArray = (start, int, cnt) => {
 
 module.exports = {
   name: "lootbox",
+  aliases: ["lb"],
   run: async (client, message, args, shared) => {
     let am = parseInt(args[0], 10)
     if (!isNaN(am)) args.pop()
@@ -53,7 +54,8 @@ module.exports = {
       },
     ]
     let bonusItem = items[wrg(items.map(x => x.weight))]
-    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse().map(x => Math.pow(x,2)))]
+    let possibleValues = fn.deepClone(bonusItem.possibleValues)
+    let bonusItemAmt = bonusItem.possibleValues[wrg(possibleValues.reverse().map(x => Math.pow(x,2)))]
     
     let embed = new Discord.MessageEmbed()
       .setTitle("Lootbox")

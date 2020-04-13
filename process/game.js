@@ -56,7 +56,8 @@ module.exports = client => {
               for (var j = 0; j < lynchVotes.length; j++) {
                 if (!lynchCount[lynchVotes[j]]) lynchCount[lynchVotes[j]] = 0
                 lynchCount[lynchVotes[j]] +=
-                  game.players.filter(player => player.alive)[j].role == "Mayor"
+                  game.players.filter(player => player.alive)[j].role == "Mayor" ||
+                  (game.shade && roles[game.players.filter(player => player.alive)[j].role].team == "Werewolves")
                     ? 2
                     : 1
               }

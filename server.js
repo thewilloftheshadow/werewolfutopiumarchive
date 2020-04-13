@@ -96,9 +96,10 @@ app.use(function (req, res, next) {
   }
   if(!req.user && req.cookies.rememberme){ //not logged in but rm cookie
     let uid = useToken(req.cookies.rememberme)
-    req.user = authdb.get(uid)
     res.clearCookie('rememberme');
     res.clearCookie('remember-me');
+    if(!uid) return next()
+    req.user = authdb.get(uid)
     let token = issueToken(req.user)
     res.cookie('rememberme', token, {secure: true, httpOnly: true, maxAge: 604800000})
   }

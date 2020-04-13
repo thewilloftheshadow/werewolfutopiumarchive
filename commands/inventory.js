@@ -35,7 +35,7 @@ module.exports = {
       let item = shop[invitem]
       if(item.itemid != "talisman" && inv[invitem] != 0){
       if (i % 10 == 0) embeds.push(new Discord.MessageEmbed().setTitle(`Inventory for ${name}`).setDescription("").setColor(0x7289da))
-        embeds[embeds.length - 1].description += `${fn.getEmoji(client, item.emoji ? item.emoji : item.name) ? fn.getEmoji(client, item.emoji ? item.emoji : item.name) : ""}${item.name} - ${inv[invitem]}\n`
+        embeds[embeds.length - 1].description += `${fn.getEmoji(client, item.emoji ? item.emoji : item.name) ? fn.getEmoji(client, item.emoji ? item.emoji : item.name) : ""} ${item.name} - ${inv[invitem]}\n`
       i += 1
       }
     }
@@ -49,7 +49,7 @@ module.exports = {
     }
     
     for (var [x, embed] of embeds.entries()) {
-      embed.setFooter(`Page ${x + 1}/${embeds.length} | Some items are currently unavaliable`)
+      embed.setFooter(`Page ${x + 1}/${embeds.length} | Some items are currently unavailable`)
     }
     
     if(embeds[0].description === " " && !inv.talisman) embeds[0].description = "No items in inventory"
