@@ -109,15 +109,35 @@ module.exports = client => {
                         lynchedPlayer.id
                       )}** cannot be lynched.`
                     )
-                  } else if(lynchedPlayer.role == "Handsome Prince"){
+                  }
+                  if (lynchedPlayer.role == "Handsome Prince") {
                     game.running = "no lynch prince"
-                    fn.broadcastTo(
-                      client,
-                      game.players.filter(p => !p.left),
-                      `**${lynchedPlayer.number} ${nicknames.get(
-                        lynchedPlayer.id
-                      )}** has survived! They are the ${fn.getEmoji(client, "Handsome Prince")} Handsome Prince.`)
-                    lynchedPlayer.roleRevealed = lynchedPlayer.role
+                    if (game.config.deathReveal) {
+                      fn.broadcastTo(
+                        client,
+                        game.players.filter(p => !p.left),
+                        new Discord.MessageEmbed()
+                          .setTitle("His Royal Highness")
+                          .setThumbnail(
+                            fn.getEmoji(client, "Handsome Prince").url
+                          )
+                          .setDescrtipion(
+                            `**${lynchedPlayer.number} ${nicknames.get(
+                              lynchedPlayer.id
+                            )}** is the Handsome Prince!`
+                          )
+                      )
+                      lynchedPlayer.roleRevealed = lynchedPlayer.role
+                    }
+                    else {
+                      fn.broadcastTo(
+                        client,
+                        game.players.filter(p => !p.left),
+                        `**${lynchedPlayer.number} ${nicknames.get(
+                          lynchedPlayer.id
+                        )}** cannot be lynched.`
+                      )
+                    }
                   } else {
                     game.running = "kill lynched player"
                     lynchedPlayer.alive = false
@@ -204,7 +224,7 @@ module.exports = client => {
                   game.players.filter(p => !p.left),
                   "The village cannot decide on who to lynch."
                 )
-            } else game.noVoting = false
+            } else game.noVoting = game.shade = false
 
             // CLEAR LYNCH PREVENTION SELECTIONS
             game.running = "clear lynch prevention seletions"
@@ -2021,13 +2041,11 @@ module.exports = client => {
             case 0:
               for (var player of game.players.filter(
                 p =>
-                  !p.left &&
-                  p.alive &&
+                  !p.left && p.alive &&
                   p.role !== "Jailer" &&
-                  (!game.players.find(p => p.role == "Jailer") ||
-                    (!p.jailed &&
-                      game.players.find(p => p.role == "Jailer") &&
-                      game.players.find(p => p.role == "Jailer").alive))
+                  !(p.jailed &&
+                    game.players.find(p => p.role == "Jailer") &&
+                    game.players.find(p => p.role == "Jailer").alive)
               )) {
                 fn.getUser(client, player.id).send(
                   new Discord.MessageEmbed()
@@ -2130,8 +2148,7 @@ module.exports = client => {
 
                 if (jailer.alive) {
                   if (
-                    roles[jailed.role].team == "Werewolves" &&
-                    jailed.role !== "Sorcerer"
+                    roles[jailed.role].team == "Werewolves"
                   )
                     fn.broadcastTo(
                       client,
@@ -2140,7 +2157,6 @@ module.exports = client => {
                           p =>
                             !p.left &&
                             roles[p.role].team == "Werewolves" &&
-                            p.role !== "Sorcerer" &&
                             p.id !== jailed.id
                         )
                         .map(p => p.id),
@@ -2148,9 +2164,9 @@ module.exports = client => {
                         .setTitle(`Jailed!`)
                         .setThumbnail(fn.getEmoji(client, "Jail").url)
                         .setDescription(
-                          `Fellow Werewolf **${jailed.number} ${nicknames.get(
+                          `**${jailed.number} ${nicknames.get(
                             jailed.id
-                          )}** is jailed!`
+                          )} ${fn.getEmoji(client, jailed.role)}** is jailed!`
                         )
                     )
 

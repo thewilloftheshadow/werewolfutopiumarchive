@@ -193,25 +193,29 @@ client.on('message', async message => {
       .replace(/\\?<(?:#|@|@&)[^\s]*?>/g, "")
       .replace(/(https?:\/\/)?((([^.,\/#!$%\^&\*;:{}=\-_`~()\[\]\s])+\.)+([^.,\/#!$%\^&\*;:{}=\-_`~()\[\]\s])+|localhost)(:\d+)?(\/[^\s]*)*/gi, "")
   
-  let bwlA = ["fuck","fuk","fak","fck","shit","shat","sex","s3x","horny","ass",
-              "pussy","arse","penis","vagina","viagra","dick","cock","dicc","fucc",
-              "cocc","nigg","niga","masterbate","anal","anus","jerk off","jack off",
-              "jerkoff","jackoff","corona","piss","semen","a\\$\\$","n1g","c0c",
-              "c0rona","cor0na"] // filter regardless
+  let bwlA = ["sex","s3x","horny","ass","pussy","arse","penis","vagina","viagra",
+              "dick","cock","dicc","cocc","nigg","niga","masterbate","anal","anus",
+              "jerk off","jack off","jerkoff","jackoff","semen","a\\$\\$",
+              "n1g","c0c",]
+             // ["fuck","fuk","fak","fck","shit","shat","sex","s3x","horny","ass",
+             //  "pussy","arse","penis","vagina","viagra","dick","cock","dicc","fucc",
+             //  "cocc","nigg","niga","masterbate","anal","anus","jerk off","jack off",
+             //  "jerkoff","jackoff","corona","piss","semen","a\\$\\$","n1g","c0c",
+             //  "c0rona","cor0na"] // filter regardless
   let bwlB = ["nig","cum"] // filter if individual word 
   let censor = "*************".split('').join("*******************************") // censor characters
-  // let beforePC = input
-  // input = input.replace(new RegExp(`(?<=[^\\s]*?(?:${bwlA.join('|')})[^\\s]*?)[^\\s]`,"gi"), "*")
-  //   .replace(new RegExp(`(${bwlA.join('|')}|${bwlB.map(x => `\\b${x}\\b`).join('|')})`,"gi"), x => censor.substring(0, x.length))
-  // if (beforePC !== input) {
-  //   await message.channel.send("You are auto-warned for the following reason: **Please refrain from using profanity!**")
-  //   client.channels.cache.get("699144758525952000").send(
-  //     new Discord.MessageEmbed()
-  //       .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
-  //       .setDescription(message.content)
-  //       .addField("Reason", "Profanity")
-  //   )
-  // }
+  let beforePC = input
+  input = input.replace(new RegExp(`(?<=[^\\s]*?(?:${bwlA.join('|')})[^\\s]*?)[^\\s]`,"gi"), "*")
+    .replace(new RegExp(`(${bwlA.join('|')}|${bwlB.map(x => `\\b${x}\\b`).join('|')})`,"gi"), x => censor.substring(0, x.length))
+  if (beforePC !== input) {
+    await message.channel.send("You are auto-warned for the following reason: **Please refrain from using profanity!**")
+    client.channels.cache.get("699144758525952000").send(
+      new Discord.MessageEmbed()
+        .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
+        .setDescription(message.content)
+        .addField("Reason", "Profanity")
+    )
+  }
       
   input = input.split(/\n/g)
   

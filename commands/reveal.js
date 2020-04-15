@@ -11,7 +11,7 @@ const fn = require('/app/util/fn'),
 
 module.exports = {
   name: "reveal",
-  gameroles: ["Pacifist", "Mayor", "Wolf Pacifist"],
+  gameroles: ["Pacifist", "Mayor", "Wolf Pacifist", "Loudmouth"],
   run: async (client, message, args, shared) => {
     let player = players.get(message.author.id)
     if (!player.currentGame) 
@@ -22,10 +22,42 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
-    if (gamePlayer.role.includes("Pacifist") && args.length) {
+    if (gamePlayer.role == "Loudmouth" && args.length) {
       if (!gamePlayer.alive)
         return await message.author.send("You are dead. You can no longer reveal a player's role!")
-      if (gamePlayer.revealed)
+      
+      if (game.currentPhase >= 999)
+        return await message.author.send("The game is over! You can no longer use your actions.")
+      
+      let target = parseInt(args[0])
+      if (isNaN(target) || target > game.players.length || target < 1)
+        return await message.author.send("Invalid target.")
+      
+      let targetPlayer = game.players[target-1]
+      if (!targetPlayer.alive)
+        return await message.author.send("You cannot reveal a dead player's role!")
+    //  if (targetPlayer.paciReveal)
+    //    return await message.author.send("This player is already revealed by another Pacifist!")
+      if (targetPlayer.roleRevealed)
+        return await message.author.send("That player has already been revealed!")
+      if (game.currentPhase % 3 !== 0)
+        return await message.author.send("You can only sect a player during the night!")
+      if (game.currentPhase >= 999)
+        return await message.author.send("The game is over! You can no longer use your actions.")
+      
+      await message.author.send(
+      `${fn.getEmoji(client, "Voting")} You selected **${
+        targetPlayer.number
+      } ${nicknames.get(targetPlayer.id)}** to be revealed when you die.`
+      )
+      
+      gamePlayer.selected = targetPlayer.number
+    
+    }
+    else if (gamePlayer.role.includes("Pacifist") && args.length) {
+      if (!gamePlayer.alive)
+        return await message.author.send("You are dead. You can no longer reveal a player's role!")
+      if (!gamePlayer.abil1)
         return await message.author.send("You have already revealed a player!")
       
       if (game.currentPhase % 3 == 0)
@@ -60,7 +92,7 @@ module.exports = {
           )
       )
       
-      gamePlayer.revealed = true
+      gamePlayer.abil1 -= 1
       targetPlayer.roleRevealed = targetPlayer.role
       targetPlayer.paciRevealed = true
       game.noVoting = true

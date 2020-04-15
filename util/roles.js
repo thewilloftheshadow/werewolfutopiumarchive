@@ -61,6 +61,7 @@ let roles = {
     abbr: ["bg"],
     cat : "Regular Villager",
     nite: "Select a player to protect (`w!protect [player]`).",
+    attr: { health: 2 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -113,6 +114,7 @@ let roles = {
  		abbr: ["fc", "flower"],
     cat : "Regular Villager",
     day : "You can once protect a player from being lynched by the village (`w!protect [player]`).",
+    attr: { abil1: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -137,6 +139,7 @@ let roles = {
     cat : "Strong Villager",
     nite: "Select a player to give your card to (`w!card [player]`).\n" +
           "You can give both cards to two players at once (`w!cards [player1] [player2]`).",
+    attr: { abil1: 2, cards: [] },
     tag : tags.ROLE.VILLAGER | tags.ROLE.STRONG_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
@@ -162,6 +165,7 @@ let roles = {
     cat : "Strong Villager",
     day : "Select a player to kill (`w!shoot [player]`) if you find them suspicious.\n" +
           "**⚠️ Random shooting is a gamethrowing act, and can result in a ban!**",
+    attr: { abil1: 2 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.STRONG_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -175,6 +179,7 @@ let roles = {
     cat : "Strong Villager",
     oneOnly: true,
     day : "Select a player to put in jail during the next night (`w!jail [player]`).",
+    attr: { abil1: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.STRONG_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE | tags.ROLE.ONE_ONLY
   },
@@ -186,8 +191,9 @@ let roles = {
     cat : "Regular Villager",
     day : "Select a player to be revealed when you are killed (`w!reveal [player]`).",
     nite: "Select a player to be revealed when you are killed (`w!reveal [player]`).",
+    // attr: { abil1: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   },
   "Marksman": {
  		desc: "At night you can mark a player as your target." +
@@ -203,6 +209,7 @@ let roles = {
     nite: "Mark a player as your target (`w!mark [player]`).\n" +
           "After the next day, you can kill your target (`w!shoot`) if you find them suspicious.\n" +
           "**⚠️ If your target is a villager, your shot will backfire and kill you!**",
+    attr: { abil1: 2 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
   }, 
@@ -212,6 +219,7 @@ let roles = {
     team: "Village",
     abbr: [],
     day : "You can reveal your role (`w!reveal mayor`) to make your vote count double during the rest of the game.",
+    attr: { abil1: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -224,6 +232,7 @@ let roles = {
     cat : "Strong Villager",
     nite: "You can talk anonymously with the dead." +
           " Once during the game you can revive a dead player (`w!revive [player]`).",
+    attr: { abil1: 1, abil2: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.STRONG_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -235,6 +244,7 @@ let roles = {
     cat : "Regular Villager",
     day : "You can reveal the role of a player (`w!reveal [player]`) and prevent anybody from voting during that day.\n" +
           "**⚠️ Random revealing is a gamethrowing act, and can result in a ban!**",
+    attr: { abil1: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -256,6 +266,7 @@ let roles = {
     cat : "Regular Villager",
     day : "You can throw holy water on another player (`w!water [player]`) if you find them suspicious.\n" +
           "**⚠️ If your target is __not__ a werewolf, you die!**",
+    attr: { abil1: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -323,6 +334,7 @@ let roles = {
     abbr: ["tg"],
     cat : "Regular Villager",
     nite: "Select a player to protect (`w!protect [player]`).",
+    attr: { health: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
@@ -335,7 +347,8 @@ let roles = {
     cat : "Regular Villager",
     nit1: "Select a player to heal with your protect potion (`w!heal [player]`).",
     nite: "Select a player to heal with your protect potion (`w!heal [player]`) or to kill with your poison potion (`w!poison [player]`).\n" +
-          "**⚠️ Random revealing is a gamethrowing act, and can result in a ban!**",
+          "**⚠️ Random killing is a gamethrowing act, and can result in a ban!**",
+    attr: { abil1: 1, abil2: 1 },
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -370,6 +383,7 @@ let roles = {
     cat : "Werewolf",
     day : "You can once protect a player from being lynched by the village (`w!protect [player]`).",
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    attr: { abil1: 1 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
@@ -382,6 +396,7 @@ let roles = {
     day : "Select a player to kill when you die (`w!avenge [player]`).",
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`)." +
           " Select a player to kill when you die (`w!avenge [player]`).",
+    // attr: { abil1: 1 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -396,6 +411,7 @@ let roles = {
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).\n" +
           "Once you can convert a villager into a werewolf (`w!scratch [player]`).\n" +
           "**⚠️ If they are not a villager, you lose your ability!**",
+    attr: { abil1: 1 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
@@ -404,7 +420,8 @@ let roles = {
     aura: "Unknown",
     team: "Solo",
     abbr: ["lw"],
-    nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`)." +
+          " However, remember you have to be last werewolf alive to win!",
     tag : tags.ROLE.SOLO_VOTING | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWC_ROLE | tags.ROLE.UNAVAILABLE
   },
@@ -417,6 +434,7 @@ let roles = {
     cat : "Werewolf",
     day : "You can select a player during the day to \"fall asleep\" for one night (`w!nightmare [player]`).",
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    attr: { abil1: 2 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   },
@@ -428,6 +446,7 @@ let roles = {
     cat : "Werewolf",
     day : "You can double your team's votes while hiding all votes (`w!shade`).",
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    attr: { abil1: 1 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
   },
@@ -451,6 +470,7 @@ let roles = {
     cat : "Werewolf",
     day : "Once per game, you can active a werewolves \"frenzy\" during the day (`w!frenzy`).",
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    attr: { abil1: 1 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   },
@@ -462,6 +482,7 @@ let roles = {
     cat : "Werewolf",
     day : "You can reveal the role of a player (`w!reveal [player]`) and prevent anybody from voting during that day.",
     nite: "Chat and vote with the werewolves on who to kill tonight (`w!vote [player]`).",
+    attr: { abil1: 1 },
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
@@ -514,7 +535,7 @@ let roles = {
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Soul Collector": {
-    desc: "At night select up to three players to collect their souls if they die from villagers or werewolves." +
+    desc: "At night select a number of players to collect their souls if they die from villagers or werewolves." +
           " Souls you obtained can't be reached until you die." +
           " Win by filling up all three boxes with souls.",
     aura: "Unknown",
@@ -522,7 +543,7 @@ let roles = {
     abbr: ["sc"],
     oneOnly: true,
     // cat : "Voting",
-    nite: "Select up to three players to collect their souls (`w!collect [player] ...`).",
+    nite: "Select a number of players to collect their souls (`w!collect [player] ...`).",
     tag : tags.ROLE.SOLO_VOTING | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWOWC_ROLE | tags.ROLE.TO_BE_TESTED | tags.ROLE.ONE_ONLY
   },
@@ -598,6 +619,7 @@ let roles = {
     abbr: ["canni", "cani", "cb"],
     cat : "Killer",
     nite: "Select a player to \"eat\" (`w!eat [player1]`) or save up your hunger.",
+    attr: { abil1: 1 },
     tag : tags.ROLE.SOLO_KILLER |
           tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
   },
@@ -779,6 +801,7 @@ let roles = {
     abbr: [],
     aura: "Unknown",
     team: "Village",
+    attr: { abil1: 1 },
     tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.UNAVAILABLE
   },
   "Sect Hunter": {

@@ -200,66 +200,110 @@ const addWin = (game, winners, team) => {
 
 const gameEmbed = (client, game) => {
   return new Discord.MessageEmbed()
-    .setTitle(game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`)
+    .setTitle(
+      game.mode == "custom"
+        ? `${game.name} [\`${game.gameID}\`]`
+        : `Game #${game.gameID}`
+    )
     .addField(
       `Players [${game.players.length}]`,
       !game.players.length
         ? "-"
         : game.currentPhase == -1
         ? game.players.map(p => nicknames.get(p.id)).join("\n")
-        : game.players.map(
-            p =>
-              `${
-                p.number
-              } ${nicknames.get(p.id)}${
-                p.alive ? "" : " <:Death:668750728650555402>"
-              } ${getEmoji(client, p.role)}${
-                p.couple
-                  ? ` ${getEmoji(client, "Cupid Lovers")}`
-                  : ""
-              }${
-                p.sect && p.role !== "Sect Leader"
-                  ? ` ${getEmoji(client, "Sect Member")}`
-                  : ""
-              }${
-                p.boxed && game.players.find(pl => pl.role == "Soul Collector" && pl.alive)
-                  ? ` ${getEmoji(client, "Soul")}` : ""
-              }${p.left ? " *off*" : ""}`
-          ).join("\n")
+        : game.players
+            .map(
+              p =>
+                `${p.number} ${nicknames.get(p.id)}${
+                  p.alive ? "" : " <:Death:668750728650555402>"
+                } ${
+                  p.initialRole && p.initialRole !== p.role
+                    ? `${getEmoji(client, p.role)} ➨ `
+                    : ""
+                }${getEmoji(client, p.role)}${
+                  p.couple ? ` ${getEmoji(client, "Cupid Lovers")}` : ""
+                }${
+                  p.sect && p.role !== "Sect Leader"
+                    ? ` ${getEmoji(client, "Sect Member")}`
+                    : ""
+                }${
+                  p.boxed &&
+                  game.players.find(
+                    pl => pl.role == "Soul Collector" && pl.alive
+                  )
+                    ? ` ${getEmoji(client, "Soul")}`
+                    : ""
+                }${p.left ? " *off*" : ""}`
+            )
+            .join("\n")
     )
-    .addField("Roles", game.originalRoles.map(r => `${getEmoji(client, r)}`).join(' '))
+    .addField(
+      "Roles",
+      game.originalRoles.map(r => `${getEmoji(client, r)}`).join(" ")
+    )
 }
 
 const death = (client, game, number, suicide = false) => {
   let deadPlayer = game.players.find(p => p.number == number)
   
-  // DOPPEL TAKE ROLE
-  game.running = "doppelganger taking new role"
-  let doppels = game.players.filter(p => p.alive && p.role == "Doppelganger" && p.selection == deadPlayer.number)
-  for (var doppel of doppels) {
-    doppel.role = deadPlayer.role
-    getUser(client, doppel.id).send(
-      new Discord.MessageEmbed()
-        .setTitle("Welp.")
-        .setThumbnail(getEmoji(client, deadPlayer.role))
-        .setDescription(
-          `**${deadPlayer.number} ${nicknames.get(deadPlayer.id)} ${getEmoji(
-            client,
-            deadPlayer.role
-          )}** has died and you have taken their role. You are now a${[
-            "A",
-            "E",
-            "I",
-            "O",
-            "U"
-          ].includes(deadPlayer.role[0])} ${deadPlayer.role}!`
-        )
-    )
+  if (suicide !== "corr"){
+    // DOPPEL TAKE ROLE
+    game.running = "doppelganger taking new role"
+    let doppels = game.players.filter(p => p.alive && p.role == "Doppelganger" && p.selection == deadPlayer.number)
+    for (var doppel of doppels) {
+      doppel.role = deadPlayer.role
+      getUser(client, doppel.id).send(
+        new Discord.MessageEmbed()
+          .setTitle("Welp.")
+          .setThumbnail(getEmoji(client, deadPlayer.role))
+          .setDescription(
+            `**${deadPlayer.number} ${nicknames.get(deadPlayer.id)} ${getEmoji(
+              client,
+              deadPlayer.role
+            )}** has died and you have taken their role. You are now a${[
+              "A",
+              "E",
+              "I",
+              "O",
+              "U"
+            ].includes(deadPlayer.role[0])} ${deadPlayer.role}!`
+          )
+      )
+    }
   }
   
   game.running = "start death module"
   
   if (!suicide || suicide == "corr") {
+    // LOUDMOUTH REVEAL
+    game.running = "loudmouth reveal"
+    if (deadPlayer.role == "Loudmouth" && deadPlayer.selected) {
+      let revealedPlayer = game.players[deadPlayer.selected]
+        if (revealedPlayer.alive) {
+        broadcastTo(
+          client,
+          game.players.filter(p => !p.left),
+          `**${deadPlayer.number} ${nicknames.get(
+            deadPlayer.id
+          )} ${getEmoji(client, "Loudmouth")}** revealed **${
+            revealedPlayer.number
+          } ${nicknames.get(
+            revealedPlayer.id
+          )}**. They are ${
+                roles[revealedPlayer.role].oneOnly
+                  ? "the"
+                  : /^([aeiou])/i.test(revealedPlayer.role)
+                  ? "an"
+                  : "a"
+              } ${getEmoji(
+            client,
+            revealedPlayer.role
+          )} ${revealedPlayer.role}.`
+        )
+        revealedPlayer.roleRevealed = revealedPlayer.role
+      }
+    }
+    
     if (game.currentPhase % 3 == 1) {
       // RED LADY VISITING ATTACKED PLAYER
       game.running = "kill red lady visiting attacked player"

@@ -94,24 +94,25 @@ module.exports = {
       if (vote == gamePlayer.number) 
         return await message.author.send("You cannot vote yourself.")
       game.players[gamePlayer.number-1].vote = vote
-      fn.broadcastTo(
-        client, game.players.filter(p => !p.left),
-        `${fn.getEmoji(client, "Voting")} **${gamePlayer.number} ${nicknames.get(message.author.id)}${
-          gamePlayer.roleRevealed
-            ? ` ${client.emojis.cache.find(
-                e => e.name == gamePlayer.role.replace(/ /g, "_")
-              )}`
-            : ""
-        }** voted to lynch **${vote} ${
-          nicknames.get(game.players[vote - 1].id)
-        }${
-          game.players[vote - 1].roleRevealed
-            ? ` ${client.emojis.cache.find(
-                e => e.name == game.players[vote - 1].role.replace(/ /g, "_")
-              )}`
-            : ""
-        }**.`
-      )
+      if (!game.shade)
+        fn.broadcastTo(
+          client, game.players.filter(p => !p.left),
+          `${fn.getEmoji(client, "Voting")} **${gamePlayer.number} ${nicknames.get(message.author.id)}${
+            gamePlayer.roleRevealed
+              ? ` ${client.emojis.cache.find(
+                  e => e.name == gamePlayer.role.replace(/ /g, "_")
+                )}`
+              : ""
+          }** voted to lynch **${vote} ${
+            nicknames.get(game.players[vote - 1].id)
+          }${
+            game.players[vote - 1].roleRevealed
+              ? ` ${client.emojis.cache.find(
+                  e => e.name == game.players[vote - 1].role.replace(/ /g, "_")
+                )}`
+              : ""
+          }**.`
+        )
     }
     QuickGames[index] = game
     

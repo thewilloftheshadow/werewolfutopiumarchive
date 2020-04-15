@@ -22,6 +22,7 @@ module.exports = {
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
     if (game.currentPhase % 3 != 2) return;
+    if (game.shade) return;
     
     message.author.send(
       new Discord.MessageEmbed()

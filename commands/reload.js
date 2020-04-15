@@ -24,6 +24,8 @@ module.exports = {
     
     let command = args[0];
     
+    if (!args[0]) return await message.author.send(`***Bruh***`)
+    
     if(command.startsWith("/")){
       command = args.join(" ")
       

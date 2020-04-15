@@ -35,39 +35,45 @@ module.exports = {
       booster = true
     
     // EXPERIMENTAL
-    let items = [
-      {
-        weight: 100 + player.streak,
-        item: "coin",
-        possibleValues: numArray(10, 10, 15)
-      },
-      {
-        weight: 50 + player.streak,
-        item: "rose",
-        possibleValues: numArray(5, 5, 10)
-      },
-      {
-        weight: 25 + player.streak,
-        item: "common lootbox",
-        possibleValues: numArray(1, 1, 5)
-      },
-      {
-        weight: 10 + player.streak,
-        item: "apprentice lootbox",
-        possibleValues: numArray(1, 1, 3)
-      },
-      {
-        weight: 5 + player.streak,
-        item: "gem",
-        possibleValues: numArray(5, 5, 4)
-      },
-      { weight: player.streak, item: "master lootbox", possibleValues: [1] }
-    ]
-    let bonusItem = items[wrg(items.map(x => x.weight))]
-    let bonusItemAmt = bonusItem.possibleValues[wrg(bonusItem.possibleValues.reverse().map(x => Math.pow(x,2)))]
+//     let items = [
+//       {
+//         weight: 100 + player.streak,
+//         item: "coin",
+//         possibleValues: numArray(10, 10, 15)
+//       },
+//       {
+//         weight: 50 + player.streak,
+//         item: "rose",
+//         possibleValues: numArray(5, 5, 10)
+//       },
+//       {
+//         weight: 25 + player.streak,
+//         item: "common lootbox",
+//         possibleValues: numArray(1, 1, 5)
+//       },
+//       {
+//         weight: 10 + player.streak,
+//         item: "apprentice lootbox",
+//         possibleValues: numArray(1, 1, 3)
+//       },
+//       {
+//         weight: 10 + player.streak,
+//         item: "talisman",
+//         possibleValues: [3]
+//       },
+//       {
+//         weight: 5 + player.streak,
+//         item: "gem",
+//         possibleValues: numArray(5, 5, 4)
+//       },
+//       { weight: player.streak, item: "master lootbox", possibleValues: [1] }
+//     ]
+//     let bonusItem = items[wrg(items.map(x => x.weight))]
+//     let possibleValues = fn.deepClone(bonusItem.possibleValues)
+//     let bonusItemAmt = bonusItem.possibleValues[wrg(possibleValues.reverse().map(x => Math.pow(x,2)))]
     
-    console.log(bonusItem, bonusItemAmt)
-    console.log(`You've won ${bonusItemAmt} ${bonusItem.item}s!`)
+//     console.log(bonusItem, bonusItemAmt)
+//     console.log(`You've won ${bonusItemAmt} ${bonusItem.item}s!`)
     
     if (moment(player.lastDaily).add(20, "h") >= moment()) {
       let diff = moment(player.lastDaily)
@@ -76,15 +82,20 @@ module.exports = {
       let diffclaim = moment()
         .diff(moment(player.lastDaily), "seconds")
       let rdmmsgs = [
-        `You cannot collect daily rewards for another **${Math.floor(diff / 60 / 60) % 24}h ${Math.floor(diff / 60) %
-        60}m ${diff % 60}s**.`,
-        `How is it "daily" if you claim it **${Math.floor(diffclaim / 60 / 60) % 24}h ${Math.floor(diffclaim / 60) %
-        60}m ${diffclaim % 60}s** after you last claimed?`,
-        `Hmm... You need to wait for another **${Math.floor(diff / 60 / 60) % 24}h ${Math.floor(diff / 60) %
-        60}m ${diff % 60}s** to claim your next daily reward!`
+        `You cannot collect daily rewards for another **${Math.floor(
+          diff / 60 / 60
+        ) % 24}h ${Math.floor(diff / 60) % 60}m ${diff % 60}s**.`,
+        `Hmm... You need to wait for another **${Math.floor(diff / 60 / 60) %
+          24}h ${Math.floor(diff / 60) % 60}m ${diff %
+          60}s** to claim your next daily reward!`
       ]
       return await message.channel.send(
-        rdmmsgs[Math.floor(rdmmsgs.length*Math.random())]
+        Math.floor(diffclaim / 60 / 60) % 24 < 12
+          ? `How is it "daily" if you claim it **${Math.floor(
+              diffclaim / 60 / 60
+            ) % 24}h ${Math.floor(diffclaim / 60) % 60}m ${diffclaim %
+              60}s** after you last claimed?`
+          : rdmmsgs[Math.floor(rdmmsgs.length * Math.random())]
       )
     }
     
