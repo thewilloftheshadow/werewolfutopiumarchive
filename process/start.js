@@ -36,7 +36,9 @@ module.exports = async (client, game) => { try {
             !(game.originalRoles.includes(role.name) && role.oneOnly)
       )
       
-      role = thisPlayer.initialRole = thisPlayer.role = rdmRoles[thisPlayer.role][Math.floor(Math.random()*rdmRoles[thisPlayer.role].length)]
+      role = rdmRoles[thisPlayer.role][Math.floor(Math.random()*rdmRoles[thisPlayer.role].length)]
+      thisPlayer.initialRole = role
+      thisPlayer.role = role
     }
       
     switch (thisPlayer.role) {

@@ -36,6 +36,7 @@ const token = process.env.DISCORD_BOT_TOKEN
 client.login(token)
 
 client.once('ready', async () => {
+  client.allinvites = await client.guilds.cache.get("522638136635817986").fetchInvites()
   console.log(`${fn.time()} | ${client.user.username} is up!`)
   
   client.user.setPresence({ activity: { name: 'for Werewolf Simulation Games' , type: "WATCHING"}, status: 'idle' })
@@ -48,6 +49,41 @@ client.once('ready', async () => {
     client.channels.cache.get(rebootchan).send("Bot has successfully been restarted!").catch(() => temp.delete("rebootchan"))
   }
 })
+
+client.on('inviteCreate', async invite => {
+  client.allinvites = await client.guilds.cache.get("522638136635817986").fetchInvites()
+})
+client.on('inviteDelete', async invite => {
+  client.allinvites = await client.guilds.cache.get("522638136635817986").fetchInvites()
+})
+
+client.on('guildMemberAdd', async member => {
+  let guildInvites = await member.guild.fetchInvites()
+  const oldinv = client.allinvites
+  client.allinvites = guildInvites
+  const invite = guildInvites.find(inv => inv.uses > oldinv.get(inv.code).uses)
+  const inviter = client.users.cache.get(invite.inviter.id)
+  if(!players.get(member.user.id)) players.set(member.user.id, {
+        xp: 0,
+        coins: 0,
+        roses: 0,
+        gems: 0,
+        currentGame: null,
+        wins: [],
+        loses: [],
+        suicides: 0,
+        inventory: {},
+        invBy: inviter.id
+      })
+  if(players.get(member.user.id+".invite")) return //already joined and has invite
+  players.set(member.user.id+".invite", invite)
+  await member.guild.channels.cache
+    .get("700150278413877309")
+    .send(
+      `${member.user.tag} joined using invite code ${invite.code} from ${inviter.tag}. Invite was used ${invite.uses} times since its creation.`
+    )
+})
+
 
 client.on('message', async message => {
   
@@ -86,7 +122,8 @@ client.on('message', async message => {
         wins: [],
         loses: [],
         suicides: 0,
-        inventory: {}
+        inventory: {},
+        invite: null
       }
       
       await message.channel.send("Please check your DMs!")
@@ -193,16 +230,16 @@ client.on('message', async message => {
       .replace(/\\?<(?:#|@|@&)[^\s]*?>/g, "")
       .replace(/(https?:\/\/)?((([^.,\/#!$%\^&\*;:{}=\-_`~()\[\]\s])+\.)+([^.,\/#!$%\^&\*;:{}=\-_`~()\[\]\s])+|localhost)(:\d+)?(\/[^\s]*)*/gi, "")
   
-  let bwlA = ["sex","s3x","horny","ass","pussy","arse","penis","vagina","viagra",
+  let bwlA = ["sex","s3x","horny","pussy","arse","penis","vagina","viagra",
               "dick","cock","dicc","cocc","nigg","niga","masterbate","anal","anus",
               "jerk off","jack off","jerkoff","jackoff","semen","a\\$\\$",
-              "n1g","c0c",]
+              "n1g","c0c","dumbass","asshole","butthole","nazi"]
              // ["fuck","fuk","fak","fck","shit","shat","sex","s3x","horny","ass",
              //  "pussy","arse","penis","vagina","viagra","dick","cock","dicc","fucc",
              //  "cocc","nigg","niga","masterbate","anal","anus","jerk off","jack off",
              //  "jerkoff","jackoff","corona","piss","semen","a\\$\\$","n1g","c0c",
              //  "c0rona","cor0na"] // filter regardless
-  let bwlB = ["nig","cum"] // filter if individual word 
+  let bwlB = ["nig","cum","ass"] // filter if individual word 
   let censor = "*************".split('').join("*******************************") // censor characters
   let beforePC = input
   input = input.replace(new RegExp(`(?<=[^\\s]*?(?:${bwlA.join('|')})[^\\s]*?)[^\\s]`,"gi"), "*")

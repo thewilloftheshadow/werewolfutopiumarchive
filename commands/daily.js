@@ -20,6 +20,7 @@ let numArray = (start, int, cnt) => {
 
 module.exports = {
   name: "daily",
+  aliases: ["daliy"],
   run: async (client, message, args) => {
     let player = players.get(message.author.id)
     if(!player.lastDaily) player.lastDaily = 0
@@ -103,7 +104,7 @@ module.exports = {
       player.streak = 0
     
     let base = 10
-    let bonus = Math.round(Math.pow(5*player.streak, 4/5))
+    let bonus = Math.round(Math.pow(5*player.streak, 7/10))
     
     player.coins += Math.round((base + bonus) * (booster ? 1.25 : 1))
     

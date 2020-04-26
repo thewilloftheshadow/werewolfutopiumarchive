@@ -36,12 +36,8 @@ module.exports = {
       let targetPlayer = game.players[target-1]
       if (!targetPlayer.alive)
         return await message.author.send("You cannot reveal a dead player's role!")
-    //  if (targetPlayer.paciReveal)
-    //    return await message.author.send("This player is already revealed by another Pacifist!")
       if (targetPlayer.roleRevealed)
         return await message.author.send("That player has already been revealed!")
-      if (game.currentPhase % 3 !== 0)
-        return await message.author.send("You can only sect a player during the night!")
       if (game.currentPhase >= 999)
         return await message.author.send("The game is over! You can no longer use your actions.")
       

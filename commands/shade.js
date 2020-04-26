@@ -22,7 +22,7 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
-    if (gamePlayer.role !== "Werewolf Berserk")
+    if (gamePlayer.role !== "Shadow Wolf")
       return await message.author.send("You do not have the abilities to activate shady voting.")
     if (!gamePlayer.alive)
       return await message.author.send("You are dead. You can no longer activate shady voting.")
@@ -33,14 +33,25 @@ module.exports = {
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your actions.")
     
-    if (game.currentPhase % 3 == 0)
-      return await message.author.send("You can only activate shady voting at day!")
+    // if (game.currentPhase % 3 !== 0)
+    //   return await message.author.send("You can only activate shady voting at night!")
         
     game.shade = true
     
     message.author.send(
-      "You have activated shady voting for today!"
+      `${fn.getEmoji(client, "Shadow Wolf Shade")} You have activated shady voting for today!`
     )
+    
+    if (game.currentPhase % 3 !== 0)
+      fn.broadcastTo(
+        client, game.players.filter(p => p.alive && !p.left),
+        new Discord.MessageEmbed()
+          .setTitle("Shady Things")  
+          .setThumbnail(fn.getEmoji(client, "Shadow Wolf Shade").url)
+          .setDescription(
+            `${fn.getEmoji(client, "Shadow Wolf")} Shadow Wolf manipulated today's voting!`
+          )
+      )
     
     gamePlayer.abil1 -= 1
     

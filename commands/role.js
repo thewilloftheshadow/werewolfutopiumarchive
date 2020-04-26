@@ -14,10 +14,9 @@ module.exports = {
         data.name.toLowerCase().startsWith(targetRole.toLowerCase()) ||
          (data.abbr && data.abbr.includes(targetRole.toLowerCase()))
     )
-    console.log(role)
     
     if (!role) return await message.author.send("Unknown role.")
-    let rolecmdobj = client.commands.filter((cmd) => cmd.gameroles && cmd.gameroles.includes(role)).array()
+    let rolecmdobj = client.commands.filter((cmd) => cmd.gameroles && cmd.gameroles.includes(role.name)).array()
     let rolecmds = []
     rolecmdobj.forEach(cmd => {
       rolecmds.push(cmd.name)

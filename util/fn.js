@@ -249,9 +249,11 @@ const death = (client, game, number, suicide = false) => {
   if (suicide !== "corr"){
     // DOPPEL TAKE ROLE
     game.running = "doppelganger taking new role"
-    let doppels = game.players.filter(p => p.alive && p.role == "Doppelganger" && p.selection == deadPlayer.number)
+    let doppels = game.players.filter(p => p.alive && p.role == "Doppelganger" && p.selected == deadPlayer.number)
     for (var doppel of doppels) {
-      doppel.role = deadPlayer.role
+      let gamePlayer = deepClone(deadPlayer)
+      ['number','id','headhunter','lastAction','roleRevealed','initialRole'].forEach( x => delete gamePlayer[x])
+      doppel = Object.assign(doppel, gamePlayer)
       getUser(client, doppel.id).send(
         new Discord.MessageEmbed()
           .setTitle("Welp.")
@@ -278,27 +280,30 @@ const death = (client, game, number, suicide = false) => {
     // LOUDMOUTH REVEAL
     game.running = "loudmouth reveal"
     if (deadPlayer.role == "Loudmouth" && deadPlayer.selected) {
-      let revealedPlayer = game.players[deadPlayer.selected]
+      let revealedPlayer = game.players[deadPlayer.selected-1]
         if (revealedPlayer.alive) {
         broadcastTo(
           client,
           game.players.filter(p => !p.left),
-          `**${deadPlayer.number} ${nicknames.get(
-            deadPlayer.id
-          )} ${getEmoji(client, "Loudmouth")}** revealed **${
-            revealedPlayer.number
-          } ${nicknames.get(
-            revealedPlayer.id
-          )}**. They are ${
-                roles[revealedPlayer.role].oneOnly
-                  ? "the"
-                  : /^([aeiou])/i.test(revealedPlayer.role)
-                  ? "an"
-                  : "a"
-              } ${getEmoji(
-            client,
-            revealedPlayer.role
-          )} ${revealedPlayer.role}.`
+          new Discord.MessageEmbed()
+            .setTitle("Last Will")
+            .setThumbnail(getEmoji(client, "Loudmouth").url)
+            .setDescription(
+              `The Loudmouth's last will was to reveal **${
+                revealedPlayer.number
+              } ${nicknames.get(
+                revealedPlayer.id
+              )}**. They are ${
+                    roles[revealedPlayer.role].oneOnly
+                      ? "the"
+                      : /^([aeiou])/i.test(revealedPlayer.role)
+                      ? "an"
+                      : "a"
+                  } ${getEmoji(
+                client,
+                revealedPlayer.role
+              )} ${revealedPlayer.role}.`
+            )
         )
         revealedPlayer.roleRevealed = revealedPlayer.role
       }

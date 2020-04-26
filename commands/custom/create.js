@@ -58,80 +58,6 @@ module.exports = {
       }
     }
     
-    let rolePrompt = await message.author.send(
-      new Discord.MessageEmbed()
-        .setTitle("Custom Game Setup")
-        .setDescription(
-          `Select roles for your custom game by inputting their names or aliases.\n` +
-          "You have 30 seconds for each role. Type `back` to remove your last selection."
-        )
-    )
-    
-    let messagesSince = 0
-    for (var i = 0; i < 16; i++) {
-      let inputRole = await rolePrompt.channel
-        .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
-        .catch(() => {})
-      
-      if (!inputRole)
-        return await message.author.send(
-          new Discord.MessageEmbed()
-            .setColor("RED")
-            .setTitle("Prompt timed out.")
-        )
-      inputRole = inputRole.first().content.replace(/(_|\s+)/g, " ")
-      messagesSince++
-      if (inputRole.toLowerCase() == "back") {
-        if (i == 0) {
-          await message.channel.send("uhhh wot?")
-          i--
-          continue;
-        }
-        currentGame.originalRoles.pop()
-        i -= 2
-      }
-      else {
-        let role = Object.values(roles).find(
-          data =>
-            data.name.toLowerCase().startsWith(inputRole.toLowerCase()) ||
-            (data.abbr && data.abbr.includes(inputRole.toLowerCase()))
-        )
-        if (!role) {
-          await message.author.send("Unknown role.")
-          i--; continue;
-        }
-        if (role.oneOnly && currentGame.originalRoles.indexOf(role.name) !== -1) {
-          await message.author.send(
-            new Discord.MessageEmbed()
-              .setColor("RED")
-              .setTitle(`There can only be one ${fn.getEmoji(client, role.name)} ${role.name} in each game!`)
-          )
-          i--
-          continue;
-        }
-        currentGame.originalRoles[i] = role.name
-      }
-      let editEmbed = rolePrompt.embeds[0]
-      if (!i) editEmbed.fields = [{name: "Roles", value: ""}]
-      editEmbed.fields[0].value = currentGame.originalRoles.map(role => `${fn.getEmoji(client, role)} ${role}`).join('\n')
-      if (!editEmbed.fields[0].value.length) delete editEmbed.fields
-      if (messagesSince && messagesSince % 5 == 0) {
-        await rolePrompt.delete()
-        rolePrompt = await message.author.send(editEmbed)
-      } else {
-        await rolePrompt.edit(editEmbed)
-      }
-    }
-    
-    await message.author.send(
-      new Discord.MessageEmbed()
-        .setTitle("Custom Game Setup")
-        .setDescription(
-          currentGame.originalRoles
-            .map(r => `${fn.getEmoji(client, r)} ${r}`).join('\n')
-        )
-    )
-    
     while (!currentGame.gameID) {
       let gcPrompt = await message.author.send(
         new Discord.MessageEmbed()
@@ -247,6 +173,91 @@ module.exports = {
       else if (!nameInput.match(/^[^*_`\\()[\]>\n]{3,30}$/i))
         await namePrompt.channel.send("Your game name contains invalid characters.")
     }
+    
+    let rolePrompt = await message.author.send(
+      new Discord.MessageEmbed()
+        .setTitle("Custom Game Setup")
+        .setDescription(
+          `Select roles for your custom game by inputting their names or aliases.\n` +
+          "You have 30 seconds for each role. Type `back` to remove your last selection."
+        )
+    )
+    
+    let messagesSince = 0
+    let playerCustom = players.get(`${message.author.id}.custom`)
+    for (var i = 0; i < 16; i++) {
+      let inputRole = await rolePrompt.channel
+        .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
+        .catch(() => {})
+      
+      if (!inputRole)
+        return await message.author.send(
+          new Discord.MessageEmbed()
+            .setColor("RED")
+            .setTitle("Prompt timed out.")
+        )
+      inputRole = inputRole.first().content.replace(/(_|\s+)/g, " ")
+      messagesSince++
+      if (inputRole.toLowerCase() == "back") {
+        if (i == 0) {
+          await message.channel.send("uhhh wot?")
+          i--
+          continue;
+        }
+        currentGame.originalRoles.pop()
+        i -= 2
+      }
+      else {
+        let role = Object.values(roles).find(
+          data =>
+            data.name.toLowerCase().startsWith(inputRole.toLowerCase()) ||
+            (data.abbr && data.abbr.includes(inputRole.toLowerCase()))
+        )
+        if (!role) {
+          await message.author.send("Unknown role.")
+          i--; continue;
+        }
+        if (role.oneOnly && currentGame.originalRoles.indexOf(role.name) !== -1) {
+          await message.author.send(
+            new Discord.MessageEmbed()
+              .setColor("RED")
+              .setTitle(`There can only be one ${fn.getEmoji(client, role.name)} ${role.name} in each game!`)
+          )
+          i--
+          continue;
+        }
+        if (!playerCustom.includes(role.name) && currentGame.gameID.toLowerCase().startsWith(`betatest_`)) {
+          await message.author.send(
+            new Discord.MessageEmbed()
+              .setColor("RED")
+              .setTitle(`You do not own ${fn.getEmoji(client, role.name)} ${role.name} in Custom Maker yet!`)
+              .setFooter(`Buy the role with \`w!custom buy ${role.name}\`!`)
+          )
+          i--
+          continue;
+        }
+        currentGame.originalRoles[i] = role.name
+      }
+      let editEmbed = rolePrompt.embeds[0]
+      if (!i) editEmbed.fields = [{name: "Roles", value: ""}]
+      editEmbed.fields[0].value = currentGame.originalRoles.map(role => `${fn.getEmoji(client, role)} ${role}`).join('\n')
+      if (!editEmbed.fields[0].value.length) delete editEmbed.fields
+      if (messagesSince && messagesSince % 5 == 0) {
+        await rolePrompt.delete()
+        rolePrompt = await message.author.send(editEmbed)
+      } else {
+        await rolePrompt.edit(editEmbed)
+      }
+    }
+    
+    await message.author.send(
+      new Discord.MessageEmbed()
+        .setTitle("Custom Game Setup")
+        .setDescription(
+          currentGame.originalRoles
+            .map(r => `${fn.getEmoji(client, r)} ${r}`).join('\n')
+        )
+    )
     
     let settingsPrompt = await message.author.send(
       new Discord.MessageEmbed()

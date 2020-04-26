@@ -10,6 +10,33 @@ const passport = require("passport");
 const probe = require('probe-image-size');
 const cmd = require("node-cmd");
 
+const statusMonitor = require('express-status-monitor')({
+  title: 'Werewolf Utopium Status',
+path: '/status',
+spans: [{
+  interval: 1,            // Every second
+  retention: 60           // Keep 60 datapoints in memory
+}, {
+  interval: 5,            // Every 5 seconds
+  retention: 60
+}, {
+  interval: 15,           // Every 15 seconds
+  retention: 60
+}],
+chartVisibility: {
+  cpu: true,
+  mem: true,
+  load: false,
+  responseTime: false,
+  rps: false,
+  statusCodes: true
+}/* ,
+healthChecks: [{
+  protocol: 'https',
+  host: 'staff.werewolf-utopium.tk',
+}] */
+});
+
 app.use(
   require("express-session")({
     secret: process.env.SESSION_SECRET,
@@ -202,15 +229,13 @@ module.exports = client => {
       res.sendStatus(200)
     })
     
-    app.get("/json.sqlite", async(req, res) => {
+    app.get("/json.sqlite", checkAuth, devonly, async(req, res) => {
       if(!req.user) res.redirect("/")
       if (!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
       res.sendFile("/app/json.sqlite")
     })
     
-    app.get("/restart", async(req, res) => {
-      if(!req.user) res.redirect("/")
-      if(!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
+    app.get("/restart", checkAuth, devonly, async(req, res) => {
       cmd.run("refresh")
       res.sendStatus(200)
     })
@@ -254,11 +279,19 @@ module.exports = client => {
       res.render(__dirname + "/views/roles.ejs", pass)
     })
     
+    app.get('/status', checkAuth, devonly, statusMonitor.pageRoute)
+
+    
 
     function checkAuth(req, res, next) {
       if (req.user) return next()
       res.redirect("/login")
     }
+    function devonly(req, res, next) {
+      if (!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
+      next()
+    }
+    
     const listener = app.listen(process.env.PORT, function() {
       console.log("werewolf-utopium.tk is online, using port " + listener.address().port);
     })

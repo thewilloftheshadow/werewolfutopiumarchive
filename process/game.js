@@ -20,7 +20,8 @@ module.exports = client => {
     
     let activeGames = QuickGames.filter(g => g.currentPhase <= 1000 && g.currentPhase >= 0)
     
-    for (var game of activeGames) {if (game.currentPhase === 999) {
+    for (var game of activeGames) {
+      if (game.currentPhase === 999) {
         fn.broadcastTo(
           client,
           game.players.filter(p => !p.left),
@@ -39,6 +40,20 @@ module.exports = client => {
           .forEach(m =>
             m.roles.add(fn.getRole(m.guild, "Player")).catch(() => {})
           )
+      
+        if (game.mode == "quick") for (var player of game.players.map(x => x.id)) {
+          // if (!players.get(`${player}.wins`).find(g =>)) return;
+          let rdm = Math.floor(Math.random()*25)+1
+          if (rdm == 25) {
+            players.add(`${player}.inventory.lootbox`, 1)
+            fn.getUser(client, player).send(
+              new Discord.MessageEmbed()
+                .setTitle("Lootbox")
+                .setThumbnail(fn.getEmoji(client, "Lootbox").url)
+                .setDescription(`Congratulations, you got a lootbox!`)
+            )
+          }
+        }
       }
       if (game.currentPhase == -1 || game.currentPhase >= 999) continue;
 
@@ -121,7 +136,7 @@ module.exports = client => {
                           .setThumbnail(
                             fn.getEmoji(client, "Handsome Prince").url
                           )
-                          .setDescrtipion(
+                          .setDescription(
                             `**${lynchedPlayer.number} ${nicknames.get(
                               lynchedPlayer.id
                             )}** is the Handsome Prince!`
@@ -224,7 +239,9 @@ module.exports = client => {
                   game.players.filter(p => !p.left),
                   "The village cannot decide on who to lynch."
                 )
-            } else game.noVoting = game.shade = false
+            } else {
+              game.noVoting = false
+            }
 
             // CLEAR LYNCH PREVENTION SELECTIONS
             game.running = "clear lynch prevention seletions"
@@ -406,7 +423,48 @@ module.exports = client => {
 
                   let protector = game.players[x - 1]
 
-                  if (protector.role == "Bodyguard") {
+                  if (protector.role == "Doctor") {
+                    game.running = "protect from sk attack for doc"
+                    fn.getUser(client, protector.id).send(
+                      new Discord.MessageEmbed()
+                        .setAuthor(
+                          "Protection",
+                          fn.getEmoji("Doctor_Protection").url
+                        )
+                        .setDescription(
+                          `Your protection saved **${
+                            attackedPlayer.number
+                          } ${nicknames.get(attackedPlayer.id)}** last night!`
+                        )
+                    )
+                  }
+                  else if (protector.role == "Beast Hunter") {
+                    game.running = "protect from sk attack for bh"
+                    protector.trap.status = -1
+
+                    fn.getUser(client, protector.id).send(
+                      new Discord.MessageEmbed()
+                        .setAuthor(
+                          "Trap Triggered!",
+                          fn.getEmoji(client, "Beast Hunter TrapInactive").url
+                        )
+                        .setDescription(
+                          "Your target was too string to be killed!"
+                        )
+                    )
+                  }
+                  else if (protector.role == "Witch") {
+                    game.running = "protect from sk attack for witch"
+                    protector.abil1 = 0
+
+                    fn.getUser(client, protector.id).send(
+                      new Discord.MessageEmbed()
+                        .setAuthor("Elixir", fn.getEmoji("Witch Elixir").url)
+                        .setDescription("Last night your potion saved a life!")
+                    )
+                  }
+                  // FORGER'S SHIELD
+                  else if (protector.role == "Bodyguard") {
                     game.running = "protect from sk attack for bg"
                     protector.health -= 1
                     if (protector.health) {
@@ -441,7 +499,8 @@ module.exports = client => {
 
                       game = fn.death(client, game, protector.number)
                     }
-                  } else if (protector.role == "Tough Guy") {
+                  }
+                  else if (protector.role == "Tough Guy") {
                     game.running = "protect from sk attack for tg"
                     protector.health = 0
 
@@ -465,44 +524,8 @@ module.exports = client => {
                             "You have been wounded and will die at the end of the day."
                         )
                     )
-                  } else if (protector.role == "Doctor") {
-                    game.running = "protect from sk attack for doc"
-                    fn.getUser(client, protector.id).send(
-                      new Discord.MessageEmbed()
-                        .setAuthor(
-                          "Protection",
-                          fn.getEmoji("Doctor_Protection").url
-                        )
-                        .setDescription(
-                          `Your protection saved **${
-                            attackedPlayer.number
-                          } ${nicknames.get(attackedPlayer.id)}** last night!`
-                        )
-                    )
-                  } else if (protector.role == "Witch") {
-                    game.running = "protect from sk attack for witch"
-                    protector.abil1 = 0
-
-                    fn.getUser(client, protector.id).send(
-                      new Discord.MessageEmbed()
-                        .setAuthor("Elixir", fn.getEmoji("Witch Elixir").url)
-                        .setDescription("Last night your potion saved a life!")
-                    )
-                  } else if (protector.role == "Beast Hunter") {
-                    game.running = "protect from sk attack for bh"
-                    protector.trap.status = -1
-
-                    fn.getUser(client, protector.id).send(
-                      new Discord.MessageEmbed()
-                        .setAuthor(
-                          "Trap Triggered!",
-                          fn.getEmoji(client, "Beast Hunter TrapInactive").url
-                        )
-                        .setDescription(
-                          "Your target was too string to be killed!"
-                        )
-                    )
                   }
+                  // RED LADY PROTECT
                 }
               } else if (attackedPlayer.role == "Bodyguard") {
                 game.running = "bg self-prot from sk attack"
@@ -1168,7 +1191,8 @@ module.exports = client => {
               let targets = spz.usedAbilityTonight.map(
                 p => game.players[p.number - 1]
               )
-
+              console.log(spz)
+              console.log(targets)
               if (targets[0].killedTonight || targets[1].killedTonight)
                 fn.getUser(client, spz.id).send(
                   new Discord.MessageEmbed()
@@ -1205,6 +1229,7 @@ module.exports = client => {
               p => p.alive && p.role == "Sheriff" && p.usedAbilityTonight
             )
             for (var sheriff of sheriffs) {
+              console.log(sheriff)
               let target = game.players[sheriff.usedAbilityTonight - 1]
               if (!target.killedBy) continue;
 
@@ -1474,6 +1499,7 @@ module.exports = client => {
             let zombies = game.players.filter(
               p => p.alive && p.role == "Zombie"
             )
+            if(bitten.array().length){
             fn.broadcastTo(
               client,
               zombies,
@@ -1486,15 +1512,16 @@ module.exports = client => {
                 )
                 .setThumbnail(fn.getEmoji(client, "Zombie").url)
             )
+            }
             game.running = "bite by zomb"
             let cannotBite = []
             for (var zombie of zombies.filter(z => z.usedAbilityTonight)) {
               let bit = game.players[zombie.usedAbilityTonight - 1]
               if (["Cursed","President","Doppelganger"].includes(bit.role) || bit.sect ||
-                 bit.headhunter || (bit.team !== "Villager" && !(roles[bit.role].tag & tags.ROLE.SOLO_VOTING))) {
+                 bit.headhunter || !(roles[bit.role].team == "Villager" || (roles[bit.role].tag & tags.ROLE.SOLO_VOTING))) {
                 cannotBite.push(bit)
               }
-              bit.bitten = true
+              else bit.bitten = true
             }
             bitten = game.players.filter(p => p.bitten && p.alive)
             fn.broadcastTo(
@@ -2039,10 +2066,11 @@ module.exports = client => {
           game.running = "broadcast phase msg for alive"
           switch (game.currentPhase % 3) {
             case 0:
+              game.shade = false
               for (var player of game.players.filter(
                 p =>
                   !p.left && p.alive &&
-                  p.role !== "Jailer" &&
+                  !["Jailer","Cannibal"].includes(p.role) &&
                   !(p.jailed &&
                     game.players.find(p => p.role == "Jailer") &&
                     game.players.find(p => p.role == "Jailer").alive)
@@ -2077,6 +2105,16 @@ module.exports = client => {
                     )
                 )
               }
+              if (game.shade)
+                fn.broadcastTo(
+                  client, game.players.filter(p => p.alive && !p.left),
+                  new Discord.MessageEmbed()
+                    .setTitle("Shady Things")  
+                    .setThumbnail(fn.getEmoji(client, "Shadow Wolf Shade").url)
+                    .setDescription(
+                      `${fn.getEmoji(client, "Shadow Wolf")} Shadow Wolf manipulated today's voting!`
+                    )
+                )
               break
             case 2:
               if (!game.noVoting)
@@ -2235,6 +2273,26 @@ module.exports = client => {
             game.running = "clear gunner shot status"
             for (var gunner of game.players.filter(p => p.role == "Gunner"))
               gunner.shotToday = false
+            
+            game.running = "add canni hunger"
+            for (var canni of game.players.filter(p => p.role == "Cannibal" && p.alive)) {
+              canni.abil1 += 1
+              fn.getUser(client, canni.id).send(
+                new Discord.MessageEmbed()
+                  .setTitle(
+                    `Night ${Math.floor(game.currentPhase / 3) +
+                      1} has started!`
+                  )
+                  .setThumbnail(fn.getEmoji(client, "Night").url)
+                  .setDescription(
+                    `Select ${canni.abil1} player${
+                      canni.abil1 == 1 ? "" : "s"
+                    } to \"eat\" (\`w!eat [player] ${
+                      canni.abil1 == 1 ? "" : `[...]`
+                    }\`) or save up your hunger.`
+                  )
+              )
+            }
           }
         } catch (error) {
           client.channels.cache.get("664285087839420416").send(

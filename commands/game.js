@@ -35,8 +35,10 @@ module.exports = {
                   } ${nicknames.get(p.id)}${
                     p.alive ? "" : " <:Death:668750728650555402>"
                   }${
-                    p.id == message.author.id || p.roleRevealed
-                      ? ` ${fn.getEmoji(client, p.roleRevealed || p.role)}`
+                    p.id == message.author.id
+                      ? ` ${fn.getEmoji(client, p.role)}`
+                      : p.roleRevealed
+                      ? ` ${fn.getEmoji(client, p.roleRevealed)}`
                       : (roles[gamePlayer.role].team == "Werewolves" &&
                         roles[p.role].team == "Werewolves" && gamePlayer.role !== "Sorcerer") ||
                         (gamePlayer.role == "Sorcerer" && p.role == "Sorcerer") || (gamePlayer.role == "Mason" && p.role == "Mason")

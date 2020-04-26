@@ -19,7 +19,7 @@ module.exports = {
     if (!Number.isNaN(am)) args.pop()
     else am = 1
     
-    let item = shop[args.join(" ")],
+    let item = shop[args.join(" ").toLowerCase()],
         player = players.get(message.author.id)
     if (!item)
       return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} Invalid item`))
@@ -120,6 +120,14 @@ module.exports = {
     
     
     if(!["talisman", "private channel"].includes(item.itemid)) players.add(message.author.id+".inventory."+item.itemid, am)
+    
+    if (item.itemid == "custom maker")
+      players.set(
+        `${message.author.id}.custom`,
+        ["Villager","Gunner","Doctor","Bodyguard","Seer","Jailer","Priest","Aura Seer","Medium",
+         "Werewolf","Alpha Werewolf","Wolf Seer","Wolf Shaman","Fool","Headhunter","Serial Killer"]
+      )
+    
     if(item.itemid === "talisman") players.add(message.author.id+".inventory."+item.itemid+"."+role.name, am)
     
     if(item.itemid === "private channel"){

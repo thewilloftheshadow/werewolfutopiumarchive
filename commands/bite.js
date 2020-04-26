@@ -57,7 +57,7 @@ module.exports = {
     
     message.author.send(
       `<:Zombie_Bitten:660826237446651905> You selected **${targetPlayer.number} ${
-      nicknames.get(targetPlayer.id)}** to be zombified!!`
+      nicknames.get(targetPlayer.id)}** to be zombified!`
     )
     
     QuickGames[index] = game

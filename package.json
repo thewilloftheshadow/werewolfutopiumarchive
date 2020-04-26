@@ -4,7 +4,7 @@
   "description": "Werewolf Utopium Bot by LuciferianThomas",
   "main": "index.js",
   "dependencies": {
-    "discord.js": "^12.1.1",
+    "discord.js": "^12.2.0",
     "fs": "^0.0.2",
     "http": "^0.0.0",
     "discord.js-commando": "^0.10.0",
@@ -13,7 +13,7 @@
     "moment": "^2.24.0",
     "quick.db": "^7.1.1",
     "express": "^4.17.1",
-    "better-sqlite-pool": "^0.2.3",
+    "better-sqlite-pool": "^0.3.0",
     "striptags": "^3.1.1",
     "https": "^1.0.0",
     "node-fetch": "^2.6.0",
@@ -23,12 +23,13 @@
     "ejs": "^3.0.2",
     "passport-discord": "^0.1.3",
     "html": "^1.0.0",
-    "express-session": "^1.16.1",
+    "express-session": "^1.17.1",
     "passport": "^0.4.1",
     "probe-image-size": "^5.0.0",
     "canvas": "^2.6.1",
     "weighted-random": "^0.1.0",
-    "handybag": "latest"
+    "handybag": "latest",
+    "express-status-monitor": "^1.3.2"
   },
   "scripts": {
     "start": "node index.js"

@@ -13,7 +13,7 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "shop",
   run: async (client, message, args) => {
-    let embeds = [new Discord.MessageEmbed().setTitle("Werewolf Utopium Shop").setFooter("Some items are currently unusable").setColor(0x7289da)]
+    let embeds = [new Discord.MessageEmbed().setTitle("Werewolf Utopium Shop").setColor(0x7289da)]
     
     for (let shopitem in shop){
       let item = shop[shopitem]
@@ -29,7 +29,7 @@ module.exports = {
     }
     
     for (var [i, embed] of embeds.entries()) {
-      embed.setFooter(`Page ${i + 1}/${embeds.length} | Some items are currently unavaliable`)
+      embed.setFooter(`Page ${i + 1}/${embeds.length} | Buy the items with \`w!buy [item] [amount]\`!`)
     }
     
     let m = await message.channel.send(embeds[0])
