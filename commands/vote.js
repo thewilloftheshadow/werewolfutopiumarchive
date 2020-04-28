@@ -53,11 +53,9 @@ module.exports = {
               !p.jailed &&
               !p.left
           ),
-          `${fn.getEmoji(client, "Voting Werewolf")} ${gamePlayer.number} ${nicknames.get(message.author.id)} ${
-            client.emojis.cache.find(
-              e => e.name == gamePlayer.role.replace(/ /g, "_")
-            )
-          } voted to kill ${vote} ${nicknames.get(game.players[vote - 1].id)}${
+          `${fn.getEmoji(client, "Voting Werewolf")} **${gamePlayer.number} ${nicknames.get(message.author.id)} ${
+            fn.getEmoji(client, gamePlayer.role)
+          }** voted to kill **${vote} ${nicknames.get(game.players[vote - 1].id)}**${
             game.players[vote - 1].roleRevealed
               ? ` ${client.emojis.cache.find(
                   e => e.name == game.players[vote - 1].role.replace(/ /g, "_")

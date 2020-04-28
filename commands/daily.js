@@ -11,19 +11,80 @@ const fn = require('/app/util/fn'),
       roles = require("/app/util/roles"),
       shop = require("/app/util/shop")
 
-let numArray = (start, int, cnt) => {
-  let arr = [start]
-  for (var i = 1; i < cnt; i++)
-    arr.push(start + int * i)
-  return arr
+let streak = 0
+
+let rollBonus = (streak) => {
+  let items = [
+    {
+      weight:
+        100 + streak,
+      item: "coin",
+      amount: Math.ceil(Math.pow(5 * streak, 0.725) / 10) * 10
+    },
+    {
+      weight:
+        Math.ceil(Math.pow(5 * streak, 0.725) / 3) == 0
+          ? 0
+          : 50 + streak,
+      item: "rose",
+      amount:
+        Math.min(Math.ceil((Math.pow(5 * streak, 0.725) / 3) / 5) * 5, 50)
+    },
+    {
+      weight:
+        Math.round(Math.pow(5 * streak, 0.725) / 25) == 0
+          ? 0
+          : 25 + streak,
+      item: "lootbox",
+      amount: Math.min(
+        Math.round(Math.pow(5 * streak, 0.725) / 25),
+        5
+      )
+    },
+    {
+      weight:
+        Math.round(Math.pow(5 * streak, 0.725) / 50) == 0
+          ? 0
+          : 15 + streak,
+      item: "apprentice lootbox",
+      amount: Math.min(
+        Math.round(Math.pow(5 * streak, 0.725) / 50),
+        5
+      )
+    },
+    {
+      weight: streak < 15 ? 0 : 10 + streak,
+      item: "talisman",
+      amount: 3
+    },
+    // {
+    //   weight:
+    //     Math.round(Math.pow(5 * streak, 0.725) / 100) == 0
+    //       ? 0
+    //       : 5 + streak,
+    //   item: "gem",
+    //   amount: Math.min(
+    //     Math.round(Math.pow(5 * streak, 7 / 10) / 100),
+    //     5
+    //   )
+    // },
+    {
+      weight: streak < 60 ? 0 : streak,
+      item: "master lootbox",
+      amount: 2
+    }
+  ]
+  
+  let bonusItem = items[wrg(items.map(x => x.weight))]
+  
+  return bonusItem
 }
 
 module.exports = {
   name: "daily",
-  aliases: ["daliy"],
   run: async (client, message, args) => {
     let player = players.get(message.author.id)
-    if(!player.lastDaily) player.lastDaily = 0
+    if (!player.lastDaily) player.lastDaily = 0
     
     let guild = client.guilds.cache.get("522638136635817986")
     let booster = false
@@ -34,48 +95,7 @@ module.exports = {
         .roles.cache.has(fn.getRole(guild, "Server Booster").id)
     )
       booster = true
-    
-    // EXPERIMENTAL
-//     let items = [
-//       {
-//         weight: 100 + player.streak,
-//         item: "coin",
-//         possibleValues: numArray(10, 10, 15)
-//       },
-//       {
-//         weight: 50 + player.streak,
-//         item: "rose",
-//         possibleValues: numArray(5, 5, 10)
-//       },
-//       {
-//         weight: 25 + player.streak,
-//         item: "common lootbox",
-//         possibleValues: numArray(1, 1, 5)
-//       },
-//       {
-//         weight: 10 + player.streak,
-//         item: "apprentice lootbox",
-//         possibleValues: numArray(1, 1, 3)
-//       },
-//       {
-//         weight: 10 + player.streak,
-//         item: "talisman",
-//         possibleValues: [3]
-//       },
-//       {
-//         weight: 5 + player.streak,
-//         item: "gem",
-//         possibleValues: numArray(5, 5, 4)
-//       },
-//       { weight: player.streak, item: "master lootbox", possibleValues: [1] }
-//     ]
-//     let bonusItem = items[wrg(items.map(x => x.weight))]
-//     let possibleValues = fn.deepClone(bonusItem.possibleValues)
-//     let bonusItemAmt = bonusItem.possibleValues[wrg(possibleValues.reverse().map(x => Math.pow(x,2)))]
-    
-//     console.log(bonusItem, bonusItemAmt)
-//     console.log(`You've won ${bonusItemAmt} ${bonusItem.item}s!`)
-    
+        
     if (moment(player.lastDaily).add(20, "h") >= moment()) {
       let diff = moment(player.lastDaily)
         .add(20, "h")
@@ -103,25 +123,69 @@ module.exports = {
     if (moment(player.lastDaily || 0).add(48, "h") <= moment())
       player.streak = 0
     
-    let base = 10
-    let bonus = Math.round(Math.pow(5*player.streak, 7/10))
-    
-    player.coins += Math.round((base + bonus) * (booster ? 1.25 : 1))
-    
-    player.lastDaily = moment()
-    player.streak += 1
-    players.set(message.author.id, player)
-    await message.channel.send(
-      new Discord.MessageEmbed()
-        .setTitle(`Daily Reward for ${nicknames.get(message.author.id)}`)
-        .setThumbnail(fn.getEmoji(client, "Daily").url)
-        .setDescription(
-          `You received ${base} ${fn.getEmoji(client, "Coin")}.\n` +
-          (bonus ? `**${player.streak}-day streak bonus** | ${bonus} ${fn.getEmoji(client, "Coin")}\n` : "") +
-          (booster ? `**Booster 25% bonus** | ${Math.round((base + bonus) * 0.25)} ${fn.getEmoji(client, "Coin")}\n` : "") +
-          `You now have ${player.coins} ${fn.getEmoji(client, "Coin")}.`
-        )
-        .setFooter("Remember to come back and claim your daily reward tomorrow for streak bonus!")
+    let bonusItem = rollBonus(
+      Math.round(
+        player.streak *
+          (booster
+            ? player.streak > 60
+              ? 1.1
+              : player.streak > 30
+              ? 1.175
+              : 1.25
+            : 1)
+      )
     )
+    
+    console.log(bonusItem.item, bonusItem.amount)
+    
+    let embed = new Discord.MessageEmbed()
+      .setTitle(`Daily Rewards for ${nicknames.get(message.author.id)}`)
+      .setThumbnail(fn.getEmoji(client, "Daily").url)
+      .setDescription(`You received 10 ${fn.getEmoji(client, "Coin")}.\n`)
+      .setFooter("Remember to come back and claim your daily reward tomorrow for streak bonus!")
+    
+    players.add(`${message.author.id}.coins`, 10)
+    
+    player.streak++
+    if (player.streak > 1) {
+      if (["coin","gem"].includes(bonusItem.item)) {
+        players.set(`${message.author.id}.${bonusItem.item}s`, (players.get(`${message.author.id}.${bonusItem.item}s`) || 0) + bonusItem.amount)
+        embed.description +=
+          (`**${player.streak}-day streak** | ${bonusItem.amount} ${fn.getEmoji(client, bonusItem.item)}\n` +
+          `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")}${bonusItem.item == "gem" ? ` and ${
+          players.get(`${message.author.id}.${bonusItem.item}`)} ${fn.getEmoji(client, bonusItem.item)}` : ""}.`)
+      }
+      else if (bonusItem.item == "talisman") {
+        let roles = ["Aura Seer", "Medium", "Jailer", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", "Bodyguard", "Gunner", "Wolf Shaman", "Aura Seer", "Cursed", "Wolf Seer", "Priest"]
+        let selectedRole = roles[Math.floor(roles.length*Math.random())]
+        players.set(
+          message.author.id + ".inventory.talisman." + selectedRole,
+          (players.get(
+            message.author.id + ".inventory.talisman." + selectedRole
+          ) || 0) + 3
+        )
+        embed.description +=
+          (`**${player.streak}-day streak** | 3 ${fn.getEmoji(client, selectedRole)}${fn.getEmoji(client, "Talisman")}\n` +
+          `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")} and ${
+          players.get(`${message.author.id}.inventory.talisman.${selectedRole}`)} ${fn.getEmoji(client, selectedRole)}${
+          fn.getEmoji(client, bonusItem.item)}.`)
+      }
+      else {
+        players.set(
+          `${message.author.id}.inventory.${bonusItem.item}`,
+          (players.get(`${message.author.id}.inventory.${bonusItem.item}`) || 0) +
+            bonusItem.amount
+        )
+        embed.description +=
+          (`**${player.streak}-day streak** | ${bonusItem.amount} ${fn.getEmoji(client, bonusItem.item)}\n` +
+          `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")} and ${
+          players.get(`${message.author.id}.inventory.${bonusItem.item}`)} ${fn.getEmoji(client, bonusItem.item)}.`)
+      }
+    }
+    
+    players.set(`${message.author.id}.lastDaily`, moment())
+    players.set(`${message.author.id}.streak`, player.streak)
+    
+    message.channel.send(embed)
   }
 }

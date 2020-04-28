@@ -13,7 +13,8 @@ const games = new db.table("Games"),
       nicknames = new db.table("Nicknames"),
       temp = new db.table("temp")
 
-const roles = require("/app/util/roles")
+const roles = require("/app/util/roles"),
+      tags = require("/app/util/tags")
 
 /* --- ALL PACKAGES --- */
 
@@ -48,6 +49,101 @@ client.once('ready', async () => {
     temp.delete("rebootchan")
     client.channels.cache.get(rebootchan).send("Bot has successfully been restarted!").catch(() => temp.delete("rebootchan"))
   }
+  
+  // UPDATE PROGRESS CHANNEL
+  let prog = client.channels.cache.get("658942985853206531")
+  
+  let wwoRoles = Object.values(roles).filter(r => r.tag & tags.ROLE.WWO_ROLE || r.name.includes("Random"))
+  let wwoRoleProg = await prog.messages.fetch("704516854655352842")
+  let newWWORoleEmbed =
+    new Discord.MessageEmbed()
+      .setColor(0x7289da)
+      .setTitle("Roles")
+      .setFooter("Last Updated")
+      .setTimestamp()
+  if (wwoRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).slice(0, 25))
+    newWWORoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "green tick")} Available**`,
+        wwoRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).slice(0, 25).join(" "),
+        true
+      )
+  if (wwoRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).slice(25))
+    newWWORoleEmbed
+      .addField(
+        `\u200B`,
+        wwoRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).slice(25).join(" "),
+        true
+      )
+  if (wwoRoles.filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length)
+    newWWORoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "gray tick")} To Be Tested**`,
+        wwoRoles.filter(r => r.tag & tags.ROLE.TO_BE_TESTED).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
+      )
+  if (wwoRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).length)
+    newWWORoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "red tick")} Unavailable**`,
+        wwoRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
+      )
+  wwoRoleProg.edit(newWWORoleEmbed)
+  
+  let wwcRoles = Object.values(roles).filter(r => r.tag & tags.ROLE.WWC_ROLE)
+  let wwcRoleProg = await prog.messages.fetch("704516933445353495")
+  let newWWCRoleEmbed =
+    new Discord.MessageEmbed()
+      .setColor(0x7289da)
+      .setTitle("Classic Roles")
+      .setFooter("Last Updated")
+      .setTimestamp()
+  if (wwcRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).length)
+    newWWCRoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "green tick")} Available**`,
+        wwcRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).join(" "),
+      )
+  if (wwcRoles.filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length)
+    newWWCRoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "gray tick")} To Be Tested**`,
+        wwcRoles.filter(r => r.tag & tags.ROLE.TO_BE_TESTED).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
+      )
+  if (wwcRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).length)
+    newWWCRoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "red tick")} Unavailable**`,
+        wwcRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
+      )
+  wwcRoleProg.edit(newWWCRoleEmbed)
+  
+  let otherRoles = Object.values(roles).filter(r => r.tag & (tags.ROLE.WWOWC_ROLE | tags.ROLE.OTHER_ROLE))
+  let otherRoleProg = await prog.messages.fetch("704516981918924850")
+  let newOtherRoleEmbed =
+    new Discord.MessageEmbed()
+      .setColor(0x7289da)
+      .setTitle("Other Roles")
+      .setFooter("Last Updated")
+      .setTimestamp()
+  if (otherRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).length)
+    newOtherRoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "green tick")} Available**`,
+        otherRoles.filter(r => r.tag & tags.ROLE.AVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).join(" "),
+      )
+  if (otherRoles.filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length)
+    newOtherRoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "gray tick")} To Be Tested**`,
+        otherRoles.filter(r => r.tag & tags.ROLE.TO_BE_TESTED).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
+      )
+  if (otherRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).length)
+    newOtherRoleEmbed
+      .addField(
+        `**${fn.getEmoji(client, "red tick")} Unavailable**`,
+        otherRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
+      )
+  otherRoleProg.edit(newOtherRoleEmbed)
 })
 
 client.on('inviteCreate', async invite => {
@@ -217,14 +313,15 @@ client.on('message', async message => {
   }
 
   let input = message.cleanContent
-  input = input.replace(/\\?\|\\?\|(?:.|\s)*?\\?\|\\?\|/g, "$1")
-      .replace(/\\?~\\?~(?:.|\s)*?\\?~\\?~/g, "$1")
-      .replace(/\\?\*\\?\*\\?\*(?:.|\s)*?\\?\*\\?\*\\?\*/g, "$1")
-      .replace(/\\?\*\\?\*(?:.|\s)*?\\?\*\\?\*/g, "$1")
-      .replace(/\\?\*(?:.|\s)*?\\?\*/g, "$1")
-      .replace(/\\?_\\?_(?:.|\s)*?\\?_\\?_/g, "$1")
-      .replace(/\\?_(?:.|\s)*?\\?_/g, "$1")
-      .replace(/\\?`\\?`\\?`(?:(?:[^\s]*?\n)?(.+?)|((.|\s)*?))\\?`\\?`\\?`/g, "$1$2")
+  
+  input = input.replace(/\\?\|\\?\|(.|\s)*?\\?\|\\?\|/g, "$1")
+      .replace(/\\?~\\?~(.|\s)*?\\?~\\?~/g, "$1")
+      .replace(/\\?\*\\?\*\\?\*(.|\s)*?\\?\*\\?\*\\?\*/g, "$1")
+      .replace(/\\?\*\\?\*(.|\s)*?\\?\*\\?\*/g, "$1")
+      .replace(/\\?\*(.|\s)*?\\?\*/g, "$1")
+      .replace(/\\?_\\?_(.|\s)*?\\?_\\?_/g, "$1")
+      .replace(/\\?_(.|\s)*?\\?_/g, "$1")
+      .replace(/\\?`\\?`\\?`(?:([^\s]*?\n)?(.+?)|((.|\s)*?))\\?`\\?`\\?`/g, "$1$2")
       .replace(/\\?`((?!w\!).*?)\\?`/gi, "$1")
       .replace(/^\\?>\s*/gm, "")
       .replace(/\\?<(?:#|@|@&)[^\s]*?>/g, "")
@@ -240,10 +337,10 @@ client.on('message', async message => {
              //  "jerkoff","jackoff","corona","piss","semen","a\\$\\$","n1g","c0c",
              //  "c0rona","cor0na"] // filter regardless
   let bwlB = ["nig","cum","ass"] // filter if individual word 
-  let censor = "*************".split('').join("*******************************") // censor characters
+  let censor = "*************".split('').join("*******************************").replace(/\*/g, "\\*") // censor characters
   let beforePC = input
-  input = input.replace(new RegExp(`(?<=[^\\s]*?(?:${bwlA.join('|')})[^\\s]*?)[^\\s]`,"gi"), "*")
-    .replace(new RegExp(`(${bwlA.join('|')}|${bwlB.map(x => `\\b${x}\\b`).join('|')})`,"gi"), x => censor.substring(0, x.length))
+  input = input.replace(new RegExp(`(?<=[^\\s]*?(?:${bwlA.join('|')})[^\\s]*?)[^\\s]`,"gi"), "\\*")
+    .replace(new RegExp(`(${bwlA.join('|')}|${bwlB.map(x => `\\b${x}\\b`).join('|')})`,"gi"), x => censor.substring(0, x.length*2))
   if (beforePC !== input) {
     await message.channel.send("You are auto-warned for the following reason: **Please refrain from using profanity!**")
     client.channels.cache.get("699144758525952000").send(
@@ -270,6 +367,17 @@ client.on('message', async message => {
   //console.log(input)
   for (var i = 0; i < input.length; i++) {
     var content = input[i]
+  
+    if (content.length > 250) {
+      await message.channel.send("Your message is not sent for the following reason: **Your message is too long!** (Character limit: 250)")
+      client.channels.cache.get("699144758525952000").send(
+        new Discord.MessageEmbed()
+          .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
+          .setDescription(content)
+          .addField("Reason", "Message too long")
+      )
+      continue;
+    }
     
     if (gamePlayer.role == "Drunk" && game.currentPhase < 999) {
       content = content.split(/\s/g)

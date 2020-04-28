@@ -8,7 +8,7 @@ const fn = require('/app/util/fn')
 
 module.exports = {
   name: "profile",
-  aliases: ["prof"],
+  aliases: ["prof", "p"],
   run: async (client, message, args) => {
     let target
     if (!args[0]) target = message.author
@@ -53,6 +53,17 @@ module.exports = {
           `**Wins as Solo:** ${player.wins.filter(x => x.team == "Solo").length} (${Math.floor(player.wins.filter(x => x.team == "Solo").length/allGamesPlayed.filter(x => x.team == "Solo").length*10000)/100}%)\n` +
           `**Defeats as Solo:** ${player.loses.filter(x => x.team == "Solo").length} (${Math.floor(player.loses.filter(x => x.team == "Solo").length/allGamesPlayed.filter(x => x.team == "Solo").length*10000)/100}%)`
         )
+      // .addField(" ", 
+      //           `[Click here to see ${
+      //           target == message.author ? "your" : nicknames.get(target.id) + "'s"
+      //           } personal profile on our website](https://werewolf-utopium.glitch.me/profile/${nicknames.get(
+      //   target.id
+      // )} "${nicknames.get(target.id)}\'s Profile on Werewolf Utopium")`
+      //           `[Click here to see ${
+      //           target == message.author ? "your" : nicknames.get(target.id) + "'s"
+      //           } personal profile on our website](https://werewolf-utopium.glitch.me/profile/${nicknames.get(
+      //   target.id
+      // )} "${nicknames.get(target.id)}\'s Profile on Werewolf Utopium")`)
     )
   }
 }

@@ -254,6 +254,21 @@ module.exports = client => {
           // NIGHT END
           game.running = "start end night module"
           if (game.currentPhase % 3 == 0) {
+            if (game.currentPhase == 0){
+              // DOPPELGANGER AUTOSELECT
+              game.running = "doppelganger check selection"
+              let doppels = game.players.filter(p => p.role == "Doppelganger" && !p.selected)
+              for (var doppel of doppels) {
+                let otherPl = game.players.filter(p => p.number !== doppel.number)
+                let rdmPl = otherPl[Math.floor(Math.random()*otherPl.length)]
+                doppel.selected = rdmPl.number
+                fn.getUser(client, doppel.id).send(
+                  `${fn.getEmoji(client, "Doppelganger")} You will be inheriting **${rdmPl.number} ${
+                  nicknames.get(rdmPl.id)}**'s role when they die!`
+                )
+              }
+            }
+            
             // MEDIUM REVIVE
             game.running = "revive players for medium"
             let mediums = game.players.filter(
@@ -471,7 +486,7 @@ module.exports = client => {
                       fn.getUser(client, protector.id).send(
                         new Discord.MessageEmbed()
                           .setTitle(
-                            "<:Bodyguard_Protect:660497704526282786> Attacked!"
+                            `fn.getEmoji(client, "Bodyguard_Protect") Attacked!`
                           )
                           .setDescription(
                             "You fought off an attack last night and survived.\n" +
@@ -1189,7 +1204,7 @@ module.exports = client => {
             )
             for (var spz of spzs) {
               let targets = spz.usedAbilityTonight.map(
-                p => game.players[p.number - 1]
+                p => game.players[p - 1]
               )
               console.log(spz)
               console.log(targets)
@@ -1481,64 +1496,64 @@ module.exports = client => {
             }
 
             // ZOMBIE BITE
-            game.running = "convert by zomb"
-            let bitten = game.players.filter(p => p.bitten && p.alive)
-            for (var bit of bitten) {
-              bit.role = "Zombie"
-              game.lastDeath = game.currentPhase
-              fn.getUser(client, bit.id).send(
-                new Discord.MessageEmbed()
-                  .setTitle("Rrrrrrr")
-                  .setDescription(
-                    "You have been bitten by zombies and are now one of them!"
-                  )
-                  .setThumbnail(fn.getEmoji(client, "Zombie").url)
-              )
-              bit.bitten = false
-            }
-            let zombies = game.players.filter(
-              p => p.alive && p.role == "Zombie"
-            )
-            if(bitten.array().length){
-            fn.broadcastTo(
-              client,
-              zombies,
-              new Discord.MessageEmbed()
-                .setTitle("New FRRrrrrriends")
-                .setDescription(
-                  `${bitten
-                    .map(b => nicknames.get(b.id))
-                    .join(", ")} are now zombies!`
-                )
-                .setThumbnail(fn.getEmoji(client, "Zombie").url)
-            )
-            }
-            game.running = "bite by zomb"
-            let cannotBite = []
-            for (var zombie of zombies.filter(z => z.usedAbilityTonight)) {
-              let bit = game.players[zombie.usedAbilityTonight - 1]
-              if (["Cursed","President","Doppelganger"].includes(bit.role) || bit.sect ||
-                 bit.headhunter || !(roles[bit.role].team == "Villager" || (roles[bit.role].tag & tags.ROLE.SOLO_VOTING))) {
-                cannotBite.push(bit)
-              }
-              else bit.bitten = true
-            }
-            bitten = game.players.filter(p => p.bitten && p.alive)
-            fn.broadcastTo(
-              client,
-              zombies,
-              new Discord.MessageEmbed()
-                .setTitle("BRAINS")
-                .setDescription(
-                  (bitten.length ? `${bitten
-                    .map(b => `**${b.number} ${nicknames.get(b.id)}**`)
-                    .join(", ")} are now bitten!\n` : "") +
-                  (cannotBite.length ? `${cannotBite
-                    .map(c => `**${c.number} ${nicknames.get(c.id)}**`)
-                    .join(", ")} cannot be bitten!` : "")
-                )
-                .setThumbnail(fn.getEmoji(client, "Zombie Bitten").url)
-            )
+            // game.running = "convert by zomb"
+            // let bitten = game.players.filter(p => p.bitten && p.alive)
+            // for (var bit of bitten) {
+            //   bit.role = "Zombie"
+            //   game.lastDeath = game.currentPhase
+            //   fn.getUser(client, bit.id).send(
+            //     new Discord.MessageEmbed()
+            //       .setTitle("Rrrrrrr")
+            //       .setDescription(
+            //         "You have been bitten by zombies and are now one of them!"
+            //       )
+            //       .setThumbnail(fn.getEmoji(client, "Zombie").url)
+            //   )
+            //   bit.bitten = false
+            // }
+            // let zombies = game.players.filter(
+            //   p => p.alive && p.role == "Zombie"
+            // )
+            // if(bitten.array().length){
+            // fn.broadcastTo(
+            //   client,
+            //   zombies,
+            //   new Discord.MessageEmbed()
+            //     .setTitle("New FRRrrrrriends")
+            //     .setDescription(
+            //       `${bitten
+            //         .map(b => nicknames.get(b.id))
+            //         .join(", ")} are now zombies!`
+            //     )
+            //     .setThumbnail(fn.getEmoji(client, "Zombie").url)
+            // )
+            // }
+            // game.running = "bite by zomb"
+            // let cannotBite = []
+            // for (var zombie of zombies.filter(z => z.usedAbilityTonight)) {
+            //   let bit = game.players[zombie.usedAbilityTonight - 1]
+            //   if (["Cursed","President","Doppelganger"].includes(bit.role) || bit.sect ||
+            //      bit.headhunter || !(roles[bit.role].team == "Villager" || (roles[bit.role].tag & tags.ROLE.SOLO_VOTING))) {
+            //     cannotBite.push(bit)
+            //   }
+            //   else bit.bitten = true
+            // }
+            // bitten = game.players.filter(p => p.bitten && p.alive)
+            // fn.broadcastTo(
+            //   client,
+            //   zombies,
+            //   new Discord.MessageEmbed()
+            //     .setTitle("BRAINS")
+            //     .setDescription(
+            //       (bitten.length ? `${bitten
+            //         .map(b => `**${b.number} ${nicknames.get(b.id)}**`)
+            //         .join(", ")} are now bitten!\n` : "") +
+            //       (cannotBite.length ? `${cannotBite
+            //         .map(c => `**${c.number} ${nicknames.get(c.id)}**`)
+            //         .join(", ")} cannot be bitten!` : "")
+            //     )
+            //     .setThumbnail(fn.getEmoji(client, "Zombie Bitten").url)
+            // )
 
             // CORRUPTOR GLITCH
             game.running = "glitch by corr"

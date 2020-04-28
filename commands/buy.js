@@ -53,12 +53,14 @@ module.exports = {
           data.name.toLowerCase().startsWith(inputRole.toLowerCase()) ||
           (data.abbr && data.abbr.includes(inputRole.toLowerCase()))
       )
+      
+      if (!role) 
+        return await m.edit(
+          new Discord.MessageEmbed().setDescription("Unknown role.")
+        )
+      if (role.name == "Accomplice")
+        return await message.react(fn.getEmoji(client, "harold"))
     }
-    
-    if (!role && item.name === "Talisman")
-      return await m.edit(
-        new Discord.MessageEmbed().setDescription("Unknown role.")
-      )    
 
     let price = item.price * am
     let attachment = role ? (await fn.createTalisman(client, role.name)) : null

@@ -8,7 +8,7 @@ module.exports = {
 	usage: "restart",
 	description: "Restart the bot!",
 	run: async (client, message, args, shared) => {
-    if (!["336389636878368770","658481926213992498","524188548815912999","439223656200273932"].includes(message.author.id)) return;
+    if (!["336389636878368770","658481926213992498","439223656200273932"].includes(message.author.id)) return;
     if(message.channel.id != message.author.id) temp.set("rebootchan", message.channel.id)
     await message.channel.send("Rebooting bot, please wait...")
     fn.sleep(2000)

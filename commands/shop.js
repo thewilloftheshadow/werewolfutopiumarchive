@@ -19,11 +19,11 @@ module.exports = {
       let item = shop[shopitem]
       if (embeds[embeds.length-1].fields.length == 10)
         embeds.push(new Discord.MessageEmbed().setTitle("Werewolf Utopium Shop").setColor(0x7289da))
-      console.log(fn.getEmoji(client, (item.emoji ? item.emoji : item.name)))
+      // console.log(fn.getEmoji(client, (item.emoji ? item.emoji : item.name)))
       embeds[embeds.length - 1].addField(
         `${
         fn.getEmoji(client, item.emoji ? item.emoji : item.name) ? fn.getEmoji(client, item.emoji ? item.emoji : item.name) : ""
-        } **${item.name}** - ${item.price} ${fn.getEmoji(client, "Coin")}`,
+        } ${item.unavailable ? "~~" : ""}**${item.name}**${item.unavailable ? "~~" : ""} - ${item.price} ${fn.getEmoji(client, "Coin")}`,
         `${item.description}`
       )
     }

@@ -7,7 +7,8 @@ const games = new db.table("Games"),
       nicknames = new db.table("Nicknames")
 
 const fn = require('/app/util/fn'),
-      roles = require("/app/util/roles")
+      roles = require("/app/util/roles"),
+      tags = require("/app/util/tags")
 
 module.exports = {
   name: "create",
@@ -55,7 +56,8 @@ module.exports = {
         votingTime: 45,
         private: false,
         talismans: true
-      }
+      },
+      createdBy: message.author.id
     }
     
     while (!currentGame.gameID) {
@@ -138,6 +140,11 @@ module.exports = {
         )
       else if (usedGCs.includes(gcInput.toLowerCase()))
         await gcPrompt.channel.send("Your game code has been taken.")
+      
+      if (gcInput.match(/^betatest\_.*?$/gi))
+        currentGame.name = `Beta Test ${gcInput.replace(/^betatest\_(.*?)$/gi, "$1").replace("_"," ")}`
+      if (gcInput.match(/^devtest\_.*?$/gi))
+        currentGame.name = `Dev Test ${gcInput.replace(/^devtest\_(.*?)$/gi, "$1").replace("_"," ")}`    
     }
     
     while (!currentGame.name) {
@@ -162,7 +169,7 @@ module.exports = {
       
       if (!client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => ["βTester Helper","Developer"].includes(r.name)) && nameInput.toLowerCase().match(/beta/i))
         await namePrompt.channel.send("You cannot create a beta test game!")
-      else if (!client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => r.name == "Developer") && nameInput.toLowerCase().match(/dev/i))
+      else if (!client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => r.name == "Developer") && nameInput.toLowerCase().match(/dev test/i))
         await namePrompt.channel.send("You cannot create a developer test game!")
       else if (nameInput.match(/^[^*_`\\()[\]>\n]{3,30}$/i))
         currentGame.name = nameInput
@@ -226,12 +233,22 @@ module.exports = {
           i--
           continue;
         }
-        if (!playerCustom.includes(role.name) && currentGame.gameID.toLowerCase().startsWith(`betatest_`)) {
+        if (!playerCustom.includes(role.name) && !currentGame.gameID.toLowerCase().startsWith(`betatest_`)) {
           await message.author.send(
             new Discord.MessageEmbed()
               .setColor("RED")
               .setTitle(`You do not own ${fn.getEmoji(client, role.name)} ${role.name} in Custom Maker yet!`)
               .setFooter(`Buy the role with \`w!custom buy ${role.name}\`!`)
+          )
+          i--
+          continue;
+        }
+        if (!currentGame.gameID.match(/^(beta|dev)test_/i) && (role.tag & (tags.ROLE.TO_BE_TESTED | tags.ROLE.UNAVAILABLE))) {
+          await message.author.send(
+            new Discord.MessageEmbed()
+              .setColor("RED")
+              .setTitle(`${fn.getEmoji(client, role.name)} ${role.name} is currently unavailable!`)
+              .setFooter(`Please wait until the role is fully released!`)
           )
           i--
           continue;

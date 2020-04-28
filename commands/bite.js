@@ -56,7 +56,7 @@ module.exports = {
     gamePlayer.usedAbilityTonight = targetPlayer.number
     
     message.author.send(
-      `<:Zombie_Bitten:660826237446651905> You selected **${targetPlayer.number} ${
+      `${fn.getEmoji(client, "Zombie_Bitten")} You selected **${targetPlayer.number} ${
       nicknames.get(targetPlayer.id)}** to be zombified!`
     )
     

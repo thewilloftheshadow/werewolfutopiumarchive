@@ -1,6 +1,7 @@
 const Discord = require("discord.js"),
       moment = require("moment"),
-      db = require("quick.db")
+      db = require("quick.db"),
+      wrg = require('weighted-random')
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
@@ -26,7 +27,27 @@ module.exports = async (client, game) => { try {
   for (var i = 0; i < game.players.length; i++) {
     game.players[i].number = i+1
     let thisPlayer = game.players[i]
-    let role = thisPlayer.role = gameRoles.splice(Math.floor(Math.random() * (game.players.length-i)), 1)[0]
+    let roleWeight = gameRoles.map(r =>
+      ((game.mode == "custom" && game.config.talismans) ||
+        game.mode != "custom") &&
+      players.get(`${thisPlayer.id}.talEq`) == r
+        ? 11
+        : 1
+    )
+          
+    let role = thisPlayer.role = gameRoles.splice(wrg(roleWeight), 1)[0]
+    if (role == players.get(`${thisPlayer.id}.talEq`)){
+      players.delete(`${thisPlayer.id}.talEq`)
+      players.subtract(`${thisPlayer.id}.inventory.talisman.${role}`, 1)
+      let talisman = await fn.createTalisman(client, role)
+      fn.getUser(client, thisPlayer.id).send(
+        new Discord.MessageEmbed()
+          .attachFiles([talisman])
+          .setThumbnail(`attachment://${talisman.name}`)
+          .setTitle("Talisman Used")
+          .setDescription(`You used a ${role} Talisman.`)
+      )
+    }
     Object.assign(game.players[i], {alive: true, protectors: []})
     
     if (thisPlayer.role.includes("Random")) {
@@ -90,11 +111,6 @@ module.exports = async (client, game) => { try {
     )
   }
   
-  game.roles = game.players.map(p => p.role)
-  game.lastDeath = 0
-  game.currentPhase = 0
-  game.nextPhase = moment().add(30, "s")
-  
   let headhunters = game.players.filter(p => p.role == "Headhunter")
   for (var i = 0; i < headhunters.length; i++) {
     let possibleTargets = game.players
@@ -112,7 +128,7 @@ module.exports = async (client, game) => { try {
       .send(
         new Discord.MessageEmbed()
           .setAuthor(`Target`, fn.getEmoji(client, "Headhunter Target").url)
-          .setDescription(`Your target is ${target} ${client.users.get(game.players[target-1].id).username}.`)
+          .setDescription(`Your target is ${target} ${nicknames.get(game.players[target-1].id)}.`)
       )
   }
   
@@ -176,6 +192,9 @@ module.exports = async (client, game) => { try {
   //     .setThumbnail(fn.getEmoji(client, "Night").url)
   // )
   
+  game.roles = game.players.map(p => p.role)
+  game.currentPhase = 0
+  
   if (game.roles.includes("President")) {
     let president = game.players.find(p => p.role == "President")
     
@@ -189,6 +208,15 @@ module.exports = async (client, game) => { try {
     
     president.roleRevealed = "President"
   }
+  
+  if (game.gameID.match(/^(dev|beta)test_/gi))
+    await fn.broadcastTo(
+      client, game.players,
+      fn.gameEmbed(client, game)
+    )
+  
+  game.lastDeath = 0
+  game.nextPhase = moment().add(30, "s")
   
   game.startTime = moment()
   

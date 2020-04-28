@@ -14,9 +14,9 @@ module.exports = {
   name: "rose",
   run: async (client, message, args, shared) => {
     //return;
-    console.log(args)
+    // console.log(args)
     let rb = players.get(message.author.id+".inventory.rose")
-    console.log(rb)
+    // console.log(rb)
     if(!rb || rb < 1) return await message.channel.send(`Hey there! You can't give people roses if you haven't bought any! Go buy some in the shop first!`)
     //if(!message.author.id === "439223656200273932") return await message.channel.send("Sorry! Roses are unable to be given to people right now")
     let player = players.get(message.author.id)

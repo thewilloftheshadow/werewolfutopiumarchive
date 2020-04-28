@@ -341,7 +341,7 @@ let roles = {
     nite: "Select two players to see if either of them has killed tonight (`w!check [player1] [player2]`).",
     cgp : "25r",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
   "Tough Guy": {
   	desc: "You can choose one player to protect every night." +
@@ -460,7 +460,7 @@ let roles = {
     attr: { abil1: 2 },
     cgp : "250c",
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Shadow Wolf": {
     desc: "Once per game you can double your team's votes during the day, while hiding all votes.",
@@ -473,7 +473,7 @@ let roles = {
     attr: { abil1: 1 },
     cgp : "250c",
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Sorcerer": {
     desc: "Each night you can select a player to uncover their role." +
@@ -499,7 +499,7 @@ let roles = {
     attr: { abil1: 1 },
     cgp : "25r",
     tag : tags.ROLE.WEREWOLF | tags.ROLE.SEEN_AS_WEREWOLF |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Wolf Pacifist": {
     desc: "Once per game you can reveal the role of a player to everybody and prevent anybody from voting during that day.",
@@ -570,10 +570,10 @@ let roles = {
     team: "Solo",
     abbr: ["sc"],
     oneOnly: true,
-    // cat : "Voting",
+    cat : "Voting",
     nite: "Select a number of players to collect their souls (`w!collect [player] ...`).",
     tag : tags.ROLE.SOLO_VOTING | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWOWC_ROLE | tags.ROLE.TO_BE_TESTED | tags.ROLE.ONE_ONLY
+          tags.ROLE.WWOWC_ROLE | tags.ROLE.AVAILABLE | tags.ROLE.ONE_ONLY
   },
   
   // Solo killing roles
@@ -778,6 +778,7 @@ let roles = {
     abbr: ["actor"],
     aura: "Unknown",
     team: "Village",
+    nit1: "Select a player to take their role after they die (`w!inherit [player]`).",
     tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.TO_BE_TESTED
   },
   "Drunk": {

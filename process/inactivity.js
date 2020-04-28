@@ -35,7 +35,18 @@ module.exports = (client, game) => {
                   .map(p => nicknames.get(p.id))
                   .join("\n")
               )
-        )
+          )
+    
+        if (game.currentPhase == -1 && game.mode == "custom" && game.createdBy == leftPlayer) {
+          fn.broadcastTo(
+            client, game.players,
+            `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`
+          )
+          game.players.forEach(p => players.set(`${p.id}.currentGame`, 0))
+          let QuickGames = games.get("quick")
+          QuickGames.splice(QuickGames.indexOf(QuickGames.find(g => g.gameID == game.gameID)), 1)
+          games.set("quick", QuickGames)
+    }
       } else if (moment(game.players[pl].lastAction).add(2.5, 'm') <= moment() && !game.players[pl].prompted) {
         game.players[pl].prompted = true
         fn.getUser(client, game.players[pl].id).send(

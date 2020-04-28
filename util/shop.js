@@ -46,7 +46,7 @@ module.exports = {
     plural: "s"
   },
   "custom maker": {
-    price: 2000,
+    price: 1500,
     name: "Custom Maker",
     description:
       "Buy this to be able to make custom games to play with your friends!",
@@ -71,7 +71,7 @@ module.exports = {
     description:
     "Using this item gives you an extra chance to be the role of the talisman in a game!",
     itemid: "talisman",
-    unavailable: true,
+    unavailable: false,
     emoji: "Talisman",
     plural: "s"
   }

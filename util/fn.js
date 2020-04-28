@@ -387,7 +387,8 @@ const death = (client, game, number, suicide = false) => {
 
     // SECT SUICIDE
     game.running = "suicide for sect"
-    if (!deadPlayer.alive && !deadPlayer.suicide && deadPlayer.role == "Sect Leader" && !deadPlayer.sectSuicided) {
+    if (!deadPlayer.alive && !deadPlayer.suicide && deadPlayer.role == "Sect Leader" && !deadPlayer.sectSuicided &&
+        !game.players.find(p => p.role == "Sect Leader" && p.alive)) {
       let sectLeader = game.players.find(p => p.role == "Sect Leader")
       let sectMembers = game.players.filter(p => p.alive & p.sect)
       

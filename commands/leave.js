@@ -20,7 +20,10 @@ module.exports = {
         gamePlayer = game.players.find(p => p.id == message.author.id)
     
     if (game.currentPhase == -1) {
-      let m = await message.author.send("Are you sure you want to leave the game?")
+      let m = await message.author.send(
+        "Are you sure you want to leave the game?" +
+        (game.createdBy == message.author.id ? " The game will be removed if you do so!" : "")
+      )
       m.react(fn.getEmoji(client, "green_tick"))
       let reactions = await m.awaitReactions(
         (r, u) => r.emoji.id == fn.getEmoji(client, "green_tick").id &&
@@ -78,9 +81,6 @@ module.exports = {
 
       game = fn.death(client, game, gamePlayer.number, true)
     }
-
-    games.set("quick", QuickGames)
-    players.set(`${message.author.id}.currentGame`, 0)
     
     message.author.send(`You left Game #${game.gameID}.`)
     if (game.players.length && (game.currentPhase < 0 || game.currentPhase >= 999))
@@ -95,5 +95,17 @@ module.exports = {
             ) :
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}** left the game.`
       )
+    
+    if (game.currentPhase == -1 && game.mode == "custom" && game.createdBy == message.author.id) {
+      fn.broadcastTo(
+        client, game.players,
+        `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`
+      )
+      game.players.forEach(p => players.set(`${p.id}.currentGame`, 0))
+      QuickGames.splice(QuickGames.indexOf(QuickGames.find(g => g.gameID == game.gameID)), 1)
+    }
+
+    games.set("quick", QuickGames)
+    players.set(`${message.author.id}.currentGame`, 0)
   }
 }

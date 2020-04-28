@@ -21,7 +21,7 @@ module.exports = {
     rolecmdobj.forEach(cmd => {
       rolecmds.push(cmd.name)
     })
-    console.log(role)
+    // console.log(role)
     if (!role) return await message.author.send("Unknown role.")
     
     let embed = new Discord.MessageEmbed()
