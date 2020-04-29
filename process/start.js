@@ -209,11 +209,11 @@ module.exports = async (client, game) => { try {
     president.roleRevealed = "President"
   }
   
-  if (game.gameID.match(/^(dev|beta)test_/gi))
-    await fn.broadcastTo(
-      client, game.players,
-      fn.gameEmbed(client, game)
-    )
+  // if (game.gameID.match(/^(dev|beta)test_/gi))
+  //   await fn.broadcastTo(
+  //     client, game.players,
+  //     fn.gameEmbed(client, game)
+  //   )
   
   game.lastDeath = 0
   game.nextPhase = moment().add(30, "s")

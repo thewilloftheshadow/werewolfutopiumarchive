@@ -19,7 +19,7 @@ let rollBonus = (streak) => {
       weight:
         100 + streak,
       item: "coin",
-      amount: Math.ceil(Math.pow(5 * streak, 0.725) / 10) * 10
+      amount: Math.ceil(Math.pow(5 * streak, 0.725) / 5) * 5
     },
     {
       weight:
@@ -136,7 +136,7 @@ module.exports = {
       )
     )
     
-    console.log(bonusItem.item, bonusItem.amount)
+    // console.log(bonusItem.item, bonusItem.amount)
     
     let embed = new Discord.MessageEmbed()
       .setTitle(`Daily Rewards for ${nicknames.get(message.author.id)}`)
@@ -181,6 +181,9 @@ module.exports = {
           `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")} and ${
           players.get(`${message.author.id}.inventory.${bonusItem.item}`)} ${fn.getEmoji(client, bonusItem.item)}.`)
       }
+    }
+    else {
+      embed.description += `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")}.`
     }
     
     players.set(`${message.author.id}.lastDaily`, moment())

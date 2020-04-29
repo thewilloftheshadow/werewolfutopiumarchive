@@ -43,6 +43,11 @@ module.exports = {
     if (target == gamePlayer.number)
       return await message.author.send("You cannot watch on yourself.")
     
+    message.author.send(
+      `${fn.getEmoji(client, "Sheriff")
+      } You have chosen to watch **${target}**.`
+    )
+    
     gamePlayer.usedAbilityTonight = target
     QuickGames[index] = game
     

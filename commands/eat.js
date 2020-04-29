@@ -32,6 +32,8 @@ module.exports = {
       return await message.author.send("You are currently jailed and cannot use your abilities.")
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your abilities.")
+    
+    
   } 
 } 
 

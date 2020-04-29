@@ -33,6 +33,7 @@ module.exports = {
       let r = message.mentions.users.first() || await client.users.fetch(args[0]).cact
       if(!r) return await message.channel.send("Unable to find that user.")
     }
+    console.log(r)
     await r.send(
       new Discord.MessageEmbed()
       .setTitle("Roses for you")

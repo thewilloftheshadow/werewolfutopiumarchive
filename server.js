@@ -230,8 +230,6 @@ module.exports = client => {
     })
     
     app.get("/json.sqlite", checkAuth, devonly, async(req, res) => {
-      if(!req.user) res.redirect("/")
-      if (!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
       res.sendFile("/app/json.sqlite")
     })
     
@@ -288,7 +286,7 @@ module.exports = client => {
       res.redirect("/login")
     }
     function devonly(req, res, next) {
-      if (!["336389636878368770","658481926213992498","439223656200273932"].includes(req.user.id)) res.redirect("/")
+      if (!["336389636878368770","658481926213992498","439223656200273932","529121242716831748"].includes(req.user.id)) res.redirect("/")
       next()
     }
     
