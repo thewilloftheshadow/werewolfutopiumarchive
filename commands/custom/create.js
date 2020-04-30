@@ -451,6 +451,10 @@ module.exports = {
         )
     )
     
+    fn.addLog(currentGame, `New game: ${currentGame.name} - ${currentGame.gameID}`)
+    fn.addLog(currentGame, `Game roles: ${currentGame.originalRoles.join(", ")}\n`)
+    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)
+    
     fn.broadcastTo(
       client, currentGame.players.filter(p => p.id !== message.author.id),
       new Discord.MessageEmbed()
@@ -458,6 +462,7 @@ module.exports = {
         .addField(`Current Players [${currentGame.players.length}]`, currentGame.players.map(player => nicknames.get(player.id)).join("\n"))
         .setFooter(`Custom Game Code: ${currentGame.gameID}`)
     )
+    
     
     Games = games.get("quick")
     Games.push(currentGame)

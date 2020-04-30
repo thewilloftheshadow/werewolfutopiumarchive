@@ -53,7 +53,7 @@ module.exports = {
           `**Wins as Solo:** ${player.wins.filter(x => x.team == "Solo").length} (${Math.floor(player.wins.filter(x => x.team == "Solo").length/allGamesPlayed.filter(x => x.team == "Solo").length*10000)/100}%)\n` +
           `**Defeats as Solo:** ${player.loses.filter(x => x.team == "Solo").length} (${Math.floor(player.loses.filter(x => x.team == "Solo").length/allGamesPlayed.filter(x => x.team == "Solo").length*10000)/100}%)`
         )
-      // .addField(" ", 
+      // .addField("\u200b", 
       //           `[Click here to see ${
       //           target == message.author ? "your" : nicknames.get(target.id) + "'s"
       //           } personal profile on our website](https://werewolf-utopium.glitch.me/profile/${nicknames.get(

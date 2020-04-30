@@ -65,24 +65,26 @@ module.exports = {
     let price = item.price * am
     let attachment = role ? (await fn.createTalisman(client, role.name)) : null
     
-    if (price > player.coins)
-      return await m.edit(
-        new Discord.MessageEmbed()
-          .setTitle("Uh oh!")
-          .setDescription(
-            `You have insufficent coins to purchase ${am} ${item.name}${
-              am > 1 ? "'s" : ""
-            }. You have ${player.coins} ${fn.getEmoji(
-              client,
-              "Coin"
-            )}, but you need ${price} ${fn.getEmoji(client, "Coin")}.`
-          )
-          .setThumbnail(
-            item.name === "Talisman"
-              ? "attachment://" + attachment.name
-            : fn.getEmoji(client, item.emoji ? item.emoji : item.name).url
-          )
+    let currency = item.currency
+    let curremoji = currency == "coins" ? "Coin" : "Rose"
+    if (player[currency] < price) return await m.edit(
+      new Discord.MessageEmbed()
+      .setTitle("Uh oh!")
+      .setDescription(
+        `You have insufficent coins to purchase ${am} ${item.name}${
+        am > 1 ? "'s" : ""
+        }. You have ${player[currency]} ${fn.getEmoji(
+          client,
+          curremoji
+        )}, but you need ${price} ${fn.getEmoji(client, curremoji)}.`
       )
+      .setThumbnail(
+        item.name === "Talisman"
+        ? "attachment://" + attachment.name
+        : fn.getEmoji(client, item.emoji ? item.emoji : item.name).url
+      )
+    )
+    
     
     await m.delete()
     let e2 = attachment ? new Discord.MessageEmbed().attachFiles([attachment]) : new Discord.MessageEmbed()
@@ -93,10 +95,10 @@ module.exports = {
             role ? role.name + " " : ""
           }${item.name}${am > 1 ? item.plural : ""} for ${price} ${fn.getEmoji(
             client,
-            "Coin"
-          )}?\nYou currently have ${player.coins} ${fn.getEmoji(
+            curremoji
+          )}?\nYou currently have ${player[currency]} ${fn.getEmoji(
             client,
-            "Coin"
+            curremoji
           )}`
         )
         .setThumbnail(
@@ -114,7 +116,7 @@ module.exports = {
       u.id == message.author.id,
       { time: 30*1000, max: 1, errors: ['time'] }
     ).catch(() => {})
-    await m.reactions.removeAll()
+    await m.reactions.removeAll().catch(()=>{})
     if (!reactions)
       return await m.edit(new Discord.MessageEmbed().setDescription("Timed out, please try again."))
     let reaction = reactions.first().emoji
@@ -133,8 +135,8 @@ module.exports = {
     if(item.itemid === "talisman") players.add(message.author.id+".inventory."+item.itemid+"."+role.name, am)
     
     if(item.itemid === "private channel"){
-      if(message.guild.id === "522638136635817986") return players.add(message.author.id+".inventory."+item.itemid, am)
-      let namePrompt = await message.author.send(
+      //if(!message.guild.id === "522638136635817986") return players.add(message.author.id+".inventory."+item.itemid, am)
+      let namePrompt = await message.channel.send(
         new Discord.MessageEmbed()
         .setTitle("Private Channel Setup")
         .setDescription(
@@ -145,26 +147,32 @@ module.exports = {
       .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
       .catch(() => {})
       if (!nameInput)
-        return await message.author.send(
+        return await message.channel.send(
           new Discord.MessageEmbed()
           .setColor("RED")
           .setTitle("Prompt timed out.")
         )
       name = nameInput.first().content
-      let newchan = client.guilds.get("522638136635817986").channels.create(name.replace(/[^a-z0-9-]/g, '').toLowerCase(), {
+      nameInput.first().delete().catch(()=>{})
+      let newchan = await client.guilds.cache.get("522638136635817986").channels.create(name.replace(/[^a-z0-9-]/g, '').toLowerCase(), {
         type: 'text',
         parent: "664378730503995402",
+        topic: "Owner: " + message.author.tag,
         permissionOverwrites: [
           {
             id: message.author.id,
-            allow: ['VIEW_CHANNEL', 'MANAGE_CHANNEL'],
+            allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'MANAGE_MESSAGES'],
+            deny: ['MENTION_EVERYONE']
           },
           {id: message.guild.id, deny: ['VIEW_CHANNEL']}
         ],
       })
+      await newchan.send(`${message.author}, welcome to your private channel! If you want to add any friends here, just edit the channel permissions!`)
+      namePrompt.delete().catch(()=>{})
     }
     
-    players.subtract(message.author.id+".coins", price) 
+    //players.subtract(message.author.id+".coins", price) 
+    players.subtract(message.author.id+"."+currency, price)
     // message.channel.send(`Success! You have purchased ${am} ${role ? role.name + " " : ""}${item.name}${am > 1 ? "s" : ""}`)
     await m.edit(
       new Discord.MessageEmbed()

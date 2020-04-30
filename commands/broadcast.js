@@ -7,7 +7,8 @@ const games = new db.table("Games"),
       nicknames = new db.table("Nicknames")
 
 const fn = require('/app/util/fn'),
-      roles = require("/app/util/roles")
+      roles = require("/app/util/roles"),
+      logs = new db.table("Logs")
 
 module.exports = {
   name: "broadcast",

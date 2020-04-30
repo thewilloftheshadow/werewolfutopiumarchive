@@ -10,20 +10,17 @@ const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
 const quickGameRoles = [
-  ["Aura Seer", "Medium", "Jailer", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
+  ["Doctor", "Seer", "Pacifist", "Wolf Seer", "Mayor", "Alpha Werewolf", "Gunner", Math.random() < 0.5 ? "Fool" : "Headhunter",
    "Bodyguard", "Gunner", "Wolf Shaman", "Aura Seer", "Serial Killer", "Cursed", "Wolf Seer", "Priest"],
-  // ["Cursed", "Medium", "Jailer", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
-  //  "Bodyguard", "Gunner", "Junior Werewolf", "Detective", "Arsonist", "Priest", "Wolf Seer", "Aura Seer"],
   ["Aura Seer", "Medium", "Jailer", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
    "Bodyguard", "Gunner", "Wolf Shaman", "Cursed", "Serial Killer", "Mayor", "Wolf Seer", "Avenger"],
-  // ["Aura Seer", "Medium", "Witch", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
-  //  "Beast Hunter", "Gunner", "Wolf Shaman", "Aura Seer", "Bomber", "Priest", "Wolf Seer", "Mayor"]
 ]
 
 module.exports = {
-  name: "quick",
-  aliases: ["q"],
+  name: "sandbox",
+  aliases: ["sb"],
   run: async (client, message, args, shared) => {
+    return;
     if (!games.get("count")) games.set("count", 0)
     if (!games.get("quick")) games.set("quick", [])
     let Games = games.get("quick")
@@ -36,21 +33,17 @@ module.exports = {
       else prevGamePlayer.left = true
     }
     
-    let currentGame = Games.find(game => game.players.length <= 16 && game.currentPhase < -0.5 && game.mode == "quick")
+    let currentGame = Games.find(game => game.players.length <= 16 && game.currentPhase < -0.5 && game.mode == "sandbox")
     if (currentGame) {
       Games[Games.indexOf(currentGame)].players.push({ id: message.author.id, lastAction: moment() })
       currentGame = Games.find(game => game.gameID == currentGame.gameID)
     } else {
-      let count = games.add("count", 1)
-      let roles = quickGameRoles[Math.floor(Math.random()*quickGameRoles.length)]
-      await fn.addLog(count, `New game: ${count}`)
-      await fn.addLog(count, `Game roles: ${roles.join(", ")}\n`)
       currentGame = {
-        mode: "quick",
-        gameID: count,
+        mode: "sandbox",
+        gameID: games.add("count", 1),
         nextPhase: null,
         currentPhase: -1,
-        originalRoles: roles,
+        originalRoles: quickGameRoles[Math.floor(Math.random()*quickGameRoles.length)],
         players: [{
           id: message.author.id,
           lastAction: moment()
@@ -88,7 +81,6 @@ module.exports = {
         .addField(`Current Players [${currentGame.players.length}]`, currentGame.players.map(player => nicknames.get(player.id)).join("\n"))
     )
     
-    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)
     games.set("quick", Games)
     players.set(`${message.author.id}.currentGame`, currentGame.gameID)
       

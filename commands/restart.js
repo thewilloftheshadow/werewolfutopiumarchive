@@ -1,7 +1,8 @@
 const db = require("quick.db"),
       cmd = require("node-cmd"),
       temp = new db.table("temp"),
-      fn = require('/app/util/fn')
+      fn = require('/app/util/fn'),
+      games = new db.table("Games")
 
 module.exports = {
 	name: "restart",
@@ -9,9 +10,18 @@ module.exports = {
 	description: "Restart the bot!",
 	run: async (client, message, args, shared) => {
     if (!["336389636878368770","658481926213992498","439223656200273932"].includes(message.author.id)) return;
+    if (!games.get("quick")) games.set("quick", [])
+    let Games = games.get("quick")
+    let activeGames = Games.filter(game => game.currentPhase < 999)
+    if (!activeGames.length){
+      temp.set("gamealert", false)
+    } else {
+      activeGames.forEach(game => game.players.forEach(p => client.users.cache.get(p.id).send("The bot is currently rebooting. It will not respond until it has finished. Don't worry, your game will pick back up right where it left off!")))
+      temp.set("gamealert", true)
+    }
     if(message.channel.id != message.author.id) temp.set("rebootchan", message.channel.id)
     await message.channel.send("Rebooting bot, please wait...")
-    fn.sleep(2000)
+    await fn.sleep(5000)
     client.user.setStatus('offline')
     cmd.run("refresh")
 	}

@@ -750,7 +750,7 @@ let roles = {
     cgp : "250c",
   },
   "Random Voting": {
-    desc: "One of: Fool or Headhunter",
+    desc: "One of: Fool, Headhunter or Soul Collector",
     abbr: ["rv"],
     cat : "Random",
     tag : tags.ROLE.TO_BE_TESTED,

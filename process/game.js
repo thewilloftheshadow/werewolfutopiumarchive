@@ -4,7 +4,8 @@ const Discord = require("discord.js"),
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
-      nicknames = new db.table("Nicknames")
+      nicknames = new db.table("Nicknames"),
+      logs = new db.table("Logs")
 
 const fn = require("/app/util/fn"),
       roles = require("/app/util/roles"),
@@ -659,7 +660,8 @@ module.exports = client => {
                       attackedPlayer.id
                     )}** cannot be killed!`
                   )
-                } else {
+                }
+                else {
                   game.running = "kill attacked player for frenzy"
                   game.lastDeath = game.currentPhase
                   if (attackedPlayer.role == "Cursed") {
@@ -708,6 +710,33 @@ module.exports = client => {
                   }
                 }
 
+                if (game.frenzy) {
+                  game.running = "kill protector for frenzy"
+                  let protectors = game.players.filter(p => attackedPlayer.protectors.includes(p.number))
+                  for (var protector of protectors) {
+                    protector.alive = false
+                    protector.killedBy = wolves.filter(p => p.alive)[
+                      Math.floor(
+                        Math.random() * wolves.filter(p => p.alive).length
+                      )
+                    ].number
+                    if (game.config.deathReveal)
+                      protector.roleRevealed = protector.role
+
+                    fn.broadcastTo(
+                      client,
+                      game.players.filter(p => !p.left),
+                      `The Wolf Frenzy killed **${
+                        protector.number
+                      } ${nicknames.get(protector.id)}${
+                        game.config.deathReveal
+                          ? ` ${fn.getEmoji(client, protector.role)}`
+                          : ""
+                      }**.`
+                    )
+                  }
+                  fn.death(client, game, protectors.map(x => x.number))
+                }
                 game.running = "protect from ww attack"
                 for (var x of attackedPlayer.protectors) {
                   let protector = game.players[x - 1]
@@ -1318,7 +1347,7 @@ module.exports = client => {
               fn.broadcastTo(
                 client,
                 game.players.filter(p => !p.left),
-                `<:Grumpy_Grandma_Mute:660495619483238410> Grumpy Grandma muted **${
+                `${fn.getEmoji(client, "Grumpy_Grandma_Mute")} Grumpy Grandma muted **${
                   muted.number
                 } ${nicknames.get(muted.id)}**!` +
                   `They cannot speak or vote today.`
@@ -1400,7 +1429,7 @@ module.exports = client => {
                     `You are in love with **${lovers[0].number} ${nicknames.get(
                       lovers[0].id
                     )} ${fn.getEmoji(client, lovers[0].role)}**.` +
-                      "You have to stay alive with them until the end of the game. If your couple dies, you die along!"
+                    `You have to stay alive with them until the end of the game. If ${nicknames.get(lovers[0].id)} dies, you die along with them!`
                   )
               )
             }
@@ -1693,7 +1722,7 @@ module.exports = client => {
           game.running = "test for tie"
           if (
             game.lastDeath + 9 == game.currentPhase ||
-            !alive.length ||
+            !alive.length || alive.length == 0 ||
             (alive.length == 2 && aliveRoles.includes("Amulet of Protection Holder") &&
              roles[aliveRoles.filter(r => !r == "Amulet of Protection Holder")[0]].tag & tags.ROLE.SEEN_AS_WEREWOLF)
           ) {

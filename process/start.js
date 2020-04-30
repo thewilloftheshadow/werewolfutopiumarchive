@@ -5,15 +5,19 @@ const Discord = require("discord.js"),
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
-      nicknames = new db.table("Nicknames")
+      nicknames = new db.table("Nicknames"),
+      logs = new db.table("Logs")
 
 const fn = require("/app/util/fn"),
-      roles = require('/app/util/roles')
+      roles = require('/app/util/roles'),
+      tags = require('/app/util/tags')
 
 module.exports = async (client, game) => { try {
   let Games = games.get("quick")
   
   fn.broadcast(client, game, "Game is starting...")
+  fn.addLog(game, "-divider-")
+  fn.addLog(game, "Game is starting...")
   game.currentPhase = -.5
 
   let thisGame1 = Games.find(g => g.gameID == game.gameID)
@@ -35,7 +39,7 @@ module.exports = async (client, game) => { try {
         : 1
     )
           
-    let role = thisPlayer.role = gameRoles.splice(wrg(roleWeight), 1)[0]
+    let role = thisPlayer.role = thisPlayer.initialRole = gameRoles.splice(wrg(roleWeight), 1)[0]
     if (role == players.get(`${thisPlayer.id}.talEq`)){
       players.delete(`${thisPlayer.id}.talEq`)
       players.subtract(`${thisPlayer.id}.inventory.talisman.${role}`, 1)
@@ -47,17 +51,20 @@ module.exports = async (client, game) => { try {
           .setTitle("Talisman Used")
           .setDescription(`You used a ${role} Talisman.`)
       )
+      fn.addLog(game, `**${nicknames.get(thisPlayer.id)}** used a ${role} Talisman`)
     }
     Object.assign(game.players[i], {alive: true, protectors: []})
     
-    if (thisPlayer.role.includes("Random")) {
+    if (thisPlayer.role.startsWith("Random")) {
       let rdmRoles = Object.values(roles).filter(
         role =>
           ((thisPlayer.role == "Random" && role.cat !== "Random") || thisPlayer.role == `Random ${role.cat}`) && 
-            !(game.originalRoles.includes(role.name) && role.oneOnly)
+            !(game.originalRoles.includes(role.name) && role.oneOnly) && role.tag & tags.ROLE.AVAILABLE
       )
+      console.log(rdmRoles.map(x => x.name))
       
-      role = rdmRoles[thisPlayer.role][Math.floor(Math.random()*rdmRoles[thisPlayer.role].length)]
+      role = rdmRoles[Math.floor(Math.random()*rdmRoles.length)].name
+      console.log(role)
       thisPlayer.initialRole = role
       thisPlayer.role = role
     }
@@ -92,6 +99,8 @@ module.exports = async (client, game) => { try {
           `You are Player #${thisPlayer.number}.`
         )
     )
+    
+    fn.addLog(game, `${thisPlayer.number} ${nicknames.get(thisPlayer.id)} is ${roles[role].oneOnly ? "the" : /^([aeiou])/i.test(role) ? "an" : "a"} ${role}. Aura: ${roles[role].aura}, Team: ${roles[role].team}`)
     
     await fn.getUser(client, thisPlayer.id).send(
       new Discord.MessageEmbed()
@@ -130,6 +139,7 @@ module.exports = async (client, game) => { try {
           .setAuthor(`Target`, fn.getEmoji(client, "Headhunter Target").url)
           .setDescription(`Your target is ${target} ${nicknames.get(game.players[target-1].id)}.`)
       )
+    fn.addLog(game, `The target for ${headhunters[i].number} ${nicknames.get(headhunters[i].id)} is ${target} ${nicknames.get(game.players[target-1].id)}.`)
   }
   
   for (var i = 0; i < game.players.length; i++) {
@@ -147,7 +157,7 @@ module.exports = async (client, game) => { try {
                   `${p.id == thisPlayer.id ? "**" : ""}${
                     p.number
                   } ${nicknames.get(p.id)}${
-                    p.alive ? "" : " <:Death:668750728650555402>"
+                    p.alive ? "" : ` ${fn.getEmoji(client, "Death")}`
                   }${
                     p.id == thisPlayer.id ||
                     p.roleRevealed
@@ -183,6 +193,8 @@ module.exports = async (client, game) => { try {
           roles[thisPlayer.role].nit1 || roles[thisPlayer.role].nite || "Nothing to do. Go back to sleep!"
         )
     )
+    fn.addLog(game, "-divider-")
+    fn.addLog(game, "Night 1 has started")
   }
   
   // await fn.broadcastTo(
@@ -203,17 +215,18 @@ module.exports = async (client, game) => { try {
       new Discord.MessageEmbed()
         .setTitle("President")
         .setThumbnail(fn.getEmoji(client, "President"))
-        .setDescription(`**${president.number} ${fn.getUser(client, president.id).username}** is the President!`)
+        .setDescription(`**${president.number} ${nicknames.get(president.id)}** is the President!`)
     )
+    fn.addLog(game, `${president.number} ${nicknames.get(president.id)} is the President!`)
     
     president.roleRevealed = "President"
   }
   
-  // if (game.gameID.match(/^(dev|beta)test_/gi))
-  //   await fn.broadcastTo(
-  //     client, game.players,
-  //     fn.gameEmbed(client, game)
-  //   )
+  if (`${game.gameID}`.match(/^(dev|beta)test_/gi))
+    await fn.broadcastTo(
+      client, game.players,
+      fn.gameEmbed(client, game)
+    )
   
   game.lastDeath = 0
   game.nextPhase = moment().add(30, "s")

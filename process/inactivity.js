@@ -4,18 +4,21 @@ const Discord = require("discord.js"),
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
-      nicknames = new db.table("Nicknames")
+      nicknames = new db.table("Nicknames"),
+      logs = new db.table("Logs")
 
 const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
 module.exports = (client, game) => {
+  if (`${game.gameID}`.match(/^devtest_/i)) return;
   for (let pl = 0; pl < game.players.length; pl++) {
     if (game.currentPhase == -1) {
       if (!fn.getUser(client, game.players[pl].id) || moment(game.players[pl].lastAction).add(3, 'm') <= moment()) {
-        if (fn.getUser(client, game.players[pl].id))
+        if (fn.getUser(client, game.players[pl].id)){
           fn.getUser(client, game.players[pl].id).send(`You are removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} for inactivity.`)
-
+          fn.addLog(game, `${game.players[pl].number} ${nicknames.get(game.players[pl].id)} was removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} for inactivity.`)
+        }
         players.set(`${game.players[pl].id}.currentGame`, 0)
 
         let leftPlayer = game.players[pl].id
@@ -43,6 +46,7 @@ module.exports = (client, game) => {
             `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`
           )
           game.players.forEach(p => players.set(`${p.id}.currentGame`, 0))
+          fn.addLog(game, `All players were removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} as the game creator left.`)
           let QuickGames = games.get("quick")
           QuickGames.splice(QuickGames.indexOf(QuickGames.find(g => g.gameID == game.gameID)), 1)
           games.set("quick", QuickGames)
@@ -64,8 +68,10 @@ module.exports = (client, game) => {
         game.players[pl].left = true
         players.set(`${game.players[pl].id}.currentGame`, 0)
 
-        if (fn.getUser(client, game.players[pl].id))
+        if (fn.getUser(client, game.players[pl].id)){
           fn.getUser(client, game.players[pl].id).send(`You were removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`}.`)
+          fn.addLog(game, `${game.players[pl].number} ${nicknames.get(game.players[pl].id)} was removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`}.`)
+        }
       }
     }
     else {
@@ -83,6 +89,8 @@ module.exports = (client, game) => {
 
         if (fn.getUser(client, game.players[pl].id))
           fn.getUser(client, game.players[pl].id).send(`You were removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} for inactivity.`)
+        
+        fn.addLog(game, `${game.players[pl].number} ${nicknames.get(game.players[pl].id)} was removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} for inactivity.`)
         fn.broadcastTo(
           client, game.players.filter(p => !p.left),
           `${

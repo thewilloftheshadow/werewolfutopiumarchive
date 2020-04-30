@@ -23,7 +23,7 @@ module.exports = {
       embeds[embeds.length - 1].addField(
         `${
         fn.getEmoji(client, item.emoji ? item.emoji : item.name) ? fn.getEmoji(client, item.emoji ? item.emoji : item.name) : ""
-        } ${item.unavailable ? "~~" : ""}**${item.name}**${item.unavailable ? "~~" : ""} - ${item.price} ${fn.getEmoji(client, "Coin")}`,
+        } ${item.unavailable ? "~~" : ""}**${item.name}**${item.unavailable ? "~~" : ""} - ${item.price} ${fn.getEmoji(client, item.currency)}`,
         `${item.description}`
       )
     }

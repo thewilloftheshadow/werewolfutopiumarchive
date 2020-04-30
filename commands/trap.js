@@ -10,8 +10,8 @@ const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
 module.exports = {
-  name: "watch",
-  gameroles: ["Sheriff"],
+  name: "trap",
+  gameroles: ["Beast Hunter"],
   run: async (client, message, args, shared) => {
     let player = players.get(message.author.id)
     if (!player.currentGame) 
@@ -21,13 +21,13 @@ module.exports = {
         game = QuickGames.find(g => g.gameID == player.currentGame),
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
-    if (gamePlayer.role !== "Sheriff")
-      return await message.author.send("You do not have the abilities to watch a player.")
+    if (gamePlayer.role !== "Beast Hunter")
+      return await message.author.send("You do not have the abilities to make a trap.")
     if (!gamePlayer.alive)
-      return await message.author.send("You are dead. You can no longer watch a player.")
+      return await message.author.send("You are dead. You can no longer make a trap.")
     
     if (game.currentPhase % 3 != 0)
-      return await message.author.send("You can only watch a player during the night.")
+      return await message.author.send("You can only make a trap during the night.")
     if (gamePlayer.jailed)
       return await message.author.send("You are currently jailed and cannot use your abilities.")
     if (gamePlayer.nightmared)
@@ -36,20 +36,19 @@ module.exports = {
       return await message.author.send("The game is over! You can no longer use your actions.")
     
     let target = parseInt(args[0])
-    let targetPlayer = game.players[target-1]
     if (isNaN(target) || target > game.players.length || target < 1)
       return await message.author.send("Invalid target.")
     if (!game.players[target-1].alive)
-      return await message.author.send("You cannot watch a dead player.")
+      return await message.author.send("You cannot trap a dead player.")
     if (target == gamePlayer.number)
-      return await message.author.send("You cannot watch on yourself.")
+      return await message.author.send("You cannot trap on yourself.")
     
     message.author.send(
-      `${fn.getEmoji(client, "Sheriff")
-      } You have chosen to watch **${target} ${nicknames.get(targetPlayer.id)}**.`
+      `${fn.getEmoji(client, "Beast_Hunter_TrapInactive")
+      } You have chosen to trap **${target}**.`
     )
     
-    gamePlayer.usedAbilityTonight = target
+    gamePlayer.nextTrap = target
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

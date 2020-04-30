@@ -61,9 +61,9 @@ module.exports = {
         }**.`
       )
       dousedPlayer.killedBy = gamePlayer.number
-
-      game = fn.death(client, game, dousedPlayer.number)
     }
+
+    game = fn.death(client, game, dousedPlayers.map(x => x.number))
     gamePlayer.killedTonight = true
     gamePlayer.usedAbilityTonight = "ignite"
     gamePlayer.doused = []

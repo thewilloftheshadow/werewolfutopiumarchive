@@ -40,6 +40,8 @@ module.exports = {
           return await message.author.send("Invalid vote.")
         if (game.players[vote-1].team == "Werewolf") 
           return await message.author.send("You cannot vote a fellow werewolf.")
+        if (game.players[vote-1].role == "Sorcerer") 
+          return await message.author.send("You cannot vote a sorcerer.")
         if (!game.players[vote-1].alive) 
           return await message.author.send("You cannot vote a dead player.")
         gamePlayer.vote = vote

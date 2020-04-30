@@ -103,16 +103,16 @@ module.exports = {
       let diffclaim = moment()
         .diff(moment(player.lastDaily), "seconds")
       let rdmmsgs = [
-        `You cannot collect daily rewards for another **${Math.floor(
+        `you cannot collect daily rewards for another **${Math.floor(
           diff / 60 / 60
         ) % 24}h ${Math.floor(diff / 60) % 60}m ${diff % 60}s**.`,
-        `Hmm... You need to wait for another **${Math.floor(diff / 60 / 60) %
+        `hmm... You need to wait for another **${Math.floor(diff / 60 / 60) %
           24}h ${Math.floor(diff / 60) % 60}m ${diff %
           60}s** to claim your next daily reward!`
       ]
-      return await message.channel.send(
+      return await message.reply(
         Math.floor(diffclaim / 60 / 60) % 24 < 12
-          ? `How is it "daily" if you claim it **${Math.floor(
+          ? `how is it "daily" if you claim it **${Math.floor(
               diffclaim / 60 / 60
             ) % 24}h ${Math.floor(diffclaim / 60) % 60}m ${diffclaim %
               60}s** after you last claimed?`

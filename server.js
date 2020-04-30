@@ -233,6 +233,15 @@ module.exports = client => {
       res.sendFile("/app/json.sqlite")
     })
     
+    app.get("/log/:id", checkAuth, devonly, async (req, res) => {
+      let file = "/app/logs/" + req.params.id + ".log"
+      if (fs.existsSync(file)) {
+        res.sendFile(file)
+      } else {
+        res.sendStatus(404)
+      }
+    })
+    
     app.get("/restart", checkAuth, devonly, async(req, res) => {
       cmd.run("refresh")
       res.sendStatus(200)

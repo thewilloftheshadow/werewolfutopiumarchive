@@ -11,7 +11,8 @@ const Discord = require('discord.js'),
 const games = new db.table("Games"),
       players = new db.table("Players"),
       nicknames = new db.table("Nicknames"),
-      temp = new db.table("temp")
+      temp = new db.table("temp"),
+      logs = new db.table("Logs")
 
 const roles = require("/app/util/roles"),
       tags = require("/app/util/tags")
@@ -44,6 +45,23 @@ client.once('ready', async () => {
 
   require('/app/process/game.js')(client)
   
+  let gamealert = temp.get("gamealert")
+  if (gamealert) {
+    let Games = games.get("quick")
+    let activeGames = Games.filter(game => game.currentPhase < 999)
+    if (!activeGames.length) return
+    activeGames.forEach(game => {
+      console.log(game.players)
+      game.players.forEach(p =>
+        client.users.cache
+          .get(p.id)
+          .send(
+            "The bot has finished rebooting. Enjoy your game!"
+          )
+      )
+    })
+    temp.delete("gamealert")
+  }
   let rebootchan = temp.get("rebootchan")
   if(rebootchan){
     temp.delete("rebootchan")
@@ -144,6 +162,33 @@ client.once('ready', async () => {
         otherRoles.filter(r => r.tag & tags.ROLE.UNAVAILABLE).map(r => `${fn.getEmoji(client, r.name)}`).join(" ")
       )
   otherRoleProg.edit(newOtherRoleEmbed)
+  
+  setInterval(async () => {
+    let serverStats = await client.channels.cache.get("640533861154947082").messages.fetch("705294118733086781")
+    let serverStatsEmbed = new Discord.MessageEmbed()
+      .setColor(0x7289da)
+      .setTitle("Statistics")
+      .setDescription(
+        `**Player Count**: ${players.all().length}\n` +
+        `**Games Count**: ${games.get("quick").length} (${games.get("quick").filter(g => g.currentPhase < 999 && g.currentPhase >= 0).length} Active)\n` +
+        `> ${games.get("quick").filter(g => g.mode == "quick").length} Quick Games\n` +
+        `> ${games.get("quick").filter(g => g.mode == "sandbox").length} Sandbox Games\n` +
+        `> ${games.get("quick").filter(g => g.mode == "ranked").length} Ranked Games\n` +
+        `> ${games.get("quick").filter(g => g.mode == "custom" && !g.gameID.match(/^(dev|beta)test_/i)).length} Custom Games\n` +
+        `> ${games.get("quick").filter(g => g.mode == "custom" && g.gameID.match(/^(dev|beta)test_/i)).length} Test Games\n` +
+        `**Roles Count**: ${Object.values(roles).length}\n` +
+        `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.AVAILABLE).length} Available | ` +
+          `${Object.values(roles).filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length} To Be Tested | ` +
+          `${Object.values(roles).filter(r => r.tag & tags.ROLE.UNAVAILABLE).length} Unavailable\n` +
+        `**Member Count**: ${prog.guild.members.cache.size}\n` +
+        `> ${prog.guild.members.cache.filter(m => !m.user.bot).size} Humans (${prog.guild.members.cache.filter(m => !m.user.bot && m.user.presence.status !== "offline").size} Online)\n` +
+        `> ${prog.guild.members.cache.filter(m => m.user.bot).size} Bots\n`
+      )
+      //.addField
+      .setFooter("Updated")
+      .setTimestamp()
+    serverStats.edit(serverStatsEmbed)
+  }, 1000*60*1)
 })
 
 client.on('inviteCreate', async invite => {
@@ -160,17 +205,17 @@ client.on('guildMemberAdd', async member => {
   const invite = guildInvites.find(inv => inv.uses > oldinv.get(inv.code).uses)
   const inviter = client.users.cache.get(invite.inviter.id)
   if(!players.get(member.user.id)) players.set(member.user.id, {
-        xp: 0,
-        coins: 0,
-        roses: 0,
-        gems: 0,
-        currentGame: null,
-        wins: [],
-        loses: [],
-        suicides: 0,
-        inventory: {},
-        invBy: inviter.id
-      })
+    xp: 0,
+    coins: 0,
+    roses: 0,
+    gems: 0,
+    currentGame: null,
+    wins: [],
+    loses: [],
+    suicides: 0,
+    inventory: {},
+    invBy: inviter.id
+  })
   if(players.get(member.user.id+".invite")) return //already joined and has invite
   players.set(member.user.id+".invite", invite)
   await member.guild.channels.cache
@@ -270,7 +315,7 @@ client.on('message', async message => {
               message.content.replace(/(`)/g, "\$1")
             }\``
           )
-          .addField(
+          .addField( //this literally looks like a headdesk on a keyboard to me 😂 ~shadow
             "Error Description",
             `\`\`\`${error.stack.replace(/(?:(?!\n.*?\(\/app.*?)\n.*?\(\/.*?\))+/g, "\n\t...")}\`\`\``
           )
@@ -398,9 +443,13 @@ client.on('message', async message => {
 
     if (game.currentPhase == -1) {
       fn.broadcast(client, game, `**${nicknames.get(message.author.id)}**: ${content}`, [message.author.id])
+      fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content}`)
       continue;
     }
-    if (game.currentPhase == -.5) return await message.author.send("Your message was not sent for the following reason: **The game is starting!**")
+    if (game.currentPhase == -.5){
+      fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content} (Message not sent, game is starting)`)
+      return await message.author.send("Your message was not sent for the following reason: **The game is starting!**")
+    }
     
     if (game.currentPhase >= 999)
       if (gamePlayer.alive) {
@@ -408,6 +457,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}** ${fn.getEmoji(client, gamePlayer.role)}: ${content}`
         )
+        fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content}`)
         continue;
       }
       else {
@@ -415,6 +465,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}*** ${fn.getEmoji(client, gamePlayer.role)}: *${content}*`
         )
+        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat): ${content}`)
         continue;
       }
 
@@ -427,6 +478,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${content}`
         )
+        fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content}`)
         continue;
       }
       else if (!gamePlayer.alive && gamePlayer.boxed && game.players.find(p => p.role == "Soul Collector" && p.alive)) continue;
@@ -435,6 +487,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && !p.alive && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}***${gamePlayer.roleRevealed ? ` ${fn.getEmoji(client, gamePlayer.roleRevealed)}` : ""}: *${content}*`
         )
+        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat): ${content}`)
         continue;
       }
     if (game.currentPhase % 3 == 0) {
@@ -444,6 +497,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && (!p.alive || (p.alive && p.role == "Medium")) && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}***${gamePlayer.roleRevealed ? ` ${fn.getEmoji(client, gamePlayer.roleRevealed)}` : ""}: *${content}*`
         )
+        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat): ${content}`)
         continue;
       }
       if (gamePlayer.role == "Medium" && gamePlayer.alive && !gamePlayer.jailed) {
@@ -451,22 +505,27 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && (!p.alive || (p.alive && p.role == "Medium")) && p.id != message.author.id).map(p => p.id),
           `**Medium**: ${content}`
         )
+        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat - Medium): ${content}`)
         continue;
       }
 
-      if (gamePlayer.jailed && gamePlayer.alive) {
-        fn.getUser(client, game.players[game.originalRoles.indexOf("Jailer")].id)
+      
+      if (gamePlayer.jailed && gamePlayer.alive && game.players.find(p => p.role == "Jailer" && p.alive)) {
+        fn.getUser(client, game.players.find(p => p.role == "Jailer").id)
           .send(`**${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${
                 typeof content == "string" && content.match(new RegExp(`\\b${game.players[game.originalRoles.indexOf("Jailer")].number}\\b`, "gi")) ?
                   `> ${content}` : content
                 }`)
+        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Jail Chat): ${content}`)
         continue;
       }
 
       if (gamePlayer.role == "Jailer" && gamePlayer.alive) { 
-        if (game.players.find(p => p.jailed && p.alive))
+        if (game.players.find(p => p.jailed && p.alive)){
           fn.getUser(client, game.players.find(p => p.jailed && p.alive).id)
-            .send(`**<:Jailer:658633215824756748> Jailer**: ${content}`)
+            .send(`**${fn.getEmoji(client, "Jailer")} Jailer**: ${content}`)
+          fn.addLog(game, `**${nicknames.get(message.author.id)}** (Jail Chat - Jailer): ${content}`)
+        }
         else
           message.author.send("You did not jail anyone or your target cannot be jailed.")
         continue;
@@ -479,7 +538,8 @@ client.on('message', async message => {
             .filter(p => roles[p.role].team == "Werewolves" &&
                     gamePlayer.role !== "Sorcerer" && !p.jailed && 
                     gamePlayer.id != p.id),
-          `**<:Fellow_Werewolf:660825937109057587> ${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${content}`)
+          `**${fn.getEmoji(client, "Fellow_Werewolf")} ${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${content}`)
+        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Werewolf Chat): ${content}`)
       }
     }
   }

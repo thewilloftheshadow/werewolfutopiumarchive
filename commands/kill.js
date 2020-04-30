@@ -48,16 +48,15 @@ module.exports = {
       fn.broadcastTo(
         client,
         game.players.filter(p => !p.left),
-        `<:Illusionist_Kill:676306659559342105> The Illusionist <:Illusionist:660365802725441538> has killed **${target.number
+        `${fn.getEmoji(client, "Illusionist_Kill")} The Illusionist ${fn.getEmoji(client, "Illusionist")} has killed **${target.number
         } ${nicknames.get(target.id)}${
           game.config.deathReveal
             ? ` ${fn.getEmoji(client, target.role)}`
             : ""
         }**.`
       )
-
-      game = fn.death(client, game, target.number)
     }
+    game = fn.death(client, game, disguised.map(x => x.number))
 
     QuickGames[index] = game
     games.set("quick", QuickGames)

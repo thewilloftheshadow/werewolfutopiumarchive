@@ -7,7 +7,8 @@ const games = new db.table("Games"),
       players = new db.table("Players"),
       nicknames = new db.table("Nicknames"),
       temp = new db.table("Temp"),
-      authdb = new db.table("authdb")
+      authdb = new db.table("authdb"),
+      logs = new db.table("Logs")
 
 const config = require('/app/util/config'),
       fn = require('/app/util/fn'),

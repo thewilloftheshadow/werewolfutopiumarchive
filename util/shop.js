@@ -6,6 +6,7 @@ module.exports = {
     itemid: "lootbox",
     unavailable: true,
     emoji: "lootbox",
+    currency: "coins",
     plural: "es"
   },
   "apprentice lootbox": {
@@ -15,6 +16,7 @@ module.exports = {
     itemid: "apprentice lootbox",
     unavailable: true,
     emoji: "apprentice lootbox",
+    currency: "coins",
     plural: "es"
   },
   "master lootbox": {
@@ -24,6 +26,7 @@ module.exports = {
     itemid: "master lootbox",
     unavailable: true,
     emoji: "master lootbox",
+    currency: "coins",
     plural: "es"
   },
   "rose": {
@@ -33,6 +36,7 @@ module.exports = {
     itemid: "rose",
     unavailable: false,
     emoji: "rose",
+    currency: "coins",
     plural: "s"
   },
   "rose bouquet": {
@@ -43,6 +47,7 @@ module.exports = {
     itemid: "rose bouquet",
     unavailable: true,
     emoji: "rose bouquet",
+    currency: "coins",
     plural: "s"
   },
   "custom maker": {
@@ -53,6 +58,7 @@ module.exports = {
     itemid: "custom maker",
     unavailable: false,
     emoji: "random",
+    currency: "coins",
     plural: ""
   },
   "private channel": {
@@ -61,8 +67,9 @@ module.exports = {
     description:
       "Buy this to be able to get a private channel to chat with your friends!",
     itemid: "private channel",
-    unavailable: true,
+    unavailable: false,
     emoji: "Private",
+    currency: "coins",
     plural: ""
   },
   "talisman": {
@@ -73,6 +80,7 @@ module.exports = {
     itemid: "talisman",
     unavailable: false,
     emoji: "Talisman",
+    currency: "coins",
     plural: "s"
   }
 }
