@@ -143,8 +143,15 @@ module.exports = client => {
             req.next()
           }
         } catch (e) {}
+        
+        if(req.user){
+          req.user.viewLogs = false
+          let member = client.guilds.cache.get(config.support).members.cache.get(req.user.id)
+          if(member && member.roles.cache.find(r => ["Developer", "Bot Helper", "βTester Helper", "Moderator", "Mini Moderator", "Helper"].includes(r.name))){
+            req.user.viewLogs = true
+          }
+        }
       })
-    
     
     app.get("/", (req, res) => {
       let pass = { user: null, player: null }
@@ -233,12 +240,21 @@ module.exports = client => {
       res.sendFile("/app/json.sqlite")
     })
     
+    // app.get("/log", checkAuth, devonly, async (req, res) => {
+    //   let files = fs.readdirSync('/app/logs').filter(file => file.endsWith('.log'))
+    //   res.send(
+    //     '<div style="font-family:\"Lucida Console\", Monaco, monospace">' +
+    //     files.map(x => `<a href="/log/${x.replace(/\.log/g, "")}">${x.replace(/\.log/g, "")}</a>`).join('\n') +
+    //     '</div>'
+    //   )
+    // })
+  
     app.get("/log/:id", checkAuth, devonly, async (req, res) => {
       let file = "/app/logs/" + req.params.id + ".log"
       if (fs.existsSync(file)) {
         res.sendFile(file)
       } else {
-        res.sendStatus(404)
+        res.status(404).send('No log for that game ID was found.')
       }
     })
     

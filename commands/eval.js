@@ -23,7 +23,18 @@ module.exports = {
  // category: "Bot Staff",
  // botStaffOnly: true,
 	run: async (client, message, args, shared) => {
-    if (!["336389636878368770","658481926213992498","439223656200273932"].includes(message.author.id)) return;
+    if (
+      !client.guilds.cache
+        .get("522638136635817986")
+        .members.cache.get(message.author.id)
+        .roles.cache.find(r =>
+          [
+            "Bot Helper",
+            "Developer"
+          ].includes(r.name)
+        )
+    )
+      return undefined
     
     const msg = message, bot = client
     

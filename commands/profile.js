@@ -37,6 +37,7 @@ module.exports = {
         .setThumbnail(target.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))
         .addField("Coins", player.coins, true)
         .addField("XP", player.xp, true)
+        .addField("Roses", player.roses, true)
         .addField(
           "**Statistics**",
           `**Games played:** ${allGamesPlayed.length + player.suicides}\n` +

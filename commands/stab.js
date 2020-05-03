@@ -53,9 +53,13 @@ module.exports = {
     gamePlayer.usedAbilityTonight = target
     message.author.send(
       `<:Serial_Killer_Knife:660823278902050826> You selected to stab **${target} ${
-        nicknames.get(game.players[target - 1].id)
+        nicknames.get(targetPlayer.id)
       }**.`
     )
+    
+    fn.addLog(game, `Serial Killer ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to stab ${targetPlayer.number} ${
+        nicknames.get(targetPlayer.id)
+      } (${targetPlayer.role}).`)
     
     QuickGames[index] = game
     

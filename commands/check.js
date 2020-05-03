@@ -69,6 +69,16 @@ module.exports = {
         return await message.author.send("You need to select **__two different targets__** for your ability to work!")
 
       gamePlayer.usedAbilityTonight = [targetA, targetB]
+      
+      let targetPlayerA = game.players[targetA-1],
+          targetPlayerB = game.players[targetB-1]
+                
+      fn.addLog(
+        game,
+        `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} wanted to see if the spirits of ${
+        targetPlayerA.number} ${nicknames.get(targetPlayerA.id)} (${targetPlayerA.role}) and ${
+        targetPlayerB.number} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role}).`
+      )
     } else {
       if (gamePlayer.usedAbilityTonight)
         return await message.author.send(
@@ -132,6 +142,12 @@ module.exports = {
           }`
 
         message.author.send(embed)
+                
+        fn.addLog(
+          game,
+          `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} gave a card to ${
+          targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+        )
       } else {
         let role = gamePlayer.role !== "Wolf Seer" && game.players.find(pl => pl.enchant == targetPlayer.number)
                      ? "Wolf Shaman"

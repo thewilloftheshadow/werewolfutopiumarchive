@@ -34,8 +34,13 @@ module.exports = {
     if (!games.get("quick")) games.set("quick", [])
     let Games = games.get("quick")
     
-    if (Games.find(g => g.gameID == players.get(`${message.author.id}.currentGame`) && g.currentPhase < 999)) 
-      return await message.author.send("You are already in a game!")
+    if (Games.find(g => g.gameID == players.get(`${message.author.id}.currentGame`))) {
+      let prevGame = Games.find(g => g.gameID == players.get(`${message.author.id}.currentGame`)),
+          prevGamePlayer = prevGame.players.find(p => p.id == message.author.id)
+      if (prevGame.currentPhase < 999 && !prevGamePlayer.left)
+        return await message.author.send("You are already in a game!")
+      else prevGamePlayer.left = true
+    }
     
     let currentGame = {
       mode: "custom",
@@ -258,6 +263,8 @@ module.exports = {
       let editEmbed = rolePrompt.embeds[0]
       if (!i) editEmbed.fields = [{name: "Roles", value: ""}]
       editEmbed.fields[0].value = currentGame.originalRoles.map(role => `${fn.getEmoji(client, role)} ${role}`).join('\n')
+      if (editEmbed.fields[0].value.length > 1024)
+        editEmbed.fields[0].value = currentGame.originalRoles.map(role => `${fn.getEmoji(client, role)}`).join(' ')
       if (!editEmbed.fields[0].value.length) delete editEmbed.fields
       if (messagesSince && messagesSince % 5 == 0) {
         await rolePrompt.delete()
@@ -452,7 +459,20 @@ module.exports = {
     )
     
     fn.addLog(currentGame, `New game: ${currentGame.name} - ${currentGame.gameID}`)
-    fn.addLog(currentGame, `Game roles: ${currentGame.originalRoles.join(", ")}\n`)
+    fn.addLog(currentGame, `Game roles: ${currentGame.originalRoles.join(", ")}`)
+    fn.addLog(currentGame, `-divider-`)
+    fn.addLog(currentGame, `Configuration`)
+    fn.addLog(currentGame, `-divider2-`)
+    fn.addLog(
+      currentGame,
+      `**Time:** Night ${currentGame.config.nightTime}s / Day ${currentGame.config.dayTime}s / Voting ${currentGame.config.votingTime}s\n` +
+        `**Death Reveal:** ${currentGame.config.deathReveal}\n` +
+        `**Talismans:** ${
+          currentGame.config.talismans ? "Enabled" : "Disabled"
+        }\n` +
+        `**Private:** ${currentGame.config.private}`
+    )
+    fn.addLog(currentGame, `-divider-`)
     fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)
     
     fn.broadcastTo(

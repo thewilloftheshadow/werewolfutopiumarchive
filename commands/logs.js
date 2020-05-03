@@ -1,27 +1,51 @@
-const Discord = require('discord.js'),
-      moment = require('moment'),
+const Discord = require("discord.js"),
+      moment = require("moment"),
       db = require("quick.db"),
-      handybag = require("handybag")
+      fs = require('fs')
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
-      nicknames = new db.table("Nicknames"),
-      temp = new db.table("Temp"),
-      authdb = new db.table("authdb"),
-      logs = new db.table("Logs")
+      nicknames = new db.table("Nicknames")
 
-const config = require('/app/util/config'),
-      fn = require('/app/util/fn'),
-      roles = require('/app/util/roles'),
-      tags = require('/app/util/tags'),
-      shop = require("/app/util/shop")
+const fn = require('/app/util/fn'),
+      roles = require("/app/util/roles")
 
-module.exports = {
-	name: "logs",
-	usage: "logs <file|db> <game ID>",
-	run: async (client, message, args, shared) => {
-    if (!["336389636878368770","658481926213992498","439223656200273932"].includes(message.author.id)) return;
-    if(!(["file", "db"].includes(args[0]))) return await message.channel.send("Please specify db or file")
-  }
+let commands = new Discord.Collection()
+
+const commandFiles = fs.readdirSync('/app/commands/logs').filter(file => file.endsWith('.js'))
+for (const file of commandFiles) {
+  const command = require(`/app/commands/logs/${file}`)
+  commands.set(command.name, command)
 }
 
+module.exports = {
+  name: "logs",
+  aliases: ["log"],
+  run: async (client, message, asdf, shared) => {
+    if (
+      !client.guilds.cache
+        .get("522638136635817986")
+        .members.cache.get(message.author.id)
+        .roles.cache.find(r =>
+          [
+            "*",
+            "βTester Helper",
+            "Mini Moderator",
+            "Moderator",
+            "Bot Helper",
+            "Developer"
+          ].includes(r.name)
+        )
+    )
+      return undefined
+    
+    var args = message.content.trim().slice(shared.commandName.length+3).split(/\s+/u)
+    
+		const commandName = args.shift().toLowerCase()
+		const command = commands.get(commandName) || commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName))
+
+		if (!command) return await message.author.send("Unknown command.")
+    
+    await command.run(client, message, args)
+  }
+}

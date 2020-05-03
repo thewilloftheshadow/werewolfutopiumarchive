@@ -193,9 +193,9 @@ module.exports = async (client, game) => { try {
           roles[thisPlayer.role].nit1 || roles[thisPlayer.role].nite || "Nothing to do. Go back to sleep!"
         )
     )
-    fn.addLog(game, "-divider-")
-    fn.addLog(game, "Night 1 has started")
   }
+  fn.addLog(game, "-divider-")
+  fn.addLog(game, "Night 1 has started.")
   
   // await fn.broadcastTo(
   //   client, game.players.filter(p => !p.left),

@@ -21,7 +21,22 @@ for (const file of commandFiles) {
 module.exports = {
   name: "games",
   run: async (client, message, asdf, shared) => {
-    if (!["336389636878368770","385876802956165125","658481926213992498","439223656200273932"].includes(message.author.id)) return;
+    if (
+      !client.guilds.cache
+        .get("522638136635817986")
+        .members.cache.get(message.author.id)
+        .roles.cache.find(r =>
+          [
+            "*",
+            "βTester Helper",
+            "Mini Moderator",
+            "Moderator",
+            "Bot Helper",
+            "Developer"
+          ].includes(r.name)
+        )
+    )
+      return undefined
 
     var args = message.content.trim().slice(shared.commandName.length+3).split(/\s+/u)
     

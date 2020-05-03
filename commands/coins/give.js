@@ -12,6 +12,7 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "give",
   run: async (client, message, args, shared) => {
+    return;
     let thisPlayer = players.get(message.author.id)
     let targetPlayer
     if (!args[0])

@@ -43,5 +43,7 @@ module.exports = {
         .setTitle("📢 Broadcast")
         .setDescription(content)
     )
+    
+    fn.addLog(game, `[BROADCAST] ${nicknames.get(message.author.id)}: ${content}`)
   }
 }

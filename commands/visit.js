@@ -51,6 +51,15 @@ module.exports = {
     message.author.send(
       `<:Red_Lady_LoveLetter:674854554369785857> You decided to visit **${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** tonight.`
     )
+
+    fn.addLog(
+      game,
+      `Red Lady ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to visit ${
+        targetPlayer.role
+      } ${
+        targetPlayer.number
+      } ${nicknames.get(targetPlayer.id)}.`
+    )
     
     QuickGames[index] = game
     

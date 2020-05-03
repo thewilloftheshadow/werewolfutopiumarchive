@@ -246,9 +246,12 @@ const gameEmbed = (client, game) => {
 }
 
 const death = (client, game, killed, suicide = false) => {
+  console.log(killed)
+  if (killed == []) return game
   let deadPlayers
-  if (typeof killed == 'array') deadPlayers = game.players.filter(p => killed.includes(p.number))
+  if (killed instanceof Array) deadPlayers = game.players.filter(p => killed.includes(p.number))
   else deadPlayers = [game.players.find(p => p.number == killed)]
+  console.log(deadPlayers)
   for (var deadPlayer of deadPlayers) {
     if (suicide !== "corr"){
       // DOPPEL TAKE ROLE
@@ -313,24 +316,25 @@ const death = (client, game, killed, suicide = false) => {
         }
       }
 
-      if (game.currentPhase % 3 == 1) {
-        // RED LADY VISITING ATTACKED PLAYER
-        game.running = "kill red lady visiting attacked player"
-        let rls = game.players.filter(p => p.alive && p.role == "Red Lady" && p.usedAbilityTonight == deadPlayer.number)
-        for (var rl of rls) {
-          rl.alive = false
-          rl.roleRevealed = "Red Lady"
-          rl.killedBy = game.players[rl.usedAbilityTonight-1].number
-          game.lastDeath = game.currentPhase - 1
-          game = death(client, game, rl.number)
+//       if (game.currentPhase % 3 == 1) {
+//         // RED LADY VISITING ATTACKED PLAYER
+//         game.running = "kill red lady visiting attacked player"
+//         let rls = game.players.filter(p => p.alive && p.role == "Red Lady" && p.usedAbilityTonight == deadPlayer.number)
+//         for (var rl of rls) {
+//           rl.visitedEvil = true
+// //           rl.alive = false
+// //           rl.roleRevealed = "Red Lady"
+// //           rl.killedBy = game.players[rl.usedAbilityTonight-1].number
+// //           game.lastDeath = game.currentPhase - 1
+// //           game = death(client, game, rl.number)
 
-          broadcastTo(
-            client, game.players.filter(p => !p.left),
-            `<:Red_Lady_LoveLetter:674854554369785857> **${rl.number} ${nicknames.get(rl.id)} ${getEmoji(client, "Red Lady")
-            }** visited an evil player and died!`
-          )
-        }
-      }
+// //           broadcastTo(
+// //             client, game.players.filter(p => !p.left),
+// //             `<:Red_Lady_LoveLetter:674854554369785857> **${rl.number} ${nicknames.get(rl.id)} ${getEmoji(client, "Red Lady")
+// //             }** visited an evil player and died!`
+// //           )
+//         }
+//       }
 
       // AVENGING
       game.running = "avenge for junior werewolf and avenger"
@@ -459,16 +463,6 @@ const death = (client, game, killed, suicide = false) => {
   return game
 }
 
-const updateLogs = async (client, game) => {
-  let logMessage = await client.channels.get("677694502915276831").fetchMessage(game.logMsgs[game.logMsgs.length-1])
-  let embed = new Discord.MessageEmbed(logMessage.embeds[0])
-  embed.addField(
-    `${game.currentPhase % 3 == 0 ? "Night" : "Day"} ${Math.floor(game.currentPhase / 3) + 1}`,
-    game.logs
-  )
-  
-}
-
 const createTalisman = async (client, role) => {
   if(typeof role == "string") role = Object.values(roles).find(data => data.name.toLowerCase().startsWith(role.toLowerCase()) || (data.abbr && data.abbr.includes(role.toLowerCase())))
   if (!role) return undefined
@@ -510,23 +504,26 @@ const addLog = (game, msg) => {
   if(!typeof game === "string") throw new TypeError('First parameter must be a game object or game ID')
   if(!typeof msg === "string") msg = msg.toString()
   if(msg === "-divider-") msg = "=============================="
-  logs.push(game, `${moment()} | ${msg}`)
-  fs.appendFile('/app/logs/' + game + ".log", `${moment()} | ${msg}`, (err) => {
-    if (err) throw err;
-  });
+  if(msg === "-divider2-") msg = "------------------------------"
+  msg = `${time()} | ` + msg
+  msg = msg.replace(/\\/g,"")
+  msg = msg.replace(/\n/g,`\n${time()} | `)
+  logs.push(game, msg)
 }
 
-// const writeLogs = async (game) => {
-//   if(typeof game === "object") game = game.gameID
-//   if(typeof game === "number") game = game.toString()
-//   if(!typeof game === "string") throw new TypeError('First parameter must be a game object or game ID')
-//   let gamelog = logs.get(game)
-//   if(!gamelog) return false
-//   fs.writeFile('/app/logs/' + game + ".log", gamelog.join("\n"), (err) => {
-//     if (err) throw err;
-//     console.log('The log has been written to the file!');
-//   });
-// }
+const writeLogs = (game) => {
+  if(typeof game === "object") game = game.gameID
+  if(typeof game === "number") game = game.toString()
+  if(!typeof game === "string") throw new TypeError('First parameter must be a game object or game ID')
+  if(!game) return
+  let gamelog = logs.get(game)
+  if(!gamelog) return false
+  fs.appendFile('/app/logs/' + game + ".log", gamelog.join("\n")+"\n", (err) => {
+    if (err) throw err;
+    console.log('The log has been written to the file!');
+    logs.delete(game)
+  });
+}
 
 module.exports = {
   time: time,
@@ -553,5 +550,7 @@ module.exports = {
   createTalisman: createTalisman,
   getRandomInt: getRandomInt,
   randomString: randomString,
-  addLog: addLog
+  addLog: addLog,
+  writeLogs: writeLogs,
+  writeLog: writeLogs
 }

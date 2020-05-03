@@ -45,6 +45,7 @@ client.once('ready', async () => {
 
   require('/app/process/game.js')(client)
   
+  //alert players in game if w!restart was used
   let gamealert = temp.get("gamealert")
   if (gamealert) {
     let Games = games.get("quick")
@@ -62,11 +63,20 @@ client.once('ready', async () => {
     })
     temp.delete("gamealert")
   }
+  //respond to w!restart command
   let rebootchan = temp.get("rebootchan")
   if(rebootchan){
     temp.delete("rebootchan")
     client.channels.cache.get(rebootchan).send("Bot has successfully been restarted!").catch(() => temp.delete("rebootchan"))
   }
+  
+  //Check if there are logs that need to be written
+  setInterval(() => {
+    let alllogs = logs.all()
+    alllogs.forEach(log => {
+      fn.writeLogs(log.ID)
+    })
+  }, 120000) //2 minutes
   
   // UPDATE PROGRESS CHANNEL
   let prog = client.channels.cache.get("658942985853206531")
@@ -175,7 +185,7 @@ client.once('ready', async () => {
         `> ${games.get("quick").filter(g => g.mode == "sandbox").length} Sandbox Games\n` +
         `> ${games.get("quick").filter(g => g.mode == "ranked").length} Ranked Games\n` +
         `> ${games.get("quick").filter(g => g.mode == "custom" && !g.gameID.match(/^(dev|beta)test_/i)).length} Custom Games\n` +
-        `> ${games.get("quick").filter(g => g.mode == "custom" && g.gameID.match(/^(dev|beta)test_/i)).length} Test Games\n` +
+        `> ${games.get("quick").filter(g => g.mode == "custom" && g.gameID.match(/^betatest_/i)).length} Test Games\n` +
         `**Roles Count**: ${Object.values(roles).length}\n` +
         `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.AVAILABLE).length} Available | ` +
           `${Object.values(roles).filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length} To Be Tested | ` +
@@ -443,11 +453,11 @@ client.on('message', async message => {
 
     if (game.currentPhase == -1) {
       fn.broadcast(client, game, `**${nicknames.get(message.author.id)}**: ${content}`, [message.author.id])
-      fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content}`)
+      fn.addLog(game, `[PRE] ${nicknames.get(message.author.id)}: ${content}`)
       continue;
     }
     if (game.currentPhase == -.5){
-      fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content} (Message not sent, game is starting)`)
+      fn.addLog(game, `Message from ${nicknames.get(message.author.id)} was not sent as game was starting: ${content}`)
       return await message.author.send("Your message was not sent for the following reason: **The game is starting!**")
     }
     
@@ -457,7 +467,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}** ${fn.getEmoji(client, gamePlayer.role)}: ${content}`
         )
-        fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content}`)
+        fn.addLog(game, `[POST][DEAD] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
       else {
@@ -465,12 +475,12 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}*** ${fn.getEmoji(client, gamePlayer.role)}: *${content}*`
         )
-        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat): ${content}`)
+        fn.addLog(game, `[POST] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
 
-    if (gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Grumpy Grandma") content = "..."
-    if (gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Corruptor") return;
+    if (gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Grumpy Grandma" && gamePlayer.alive) content = "..."
+    if (gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Corruptor" && gamePlayer.alive) return;
 
     if (game.currentPhase % 3 != 0)
       if (gamePlayer.alive) {
@@ -478,26 +488,26 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${content}`
         )
-        fn.addLog(game, `**${nicknames.get(message.author.id)}**: ${content}`)
+        fn.addLog(game, `[DAY] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
-      else if (!gamePlayer.alive && gamePlayer.boxed && game.players.find(p => p.role == "Soul Collector" && p.alive)) continue;
+      else if (!gamePlayer.alive && gamePlayer.boxed && game.players.find(p => p.role == "Soul Collector" && p.alive)) return undefined
       else {
         fn.broadcastTo(
           client, game.players.filter(p => !p.left && !p.alive && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}***${gamePlayer.roleRevealed ? ` ${fn.getEmoji(client, gamePlayer.roleRevealed)}` : ""}: *${content}*`
         )
-        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat): ${content}`)
+        fn.addLog(game, `[DEAD] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
     if (game.currentPhase % 3 == 0) {
       if (!gamePlayer.alive && gamePlayer.boxed && game.players.find(p => p.role == "Soul Collector" && p.alive)) return undefined
       else if (!gamePlayer.alive) {
         fn.broadcastTo(
-          client, game.players.filter(p => !p.left && (!p.alive || (p.alive && p.role == "Medium")) && p.id != message.author.id),
+          client, game.players.filter(p => !p.left && (!p.alive || (p.alive && !p.jailed && p.role == "Medium")) && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}***${gamePlayer.roleRevealed ? ` ${fn.getEmoji(client, gamePlayer.roleRevealed)}` : ""}: *${content}*`
         )
-        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat): ${content}`)
+        fn.addLog(game, `[MEDIUM] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
       if (gamePlayer.role == "Medium" && gamePlayer.alive && !gamePlayer.jailed) {
@@ -505,18 +515,28 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && (!p.alive || (p.alive && p.role == "Medium")) && p.id != message.author.id).map(p => p.id),
           `**Medium**: ${content}`
         )
-        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Dead Chat - Medium): ${content}`)
+        fn.addLog(game, `[MEDIUM] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
 
       
-      if (gamePlayer.jailed && gamePlayer.alive && game.players.find(p => p.role == "Jailer" && p.alive)) {
-        fn.getUser(client, game.players.find(p => p.role == "Jailer").id)
-          .send(`**${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${
-                typeof content == "string" && content.match(new RegExp(`\\b${game.players[game.originalRoles.indexOf("Jailer")].number}\\b`, "gi")) ?
-                  `> ${content}` : content
-                }`)
-        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Jail Chat): ${content}`)
+      if (gamePlayer.jailed && gamePlayer.alive && game.players.find(p => p.role == "Jailer" && p.alive && !p.left)) {
+        fn.getUser(client, game.players.find(p => p.role == "Jailer" && p.alive && !p.left).id).send(
+          `${
+            typeof content == "string" &&
+            content.match(
+              new RegExp(
+                `\\b${game.players[game.originalRoles.indexOf("Jailer")].number}\\b`,
+                "gi"
+              )
+            )
+              ? `>`
+              : ""
+          }**${gamePlayer.number} ${nicknames.get(
+            message.author.id
+          )}**: ${content}`
+        )
+        fn.addLog(game, `[JAIL] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
 
@@ -524,14 +544,14 @@ client.on('message', async message => {
         if (game.players.find(p => p.jailed && p.alive)){
           fn.getUser(client, game.players.find(p => p.jailed && p.alive).id)
             .send(`**${fn.getEmoji(client, "Jailer")} Jailer**: ${content}`)
-          fn.addLog(game, `**${nicknames.get(message.author.id)}** (Jail Chat - Jailer): ${content}`)
+          fn.addLog(game, `[JAIL] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         }
         else
           message.author.send("You did not jail anyone or your target cannot be jailed.")
         continue;
       }
 
-      if (roles[gamePlayer.role].team == "Werewolves" && gamePlayer.role !== "Sorcerer" && !gamePlayer.jailed) {
+      if (roles[gamePlayer.role].team == "Werewolves" && gamePlayer.role !== "Sorcerer" && !gamePlayer.jailed && gamePlayer.alive) {
         fn.broadcastTo(
           client,
           game.players
@@ -539,7 +559,18 @@ client.on('message', async message => {
                     gamePlayer.role !== "Sorcerer" && !p.jailed && 
                     gamePlayer.id != p.id),
           `**${fn.getEmoji(client, "Fellow_Werewolf")} ${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${content}`)
-        fn.addLog(game, `**${nicknames.get(message.author.id)}** (Werewolf Chat): ${content}`)
+        fn.addLog(game, `[WOLF] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
+      }
+
+      if (roles[gamePlayer.role].team == "Zombies" && !gamePlayer.jailed && gamePlayer.alive) {
+        fn.broadcastTo(
+          client,
+          game.players
+            .filter(p => roles[p.role].team == "Zombies" &&
+                    !p.jailed && 
+                    gamePlayer.id != p.id),
+          `**${fn.getEmoji(client, "Zombie")} ${gamePlayer.number} ${nicknames.get(message.author.id)}**: ${content}`)
+        fn.addLog(game, `[ZOMB] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
       }
     }
   }

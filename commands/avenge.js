@@ -58,10 +58,12 @@ module.exports = {
       `${fn.getEmoji(client, gamePlayer.role == "Avenger" ? "Avenger Select" : "Junior Werewolf Select")
       } You selected **${target} ${nicknames.get(targetPlayer.id)}** to be avenged on when you die.`
     )
-    
-    // game.logs[game.currentPhase] += 
-    //   `**${gamePlayer.number} ${nicknames.get(gamePlayer.id)}** (${gamePlayer.role}) selected **${
-    //   target} ${nicknames.get(targetPlayer.id)}** to be avenged on.`
+                
+    fn.addLog(
+      game,
+      `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to avenge on ${
+      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) when they die.`
+    )
     
     games.set("quick", QuickGames)
   }

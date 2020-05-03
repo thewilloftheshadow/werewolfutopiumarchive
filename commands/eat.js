@@ -9,7 +9,6 @@ const games = new db.table("Games"),
 const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
-
 module.exports = {
   name: "eat", 
   gameroles: ["Cannibal"],
@@ -17,8 +16,7 @@ module.exports = {
   run: async (client, message, args, shared) => {
     let player = players.get(message.author.id)
     if (!player.currentGame)
-    return await message.author.send("You are not currently in a game!\nDo `w!quick` to join a Quick game.") 
-
+      return await message.author.send("You are not currently in a game!\nDo `w!quick` to join a Quick game.")
 
     let QuickGames = games.get("quick"),
         game = QuickGames.find(g => g.gameID == player.currentGame),
@@ -33,7 +31,39 @@ module.exports = {
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your abilities.")
     
+    if (args.length > gamePlayer.abil1)
+      return await message.author.send(`You can only eat ${gamePlayer.abil1} player${gamePlayer.abil1 == 1 ? "" : "s"} tonight!`)
     
+    let yummyHumans = []
+    
+    for (var target of args) {
+      target = parseInt(target)
+      if (isNaN(target) || target > game.players.length || target < 1) {
+        await message.author.send("Invalid target.")
+        continue;
+      }
+      let targetPlayer = game.players[target-1]
+      if (!targetPlayer.alive) {
+        await message.author.send(`**${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** is already dead!`)
+        continue;
+      }
+      if (gamePlayer.number == targetPlayer.number) {
+        await message.react(fn.getEmoji(client, "harold"))
+        continue;
+      }
+      yummyHumans.push(targetPlayer)
+    }
+    
+    if (!yummyHumans.length) return undefined;
+    
+    message.author.send(
+    	`${fn.getEmoji(client, "Cannibal Eat")} You decided to eat ${yummyHumans.map(x => `**${x.number} ${nicknames.get(x.id)}**`).join(', ')}!`
+    )
+    
+    gamePlayer.usedAbilityTonight = yummyHumans.map(x => x.number)
+    
+    QuickGames[index] = game
+    games.set("quick", QuickGames)
   } 
 } 
 

@@ -29,11 +29,14 @@ module.exports = {
       let target = parseInt(args[0])
       if (isNaN(target) || target > game.players.length || target < 1)
         return await message.author.send("Invalid target.") 
+      r = fn.getUser(client, game.players[target-1])
     } else {
-      let r = message.mentions.users.first() || await client.users.fetch(args[0]).cact
+      r = message.mentions.users.first() || await client.users.fetch(args[0]).catch(() => {})
       if(!r) return await message.channel.send("Unable to find that user.")
     }
-    console.log(r)
+    if (r.id == message.author.id)
+      return await message.channel.send("I know you are lonely, but please don't do that. I'm sure we can find you some friends to give roses to.")
+    
     await r.send(
       new Discord.MessageEmbed()
       .setTitle("Roses for you")

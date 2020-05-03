@@ -77,7 +77,12 @@ module.exports = {
               " You can use your card at any time."
             )
         )
-   
+                
+        fn.addLog(
+          game,
+          `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} gave a card to ${
+          targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+        )
       }
     }
     

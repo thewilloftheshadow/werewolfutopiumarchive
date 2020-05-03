@@ -1,3 +1,4 @@
+//https://werewolf-online.fandom.com/wiki/Abbreviations
 module.exports = {
   "in-game": ["ig"],
   "Random Regular Villager": ["rrv","rv"],

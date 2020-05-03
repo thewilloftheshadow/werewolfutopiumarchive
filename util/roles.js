@@ -131,7 +131,7 @@ let roles = {
     aura: "Unknown",
     team: "Village",
     abbr: ["forg"],
-    cat : "Regular Villager",
+    cat : "Strong Villager",
     // nite: "",
     cgp : "250c",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |

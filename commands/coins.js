@@ -21,6 +21,23 @@ for (const file of commandFiles) {
 module.exports = {
   name: "coins",
   run: async (client, message, asdf, shared) => {
+    if (
+      !client.guilds.cache
+        .get("522638136635817986")
+        .members.cache.get(message.author.id)
+        .roles.cache.find(r =>
+          [
+            "*",
+            "βTester Helper",
+            "Mini Moderator",
+            "Moderator",
+            "Bot Helper",
+            "Developer"
+          ].includes(r.name)
+        )
+    )
+      return undefined
+    
     var args = message.content.trim().slice(shared.commandName.length+3).split(/\s+/u)
     
 		const commandName = args.shift().toLowerCase()

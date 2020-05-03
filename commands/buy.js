@@ -29,6 +29,8 @@ module.exports = {
     
     if (item.name === "Custom Maker" && players.get(`${message.author.id}.inventory.${item.itemid}`))
       return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have the Custom Maker item!`))
+    if (item.name === "Private Channel" && players.get(`${message.author.id}.inventory.${item.itemid}`))
+      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have a private channel!`))
     if (item.name === "Custom Maker" && am > 1)
       am = 1
     
@@ -135,7 +137,7 @@ module.exports = {
     if(item.itemid === "talisman") players.add(message.author.id+".inventory."+item.itemid+"."+role.name, am)
     
     if(item.itemid === "private channel"){
-      //if(!message.guild.id === "522638136635817986") return players.add(message.author.id+".inventory."+item.itemid, am)
+      players.add(message.author.id+".inventory."+item.itemid, 1)
       let namePrompt = await message.channel.send(
         new Discord.MessageEmbed()
         .setTitle("Private Channel Setup")
