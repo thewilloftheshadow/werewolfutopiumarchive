@@ -28,7 +28,11 @@ module.exports = {
     if (!activeGames.length){
       temp.set("gamealert", false)
     } else {
-      activeGames.forEach(game => game.players.forEach(p => client.users.cache.get(p.id).send("The bot is currently rebooting. It will not respond until it has finished. Don't worry, your game will pick back up right where it left off!")))
+      activeGames.forEach(game => {
+        game.players.forEach(p => client.users.cache.get(p.id).send("The bot is currently rebooting. It will not respond until it has finished. Don't worry, your game will pick back up right where it left off!"))
+        fn.addLog(game, "-divider-")
+        fn.addLog(game, `Bot restart in progress, initated by ${message.author.tag}.`)
+      })
       temp.set("gamealert", true)
     }
     if(message.channel.id != message.author.id) temp.set("rebootchan", message.channel.id)

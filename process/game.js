@@ -2753,7 +2753,8 @@ module.exports = client => {
                 )}\`\`\``
               )
           )
-          fn.addLog(game, "Error: " + error.stack)
+          fn.addLog(game, `Game was terminated at \`${game.running}\`.`)
+          fn.addLog(game, "[ERROR] " + error.stack.replace(/ {4}/g, "            "))
           game.currentPhase = 999
           // fn.addXP(game, game.players, 15)
           fn.addXP(game, game.players.filter(p => !p.left), 15)

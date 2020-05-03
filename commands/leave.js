@@ -80,10 +80,12 @@ module.exports = {
       )
 
       game = fn.death(client, game, gamePlayer.number, true)
+      fn.addLog(game, `${gamePlayer.number} ${nicknames.get(gamePlayer.id)} (${gamePlayer.role}) suicided.`)
     }
     
+    fn.addLog(game, `${nicknames.get(message.author.id)} left the game.`)
     message.author.send(`You left Game #${game.gameID}.`)
-    if (game.players.length && (game.currentPhase < 0 || game.currentPhase >= 999))
+    if (game.players.length && (game.currentPhase < 0 || game.currentPhase >= 999)){
       fn.broadcastTo(
         client, game.currentPhase == -1 ? game.players : game.players.filter(p => !p.left), 
         game.currentPhase == -1 ?
@@ -95,6 +97,7 @@ module.exports = {
             ) :
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}** left the game.`
       )
+    }
     
     if (game.currentPhase == -1 && game.mode == "custom" && game.createdBy == message.author.id) {
       fn.broadcastTo(

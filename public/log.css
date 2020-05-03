@@ -1,0 +1,29 @@
+body{
+  background: #000000
+}
+pre {
+  white-space: pre-wrap;
+  color: white;
+/*   padding: 1em; */
+}
+.error{
+  color: #FF0000;
+}
+.phase{
+  color: #1dabff;
+}
+.action{
+  color: #00FF00;
+}
+.warn{
+  color: #FFD700;
+}
+.join{
+  color: #43B581;
+}
+.leave{
+  color: #F04947;
+}
+.win{
+  color: #FDDD88;
+}

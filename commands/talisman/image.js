@@ -16,6 +16,6 @@ module.exports = {
   name: "image",
   aliases: ["img"],
   run: async (client, message, args) => {
-    await message.channel.send(`Here is your talisman:`, await fn.createTalisman(client, args.join(' ')));
+    await message.channel.send(`Here is your talisman:`, await fn.createTalisman(client, args.slice(1).join(' '), args[0]));
   }
 }

@@ -46,11 +46,11 @@ module.exports = (client, game) => {
             `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`
           )
           game.players.forEach(p => players.set(`${p.id}.currentGame`, 0))
-          fn.addLog(game, `All players were removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} as the game creator left.`)
+          fn.addLog(game, `All players were removed from ${game.name} [${game.gameID}] as the game creator left.`)
           let QuickGames = games.get("quick")
           QuickGames.splice(QuickGames.indexOf(QuickGames.find(g => g.gameID == game.gameID)), 1)
           games.set("quick", QuickGames)
-    }
+        }
       } else if (moment(game.players[pl].lastAction).add(2.5, 'm') <= moment() && !game.players[pl].prompted) {
         game.players[pl].prompted = true
         fn.getUser(client, game.players[pl].id).send(
@@ -93,17 +93,14 @@ module.exports = (client, game) => {
         fn.addLog(game, `${game.players[pl].number} ${nicknames.get(game.players[pl].id)} was removed from ${game.mode == 'custom' ? game.name : `Game #${game.gameID}`} for inactivity.`)
         fn.broadcastTo(
           client, game.players.filter(p => !p.left),
-          `${
-            game.players.filter(p => p.alive && p.role == "Corruptor").map(p => p.number).includes(game.players[pl].mute)
-              ? "Corrupted player "
-              : ""
-          }**${game.players[pl].number} ${fn.getUser(
+          `**${game.players[pl].number} ${fn.getUser(
             client,
             game.players[pl].id
           )}${
-            game.config.deathReveal
-              ? ` ${fn.getEmoji(client, game.players[pl].role)}`
-              : ""
+            game.config.deathReveal &&
+              !game.players.filter(p => p.alive && p.role == "Corruptor").map(p => p.number).includes(game.players[pl].mute)
+                ? ` ${fn.getEmoji(client, game.players[pl].role)}`
+                : ` ${fn.getEmoji(client, "Unknown")}`
           }** suicided.`
         )
 

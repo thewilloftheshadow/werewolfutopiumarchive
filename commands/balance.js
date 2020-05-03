@@ -5,7 +5,6 @@ const gamemodes = ["quick", "custom"/*, "ranked", "sandbox"*/]
 module.exports = {
   name: "balance",
   aliases: ["bal"],
-  gamerole: ["Zombie"],
   run: async (client, message, args, shared) => {
     message.content = `w!coins balance${` ${args.join(' ')}`}`
     require('./coins.js').run(client, message, undefined, Object.assign(shared, {commandName: "coins"}))

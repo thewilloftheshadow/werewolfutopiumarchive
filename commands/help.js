@@ -32,7 +32,7 @@ module.exports = {
           "Currency Commands",
           "`w!daily` | Get your daily rewards.\n" +
           "`w!balance [user]` | Get the balance of your wallet or other users.\n" +
-          "`w!rose <user>` | (WIP) Give roses to a player.\n" +
+          "`w!rose <user>` | Give roses to a player.\n" +
           "`w!use bouquet` | (WIP) Give roses to everyone in the game.\n"
         )
         .addField(

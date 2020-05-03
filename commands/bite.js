@@ -60,6 +60,15 @@ module.exports = {
       nicknames.get(targetPlayer.id)}** to be zombified!`
     )
     
+    fn.addLog(
+      game,
+      `[ACTION] Zombie ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} chose to bite ${
+        targetPlayer.role
+      } ${
+        targetPlayer.number
+      } ${nicknames.get(targetPlayer.id)} so that they could be zombified.`
+    )
+    
     QuickGames[index] = game
 
     games.set("quick", QuickGames)

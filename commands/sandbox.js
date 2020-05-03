@@ -80,6 +80,7 @@ module.exports = {
         .setAuthor(`${nicknames.get(message.author.id).replace(/\\_/g, "_")} joined the game.`, message.author.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))         
         .addField(`Current Players [${currentGame.players.length}]`, currentGame.players.map(player => nicknames.get(player.id)).join("\n"))
     )
+    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)
     
     games.set("quick", Games)
     players.set(`${message.author.id}.currentGame`, currentGame.gameID)

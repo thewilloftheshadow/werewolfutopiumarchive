@@ -80,7 +80,7 @@ module.exports = {
                 
         fn.addLog(
           game,
-          `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} gave a card to ${
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} gave a card to ${
           targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
         )
       }

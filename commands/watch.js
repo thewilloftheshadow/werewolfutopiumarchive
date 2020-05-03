@@ -50,6 +50,16 @@ module.exports = {
     )
     
     gamePlayer.usedAbilityTonight = target
+    
+    fn.addLog(
+      game,
+      `[ACTION] Sheriff ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to watch ${
+        targetPlayer.role
+      } ${
+        targetPlayer.number
+      } ${nicknames.get(targetPlayer.id)}.`
+    )
+    
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

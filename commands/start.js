@@ -35,6 +35,8 @@ module.exports = {
       `**${nicknames.get(message.author.id)}** voted to start! (${votes.length}/${game.players.length})\n` +
       "Do \`w!start\` if you want the game to start."
     )
+    fn.addLog(game, `${nicknames.get(message.author.id)} voted to start! (${votes.length}/${game.players.length})\n`)
+    
     
     games.set("quick", QuickGames)
     

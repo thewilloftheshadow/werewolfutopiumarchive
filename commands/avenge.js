@@ -61,7 +61,7 @@ module.exports = {
                 
     fn.addLog(
       game,
-      `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to avenge on ${
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to avenge on ${
       targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) when they die.`
     )
     

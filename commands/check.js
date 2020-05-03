@@ -75,7 +75,7 @@ module.exports = {
                 
       fn.addLog(
         game,
-        `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} wanted to see if the spirits of ${
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} wanted to see the spirits of ${
         targetPlayerA.number} ${nicknames.get(targetPlayerA.id)} (${targetPlayerA.role}) and ${
         targetPlayerB.number} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role}).`
       )
@@ -145,7 +145,7 @@ module.exports = {
                 
         fn.addLog(
           game,
-          `${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} gave a card to ${
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} checked the aura of ${
           targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
         )
       } else {

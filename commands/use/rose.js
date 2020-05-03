@@ -41,7 +41,7 @@ module.exports = {
       new Discord.MessageEmbed()
       .setTitle("Roses for you")
       .setDescription(
-        `You were given a rose by ${r}!`
+        `You were given a rose by ${nicknames.get(message.author.id)}!`
       )
       .setThumbnail(fn.getEmoji(client, "Rose").url)
     )

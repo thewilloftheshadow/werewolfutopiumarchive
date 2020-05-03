@@ -465,12 +465,12 @@ module.exports = {
     fn.addLog(currentGame, `-divider2-`)
     fn.addLog(
       currentGame,
-      `**Time:** Night ${currentGame.config.nightTime}s / Day ${currentGame.config.dayTime}s / Voting ${currentGame.config.votingTime}s\n` +
-        `**Death Reveal:** ${currentGame.config.deathReveal}\n` +
-        `**Talismans:** ${
+      `Time: Night ${currentGame.config.nightTime}s / Day ${currentGame.config.dayTime}s / Voting ${currentGame.config.votingTime}s\n` +
+        `Death Reveal: ${currentGame.config.deathReveal}\n` +
+        `Talismans: ${
           currentGame.config.talismans ? "Enabled" : "Disabled"
         }\n` +
-        `**Private:** ${currentGame.config.private}`
+        `Private: ${currentGame.config.private}`
     )
     fn.addLog(currentGame, `-divider-`)
     fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)

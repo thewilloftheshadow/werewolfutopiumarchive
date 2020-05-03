@@ -60,6 +60,8 @@ client.once('ready', async () => {
             "The bot has finished rebooting. Enjoy your game!"
           )
       )
+      fn.addLog(game, "Restart complete")
+      fn.addLog(game, "-divider-")
     })
     temp.delete("gamealert")
   }

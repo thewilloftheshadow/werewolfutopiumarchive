@@ -1,0 +1,19 @@
+<!DOCTYPE html> 
+<html
+  <head>
+    <title>Log: <%- id %></title>
+    <link rel="stylesheet" href="../log.css">
+  </head>
+  <body>
+    <pre>
+      <%_ let prevTimestamp -%>
+      <%_ logs.forEach(line => { -%>
+        <%_ if (!line.length) return; -%>
+        <%_ if (line.length > 150) line = line.substring(0, 150) + "\n                      " + line.substring(150) -%>
+        <%_ if (line.includes("|")) prevTimestamp = line.split(" | ")[0] -%>
+        <%_ let stripTime = line.replace(/\d{4}(\/\d{2}){2} \d{2}(\:\d{2}){2} \|\s*/gi, "") -%>
+<%- line.includes("|") ? line.split(" | ")[0] : prevTimestamp -%> | <span class="<%- stripTime.match(/^(\s*at.*?\(.*?\)|\[error\]|error\:)/i) ? 'error' : stripTime.match(/^(Game is starting|The sun is rising|(Voting for )?(Night|Day) \d+ has started.)/i) ? 'phase' : stripTime.match(/^[^\s]*? joined the game./i) ? 'join' : stripTime.match(/^[^\s]*? left the game./i) ? 'leave' : stripTime.match(/^\[action\]/i) ? 'action' : "" -%>"><%- line.includes("|") ? line.split(" | ")[1] : line -%></span>
+      <%_ }) -%>
+    </pre>
+  </body>
+</html>

@@ -66,6 +66,13 @@ module.exports = {
     
     game.players[gamePlayer.number-1].usedAbilityTonight = true
     
+    fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} checked to see if ${
+        targetPlayerA.number} ${nicknames.get(targetPlayerA.id)} (${targetPlayerA.role}) and ${
+        targetPlayerB.number} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role}) were on the same team.`
+      )
+    
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

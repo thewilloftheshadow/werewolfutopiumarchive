@@ -463,12 +463,18 @@ const death = (client, game, killed, suicide = false) => {
   return game
 }
 
-const createTalisman = async (client, role) => {
+const createTalisman = async (client, role, level) => {
   if(typeof role == "string") role = Object.values(roles).find(data => data.name.toLowerCase().startsWith(role.toLowerCase()) || (data.abbr && data.abbr.includes(role.toLowerCase())))
   if (!role) return undefined
   const canvas = Canvas.createCanvas(128, 128);
   const ctx = canvas.getContext('2d');
-  const background = await Canvas.loadImage(getEmoji(client, "Talisman").url)
+  if(!level) level = ""
+  if(typeof level != "number") level = parseInt(level, 10)
+  if(level == 1 || level < 15) level = 1
+  if(level == 2 || level <= 20) level = 2
+  if(level == 3 || level <= 25) level = 3
+  if(level == 4 || level <= 30) level = 4
+  const background = await Canvas.loadImage(getEmoji(client, `Talisman${level == 1 ? "" : `_${level}`}`).url)
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   
   const icon = await Canvas.loadImage(getEmoji(client, role.name).url+"?size=64");
@@ -498,30 +504,29 @@ const randomString = (len) => {
   return buf.join('');
 };
 
-const addLog = (game, msg) => {
-  if(typeof game === "object") game = game.gameID
-  if(typeof game === "number") game = game.toString()
-  if(!typeof game === "string") throw new TypeError('First parameter must be a game object or game ID')
+const addLog = (logid, msg) => {
+  if(typeof logid === "object") logid = logid.gameID
+  if(typeof logid === "number") logid = logid.toString()
+  if(!typeof logid === "string") throw new TypeError('First parameter must be a game object or log ID')
   if(!typeof msg === "string") msg = msg.toString()
   if(msg === "-divider-") msg = "=============================="
   if(msg === "-divider2-") msg = "------------------------------"
   msg = `${time()} | ` + msg
   msg = msg.replace(/\\/g,"")
   msg = msg.replace(/\n/g,`\n${time()} | `)
-  logs.push(game, msg)
+  logs.push(logid, msg)
 }
 
-const writeLogs = (game) => {
-  if(typeof game === "object") game = game.gameID
-  if(typeof game === "number") game = game.toString()
-  if(!typeof game === "string") throw new TypeError('First parameter must be a game object or game ID')
-  if(!game) return
-  let gamelog = logs.get(game)
-  if(!gamelog) return false
-  fs.appendFile('/app/logs/' + game + ".log", gamelog.join("\n")+"\n", (err) => {
+const writeLogs = (logid) => {
+  if(typeof logid === "object") logid = logid.gameID
+  if(typeof logid === "number") logid = logid.toString()
+  if(!typeof logid === "string") throw new TypeError('First parameter must be a game object or game ID')
+  if(!logid) return
+  let fulllog = logs.get(logid)
+  if(!fulllog) return false
+  fs.appendFile('/app/logs/' + logid + ".log", fulllog.join("\n")+"\n", (err) => {
     if (err) throw err;
-    console.log('The log has been written to the file!');
-    logs.delete(game)
+    logs.delete(logid)
   });
 }
 

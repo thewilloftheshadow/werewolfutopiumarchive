@@ -32,6 +32,9 @@ module.exports = {
         if (!args[0]) return await message.author.send("Please select a player, or choose `cancel` to remove your vote!")
         if (args[0].toLowerCase() == "cancel") {
           gamePlayer.vote = null
+          fn.addLog(
+            game,
+            `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} withdrew their vote.`)
           return await message.author.send("You have withdrawn your vote.")
         }
         
@@ -65,6 +68,12 @@ module.exports = {
               : ""
           }.`
         )
+        fn.addLog(
+          game,
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to kill ${
+          nicknames.get(game.players[vote - 1].id)
+          }${game.players[vote - 1].role}.`)
+        
         gamePlayer.killedTonight = true
       } else 
         return await message.author.send("You cannot vote at night!")
@@ -124,6 +133,12 @@ module.exports = {
               : ""
           }**.`
         )
+      
+      fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to lynch ${
+        nicknames.get(game.players[vote - 1].id)
+        }${game.players[vote - 1].role}.`)
     }
     QuickGames[index] = game
     

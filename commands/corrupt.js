@@ -53,6 +53,12 @@ module.exports = {
       } You selected to corrupt **${target} ${nicknames.get(targetPlayer.id)}**.`
     )
     
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to corrupt ${
+      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+    )
+    
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

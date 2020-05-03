@@ -44,6 +44,11 @@ module.exports = {
     
     gamePlayer.abil1 -= 1
     
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} activated frenzy night.`
+    )
+    
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

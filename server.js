@@ -116,7 +116,6 @@ app.set('view engine', 'ejs');
 app.use(function (req, res, next) {
   if(req.user) authdb.set(req.user.id, req.user) // Store all user info
   if(req.user && !req.cookies.rememberme){ //logged in but no rm cookie
-    console.log(req.cookies)
     let token = issueToken(req.user)
     res.clearCookie('remember-me');
     res.cookie('rememberme', token, {secure: true, httpOnly: true, maxAge: 604800000})
@@ -136,25 +135,37 @@ app.use(function (req, res, next) {
 module.exports = client => {
   client.on("ready", async () => {    
       app.get("*", (req, res) => {
-        try { //redirect to custom domain
+        try {
+          //redirect to custom domain
           if (req.hostname.includes("werewolf-utopium.glitch.me")) {
             res.redirect("https://werewolf-utopium.tk" + req.url)
           } else {
             req.next()
           }
         } catch (e) {}
-        
-        if(req.user){
+        if (req.user) {
           req.user.viewLogs = false
-          let member = client.guilds.cache.get(config.support).members.cache.get(req.user.id)
-          if(member && member.roles.cache.find(r => ["Developer", "Bot Helper", "βTester Helper", "Moderator", "Mini Moderator", "Helper"].includes(r.name))){
+          if (
+            client.guilds.cache
+              .get("522638136635817986")
+              .members.cache.get(req.user.id)
+              .roles.cache.find(r =>
+                [
+                  "*",
+                  "βTester Helper",
+                  "Mini Moderator",
+                  "Moderator",
+                  "Bot Helper",
+                  "Developer"
+                ].includes(r.name)
+              )
+          )
             req.user.viewLogs = true
-          }
         }
       })
     
     app.get("/", (req, res) => {
-      let pass = { user: null, player: null }
+      let pass = { user: null, player: null, path: req.path }
       if (req.user) {
         req.user.nickname = nicknames.get(req.user.id) || null
         pass.user = req.user
@@ -169,7 +180,7 @@ module.exports = client => {
     })
     
     app.get("/profile/:id", (req, res) => {
-      let pass = { user: null, player: null}
+      let pass = { user: null, player: null, path: req.path }
       if (req.user) {
         pass.user = req.user
         pass.nickname = nicknames.get(req.user.id) || null
@@ -197,21 +208,23 @@ module.exports = client => {
       res.render(__dirname + "/views/profile.ejs", pass)
     })
     
-    app.get("/register", (request, response) => {
-      response.redirect("https://discordapp.com/register")
+    app.get("/register", (req, res) => {
+      res.redirect("https://discordapp.com/register")
     })
     
-    app.get("/login", (request, response) => {
-      response.redirect("/auth/discord")
+    app.get("/login", (req, res) => {
+      let state = fn.randomString(64)
+      authdb.set("state."+state, req.query.return ? decodeURI(req.query.return) : "/")
+      res.redirect("/auth/discord?state="+state)
     })
     
     app.get("/invite", (req, res) => {
       res.redirect("https://discord.gg/M62npYk")
     })
     
-    app.get("/auth/discord", (request, response) => {
-      response.redirect(
-        "https://discordapp.com/oauth2/authorize?response_type=code&redirect_uri=https%3A%2F%2Fwerewolf-utopium.tk%2Fauth%2Fcallback&scope=identify%20guilds&client_id=657960787993690122&prompt=none"
+    app.get("/auth/discord", (req, res) => {
+      res.redirect(
+        "https://discordapp.com/oauth2/authorize?response_type=code&redirect_uri=https%3A%2F%2Fwerewolf-utopium.tk%2Fauth%2Fcallback&scope=identify%20guilds&client_id=657960787993690122&prompt=none&state=" + req.query.state
       )
     })
     
@@ -221,6 +234,10 @@ module.exports = client => {
         failureRedirect: "/"
       }),
       (req, res) => {
+        console.log(req.query.state)
+        let goto = authdb.get("state."+req.query.state)
+        console.log(goto)
+        if(goto) return res.redirect("../"+goto.replace("./", "").replace("/", ""))
         res.redirect(`/`) // Successful auth
       }
     )
@@ -233,29 +250,37 @@ module.exports = client => {
     
     app.get("/info", checkAuth, (req, res) => {
       console.log(req.user)
-      res.sendStatus(200)
+      if (["336389636878368770","658481926213992498","439223656200273932","529121242716831748"].includes(req.user.id)){
+        res.json(req.user)
+      } else {
+        res.sendStatus(200)
+      }
     })
     
     app.get("/json.sqlite", checkAuth, devonly, async(req, res) => {
       res.sendFile("/app/json.sqlite")
     })
     
-    // app.get("/log", checkAuth, devonly, async (req, res) => {
-    //   let files = fs.readdirSync('/app/logs').filter(file => file.endsWith('.log'))
-    //   res.send(
-    //     '<div style="font-family:\"Lucida Console\", Monaco, monospace">' +
-    //     files.map(x => `<a href="/log/${x.replace(/\.log/g, "")}">${x.replace(/\.log/g, "")}</a>`).join('\n') +
-    //     '</div>'
-    //   )
-    // })
   
-    app.get("/log/:id", checkAuth, devonly, async (req, res) => {
+    app.get("/oldlog/:id", checkAuth, viewLogs, async (req, res) => {
+      if(!req.user.viewLogs) res.redirect("/")
       let file = "/app/logs/" + req.params.id + ".log"
       if (fs.existsSync(file)) {
         res.sendFile(file)
       } else {
-        res.status(404).send('No log for that game ID was found.')
+        res.status(404).send('No logs with that ID were found.')
       }
+    })
+        
+    app.get("/log/:id", checkAuth, viewLogs, async (req, res) => {
+      let files = fs.readdirSync('/app/logs')
+      let file = files.find(f => f.toLowerCase() == `${req.params.id.toLowerCase()}.log`)
+      if (!file) return res.status(404).send('No logs with that ID were found.')
+      if (file != `${req.params.id}.log`) res.redirect(`/log/${file.substring(0, file.length-4)}`)
+      let fulllog = fs.readFileSync(`/app/logs/${file}`, "utf8")
+      // console.log(fulllog)
+      let logs = fulllog.split("\n")
+      res.render(__dirname + "/views/log.ejs", {logs: logs, id: req.params.id})
     })
     
     app.get("/restart", checkAuth, devonly, async(req, res) => {
@@ -292,7 +317,7 @@ module.exports = client => {
     }
 
     app.get("/roles", async (req, res) => {
-      let pass = { user: null }
+      let pass = { user: null, path: req.path }
       if (req.user) {
         pass.user = req.user
         pass.nickname = nicknames.get(req.user.id) || null
@@ -308,10 +333,29 @@ module.exports = client => {
 
     function checkAuth(req, res, next) {
       if (req.user) return next()
-      res.redirect("/login")
+      res.redirect("/login?return="+encodeURI(req.path))
     }
     function devonly(req, res, next) {
       if (!["336389636878368770","658481926213992498","439223656200273932","529121242716831748"].includes(req.user.id)) res.redirect("/")
+      next()
+    }
+    function viewLogs(req, res, next) {
+      if (
+        !client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(req.user.id)
+          .roles.cache.find(r =>
+            [
+              "*",
+              "βTester Helper",
+              "Mini Moderator",
+              "Moderator",
+              "Bot Helper",
+              "Developer"
+            ].includes(r.name)
+          )
+      )
+        res.redirect("/")
       next()
     }
     

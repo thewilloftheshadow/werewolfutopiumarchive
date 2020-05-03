@@ -49,12 +49,12 @@ module.exports = {
     
     gamePlayer.usedAbilityTonight = targetPlayer.number
     message.author.send(
-      `<:Red_Lady_LoveLetter:674854554369785857> You decided to visit **${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** tonight.`
+      `${fn.getEmoji(client, "Red_Lady_LoveLetter")} You decided to visit **${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** tonight.`
     )
 
     fn.addLog(
       game,
-      `Red Lady ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to visit ${
+      `[ACTION] Red Lady ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to visit ${
         targetPlayer.role
       } ${
         targetPlayer.number

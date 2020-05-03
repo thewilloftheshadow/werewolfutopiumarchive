@@ -194,8 +194,6 @@ module.exports = async (client, game) => { try {
         )
     )
   }
-  fn.addLog(game, "-divider-")
-  fn.addLog(game, "Night 1 has started.")
   
   // await fn.broadcastTo(
   //   client, game.players.filter(p => !p.left),
@@ -203,6 +201,9 @@ module.exports = async (client, game) => { try {
   //     .setTitle("Night 1 has started.")
   //     .setThumbnail(fn.getEmoji(client, "Night").url)
   // )
+  
+  fn.addLog(game, "-divider-")
+  fn.addLog(game, "Night 1 has started.")
   
   game.roles = game.players.map(p => p.role)
   game.currentPhase = 0
@@ -252,6 +253,8 @@ module.exports = async (client, game) => { try {
         }\`\`\``
       )
   )
+  fn.addLog(game, `Game was terminated at \`start the game\`.`)
+  fn.addLog(game, `[ERROR] ${error.stack.replace(/ {4}/g, "            ")}`)
   
   game.currentPhase = 999
   // fn.addXP(game.players, 15)
