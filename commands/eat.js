@@ -59,6 +59,14 @@ module.exports = {
     message.author.send(
     	`${fn.getEmoji(client, "Cannibal Eat")} You decided to eat ${yummyHumans.map(x => `**${x.number} ${nicknames.get(x.id)}**`).join(', ')}!`
     )
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} decided to eat ${yummyHumans
+        .map(x => `${x.number} ${nicknames.get(x.id)} (${x.role})`)
+        .join(", ")}.`
+    )
     
     gamePlayer.usedAbilityTonight = yummyHumans.map(x => x.number)
     

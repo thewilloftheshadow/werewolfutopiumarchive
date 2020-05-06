@@ -56,6 +56,14 @@ module.exports = {
         }**.`
       )
     }
+    
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} has killed the disguised ${disguised.map(x => `${x.number} ${nicknames.get(x.id)} (${x.role})`).join(", ")}.`
+    )
+    
     game = fn.death(client, game, disguised.map(x => x.number))
 
     QuickGames[index] = game

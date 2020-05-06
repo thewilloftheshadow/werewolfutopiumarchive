@@ -6,7 +6,7 @@ const config = require('/app/util/config'),
 
 module.exports = {
   name: "ping",
-  aliases: ["pong", "whomstdve", "status"],
+  aliases: ["pong", "whomstdve", "status", "poing"],
   run: async (client, message, args, shared) => {    
     let m = await message.channel.send("Pinging...")
     

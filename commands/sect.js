@@ -61,6 +61,12 @@ module.exports = {
       nicknames.get(targetPlayer.id)}** to be turned into your sect!`
     )
     
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected ${
+      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) to be turned into their sect.`
+    )
+    
     QuickGames[index] = game
 
     games.set("quick", QuickGames)

@@ -58,6 +58,12 @@ module.exports = {
         nicknames.get(game.players[target - 1].id)
       }** to be muted the next day.`
     )
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} selected ${targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) to be muted the next day.`
+    )
     
     QuickGames[index] = game
     

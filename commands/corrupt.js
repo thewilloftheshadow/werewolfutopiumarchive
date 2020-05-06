@@ -55,7 +55,7 @@ module.exports = {
     
     fn.addLog(
       game,
-      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to corrupt ${
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to corrupt ${
       targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
     )
     

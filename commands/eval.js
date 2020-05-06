@@ -8,7 +8,8 @@ const games = new db.table("Games"),
       nicknames = new db.table("Nicknames"),
       temp = new db.table("Temp"),
       authdb = new db.table("authdb"),
-      logs = new db.table("Logs")
+      logs = new db.table("Logs"),
+      api = new db.table("api")
 
 const config = require('/app/util/config'),
       fn = require('/app/util/fn'),
@@ -29,6 +30,7 @@ module.exports = {
         .members.cache.get(message.author.id)
         .roles.cache.find(r =>
           [
+            "*",
             "Bot Helper",
             "Developer"
           ].includes(r.name)

@@ -54,7 +54,13 @@ module.exports = {
     gamePlayer.nmtarget = targetPlayer.number
     
     message.author.send(
-      `<:Nightmare:660735617428226050> You have selected **${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** to give a nightmare the next night!`
+      `<:Nightmare:660735617428226050> You have selected **${targetPlayer.number} ${nicknames.get(targetPlayer.id)}** to have a nightmare on the next night!`
+    )
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} selected  (${targetPlayer.role})${targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) to have a nightmare on the next night.`
     )
     
     gamePlayer.abil1 -= 1

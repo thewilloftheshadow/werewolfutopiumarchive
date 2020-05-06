@@ -35,40 +35,54 @@ module.exports = {
     if (!thatPlayer)
       return await message.channel.send(`${fn.getEmoji(client, "red_tick")} Target not found.`)
     
-    
     let am = parseInt(args[args.length - 1], 10)
     if (!Number.isNaN(am)) args.pop()
     else am = 1
-    let input = args.slice(1).join(" "),
-        item = shop[input]
-    if(!item) return message.channel.send(`${fn.getEmoji(client, "red_tick")} Invalid item.`)
     
-    players.add(`${targetPlayer.id}.inventory.${item.itemid}`, am)
+    let targetRole = args.slice(1).join(' ')
+    let role = Object.values(roles).find(
+      data =>
+      data.name.toLowerCase().startsWith(targetRole.toLowerCase()) ||
+      (data.abbr && data.abbr.includes(targetRole.toLowerCase()))
+    )
+    
+    if (!role) return await message.channel.send("Unknown role.")
+    if (role.name == "Accomplice")
+      return await message.react(fn.getEmoji(client, "harold"))
+    
+    players.add(`${targetPlayer.id}.inventory.talisman.${role.name}`, am)
+    let talisman = await fn.createTalisman(client, role.name)
     
     
     await message.channel.send(
       new Discord.MessageEmbed()
-        .setTitle(`New item!`)
+        .setTitle(`New talisman!`)
         .setDescription(
-          `Successfully given ${am} ${item.name}(s) to ${nicknames.get(targetPlayer.id)}\n` +
-          `${nicknames.get(targetPlayer.id)} now has ${players.get(`${targetPlayer.id}.inventory.${item.itemid}`)} ${item.name}(s).`
+          `Successfully given ${am} ${role.name} talisman(s) to ${nicknames.get(targetPlayer.id)}\n` +
+          `${nicknames.get(targetPlayer.id)} now has ${players.get(`${targetPlayer.id}.inventory.talisman.${role.name}`)} ${role.name} talisman(s).`
         )
+      .attachFiles([talisman])
+      .setThumbnail(`attachment://${talisman.name}`)
     )
     await targetPlayer.send(
       new Discord.MessageEmbed()
-        .setTitle("New item!")
+        .setTitle("New talisman!")
         .setDescription(
-          `${nicknames.get(message.author.id)} added ${am} ${item.name}(s) to your inventory\n` +
-          `You now have ${players.get(`${targetPlayer.id}.inventory.${item.itemid}`)} ${item.name}(s).`
+          `${nicknames.get(message.author.id)} added ${am} ${role.name} talisman(s) to your inventory\n` +
+          `You now have ${players.get(`${targetPlayer.id}.inventory.talisman.${role.name}`)} ${role.name} talisman(s).`
         )
+      .attachFiles([talisman])
+      .setThumbnail(`attachment://${talisman.name}`)
     )
     await client.channels.cache.get("694656469232123965").send(
       new Discord.MessageEmbed()
-        .setTitle("New item!")
+        .setTitle("New talisman!")
         .setDescription(
-          `${nicknames.get(message.author.id)} added ${am} ${item.name}(s) to ${nicknames.get(targetPlayer.id)}'s inventory\n` +
-          `They now have ${players.get(`${targetPlayer.id}.inventory.${item.itemid}`)} ${item.name}(s).`
+          `${nicknames.get(message.author.id)} added ${am} ${role.name} talisman(s) to ${nicknames.get(targetPlayer.id)}'s inventory\n` +
+          `They now have ${players.get(`${targetPlayer.id}.inventory.talisman.${role.name}`)} ${role.name} talisman(s).`
         )
+      .attachFiles([talisman])
+      .setThumbnail(`attachment://${talisman.name}`)
     )
   }
 }

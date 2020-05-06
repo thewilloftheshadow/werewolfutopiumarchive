@@ -20,7 +20,7 @@ module.exports = {
   name: "sandbox",
   aliases: ["sb"],
   run: async (client, message, args, shared) => {
-    return;
+    return message.author.send("Sandbox games aren't avaliable to play yet!")
     if (!games.get("count")) games.set("count", 0)
     if (!games.get("quick")) games.set("quick", [])
     let Games = games.get("quick")

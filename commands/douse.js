@@ -76,8 +76,17 @@ module.exports = {
         .setTitle(`Doused Players`)
         .setThumbnail(fn.getEmoji(client, "Arsonist Doused").url)
         .setDescription(
-          `You have doused ${successfulDouses.map(x => `**${x.number} ${nicknames.get(x.id)}**`).join(' and ')}!`
+          `You chose to douse ${successfulDouses.map(x => `**${x.number} ${nicknames.get(x.id)}**`).join(' and ')}!`
         )
+    )
+    
+    fn.addLog(
+      game,
+      `[ACTION] Arsonist ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} chose to douse ${successfulDouses
+        .map(x => `${x.number} ${nicknames.get(x.id)} (${x.role})`)
+        .join(" and ")}.`
     )
     
     gamePlayer.usedAbilityTonight = successfulDouses.map(x => x.number)

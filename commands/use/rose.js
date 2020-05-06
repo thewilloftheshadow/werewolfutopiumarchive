@@ -47,6 +47,6 @@ module.exports = {
     )
     await message.channel.send(`Success! You've given a ${fn.getEmoji(client, "Rose")} rose to ${nicknames.get(r.id)}!`)
     players.add(r.id+".roses", 1)
-    players.set(message.author.id+"inventory.rose", 1)
+    players.subtract(message.author.id+".inventory.rose", 1)
   }
 }

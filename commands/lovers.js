@@ -54,6 +54,12 @@ module.exports = {
         .setThumbnail(fn.getEmoji(client, "Cupid Lovers").url)
         .setDescription(`You have selected **${targetA} ${nicknames.get(targetPlayerA.id)})** and **${targetB} ${nicknames.get(targetPlayerB.id)})**`)
     )
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} selected ${targetA} ${nicknames.get(targetPlayerA.id)}) (${targetPlayerA.role}) and ${targetB} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role}) to be lovers.`
+    )
     
     QuickGames[index] = game
     

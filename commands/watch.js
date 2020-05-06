@@ -54,10 +54,10 @@ module.exports = {
     fn.addLog(
       game,
       `[ACTION] Sheriff ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} decided to watch ${
-        targetPlayer.role
-      } ${
         targetPlayer.number
-      } ${nicknames.get(targetPlayer.id)}.`
+      } ${nicknames.get(targetPlayer.id)} (${
+        targetPlayer.role
+      }).`
     )
     
     QuickGames[index] = game

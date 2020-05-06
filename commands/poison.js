@@ -57,8 +57,15 @@ module.exports = {
     
     fn.broadcastTo(
       client, game.players.filter(p => !p.left).map(p => p.id), 
-      `<:Witch_Poison:660667541185626112> Witch poisoned **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""})**.`)
-    
+      `${fn.getEmoji(client, "Witch_Poison")} Witch poisoned **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""})**.`)
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} poisoned ${target} ${nicknames.get(
+        targetPlayer.id
+      )} (${targetPlayer.role}).`
+    )
     if (game.config.deathReveal) targetPlayer.roleRevealed = targetPlayer.role
     gamePlayer.abil2 = 0
     game.lastDeath = game.currentPhase

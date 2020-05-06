@@ -57,9 +57,14 @@ module.exports = {
       }**.`
     )
     
-    fn.addLog(game, `Serial Killer ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to stab ${targetPlayer.number} ${
-        nicknames.get(targetPlayer.id)
-      } (${targetPlayer.role}).`)
+    fn.addLog(
+      game,
+      `[ACTION] Serial Killer ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} decided to stab ${targetPlayer.number} ${nicknames.get(
+        targetPlayer.id
+      )} (${targetPlayer.role}) tonight.`
+    )
     
     QuickGames[index] = game
     

@@ -33,7 +33,7 @@ module.exports = {
                   `${p.id == message.author.id ? "**" : ""}${
                     p.number
                   } ${nicknames.get(p.id)}${
-                    p.alive ? "" : " <:Death:668750728650555402>"
+                    p.alive ? "" : ` ${fn.getEmoji(client, "Death")}`
                   }${
                     p.id == message.author.id
                       ? ` ${fn.getEmoji(client, p.role)}`
@@ -69,6 +69,7 @@ module.exports = {
             .map(r => `${fn.getEmoji(client, r)} ${r}`)
             .join("\n")
         )
+      
     )
   }
 }

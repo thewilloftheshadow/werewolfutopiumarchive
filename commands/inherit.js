@@ -42,6 +42,14 @@ module.exports = {
       `${fn.getEmoji(client, "Doppelganger")} You selected to inherit **${targetPlayer.number} ${
       nicknames.get(targetPlayer.id)}**'s role when they die!`
     )
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} selected to inherit ${target} ${nicknames.get(
+        game.players[target - 1].id
+      )}'s role (${targetPlayer.role}).`
+    )
     
     gamePlayer.selected = targetPlayer.number
     

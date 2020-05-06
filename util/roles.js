@@ -8,7 +8,7 @@ let roles = {
     desc: "You are a regular villager without any special abilities.",
     aura: "Good",
     team: "Village",
-    abbr: ["reg","vil","vill","forkman","forkmen"],
+    abbr: ["reg","vil","vill","forkman","forkmen","forkmannnnnnnnnnnnnnnnnnnnn"],
     cat : "Regular Villager",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
@@ -329,7 +329,7 @@ let roles = {
     nite: "Select a player to watch (`w!watch [player]`).",
     cgp : "25r",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
   "Spirit Seer": {
   	desc: "Each night you can select two players." +
@@ -573,7 +573,8 @@ let roles = {
     cat : "Voting",
     nite: "Select a number of players to collect their souls (`w!collect [player] ...`).",
     tag : tags.ROLE.SOLO_VOTING | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWOWC_ROLE | tags.ROLE.AVAILABLE | tags.ROLE.ONE_ONLY
+          tags.ROLE.WWOWC_ROLE | tags.ROLE.AVAILABLE | tags.ROLE.ONE_ONLY,
+    wrt : "516508877194395649"
   },
   
   // Solo killing roles
@@ -727,18 +728,18 @@ let roles = {
   },
   "Random Regular Villager": {
     desc: "One of: Villager, Aura Seer, Avenger, Beast Hunter, Bodyguard, Doctor, Flower Child," +
-          " Fortune Teller, Grumpy Grandma, Marksman, Pacifist, Priest, Red Lady," +
+          " Grumpy Grandma, Marksman, Pacifist, Priest, Red Lady," +
           " Seer Apprentice, Sheriff, Spirit Seer, Tough Guy, Villager or Witch",
     abbr: ["rrv"],
     cat : "Random",
-    tag : tags.ROLE.TO_BE_TESTED,
+    tag : tags.ROLE.AVAILABLE,
     cgp : "250c",
   },
   "Random Strong Villager": {
-    desc: "One of: Detective, Gunner, Jailer, Medium or Seer",
+    desc: "One of: Detective, Forger, Fortune Teller, Gunner, Jailer, Medium or Seer",
     abbr: ["rsv"],
     cat : "Random",
-    tag : tags.ROLE.TO_BE_TESTED,
+    tag : tags.ROLE.AVAILABLE,
     cgp : "250c",
   },
   "Random Werewolf": {
@@ -746,7 +747,7 @@ let roles = {
           "Kitten Wolf, Nightmare Werewolf, Werewolf Berserk, Wolf Seer, Wolf Shaman",
     abbr: ["rw"],
     cat : "Random",
-    tag : tags.ROLE.TO_BE_TESTED,
+    tag : tags.ROLE.AVAILABLE,
     cgp : "250c",
   },
   "Random Voting": {
@@ -779,7 +780,8 @@ let roles = {
     aura: "Unknown",
     team: "Village",
     nit1: "Select a player to take their role after they die (`w!inherit [player]`).",
-    tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.TO_BE_TESTED
+    tag : tags.ROLE.SEEN_AS_VILLAGER | tags.ROLE.WWC_ROLE | tags.ROLE.AVAILABLE,
+    wrt : "358980322047688704"
   },
   "Drunk": {
     desc: "You are a regular villager, but you can't speak properly becuase you are drunk. You can still place a vote during the voting session.",

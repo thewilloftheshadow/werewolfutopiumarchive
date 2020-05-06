@@ -42,13 +42,18 @@ module.exports = {
         return await message.author.send("The game is over! You can no longer use your actions.")
       
       await message.author.send(
-      `${fn.getEmoji(client, "Voting")} You selected **${
-        targetPlayer.number
-      } ${nicknames.get(targetPlayer.id)}** to be revealed when you die.`
+        `${fn.getEmoji(client, "Voting")} You selected **${
+          targetPlayer.number
+        } ${nicknames.get(targetPlayer.id)}** to be revealed when you die.`
+      )
+    
+      fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to reveal ${
+        targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) when they die.`
       )
       
       gamePlayer.selected = targetPlayer.number
-    
     }
     else if (gamePlayer.role.includes("Pacifist") && args.length) {
       if (!gamePlayer.alive)
@@ -91,6 +96,12 @@ module.exports = {
       gamePlayer.abil1 -= 1
       targetPlayer.roleRevealed = targetPlayer.role
       targetPlayer.paciRevealed = true
+    
+      fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} revealed ${
+        targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) and prevented voting on that day.`
+      )
       game.noVoting = true
     }
     else if (gamePlayer.role == "Mayor" && args[0].toLowerCase() == "mayor") {
@@ -112,6 +123,11 @@ module.exports = {
       )
     
       gamePlayer.roleRevealed = "Mayor"
+    
+      fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} revealed themselves and got double votes.`
+      )
     }
     else if (game.players.find(p => p.cards && p.cards.includes(gamePlayer.number)) && args[0].toLowerCase() == "card") {
       if (!gamePlayer.alive)
@@ -138,6 +154,11 @@ module.exports = {
       
       gamePlayer.roleRevealed = gamePlayer.role
       gamePlayer.ftCard = 1
+    
+      fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} revealed themselves using a Fortune Teller's card.`
+      )
     }
     else return await message.author.send("Missing arguments.")
       

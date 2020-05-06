@@ -51,8 +51,8 @@ module.exports = {
     let targetPlayerA = game.players[targetA-1],
         targetPlayerB = game.players[targetB-1]
     
-    let roleA = roles[targetPlayerA.enchanted ? "Wolf Shaman" : targetPlayerA.disguised ? "Illusionist" : targetPlayerA.role], 
-        roleB = roles[targetPlayerB.enchanted ? "Wolf Shaman" : targetPlayerB.disguised ? "Illusionist" : targetPlayerB.role]
+    let roleA = roles[targetPlayerA.disguised ? "Illusionist" : targetPlayerA.enchanted ? "Wolf Shaman" : targetPlayerA.role], 
+        roleB = roles[targetPlayerB.disguised ? "Illusionist" : targetPlayerB.enchanted ? "Wolf Shaman" : targetPlayerB.role]
     
     message.author.send(
       new Discord.MessageEmbed()
@@ -67,11 +67,21 @@ module.exports = {
     game.players[gamePlayer.number-1].usedAbilityTonight = true
     
     fn.addLog(
-        game,
-        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} checked to see if ${
-        targetPlayerA.number} ${nicknames.get(targetPlayerA.id)} (${targetPlayerA.role}) and ${
-        targetPlayerB.number} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role}) were on the same team.`
-      )
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} checked to see if ${targetPlayerA.number} ${nicknames.get(
+        targetPlayerA.id
+      )} (${targetPlayerA.role}) and ${targetPlayerB.number} ${nicknames.get(
+        targetPlayerB.id
+      )} (${
+        targetPlayerB.role
+      }) were on the same team. It turns out they belong to ${
+        roleA.team == roleB.team && roleA.team !== "Solo"
+          ? "the same team"
+          : "different teams"
+      }`
+    )
     
     QuickGames[index] = game
     

@@ -45,8 +45,23 @@ module.exports = {
 
     gamePlayer.enchant = targetPlayer.number
     
-    message.author.send(`${fn.getEmoji(client, "Wolf Shaman Select")
-                        } You selected **${target} ${nicknames.get(game.players[target-1].id)}** to be enchanted at night.`)
+    message.author.send(
+      `${fn.getEmoji(
+        client,
+        "Wolf Shaman Select"
+      )} You selected **${target} ${nicknames.get(
+        game.players[target - 1].id
+      )}** to be enchanted at night.`
+    )
+    
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} selected ${target} ${nicknames.get(
+        targetPlayer.id
+      )} (${targetPlayer.role}) to be enchanted at night.`
+    )
     
     QuickGames[index] = game
     

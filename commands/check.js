@@ -146,13 +146,13 @@ module.exports = {
         fn.addLog(
           game,
           `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} checked the aura of ${
-          targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+          targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) and found that they were ${aura}.`
         )
       } else {
-        let role = gamePlayer.role !== "Wolf Seer" && game.players.find(pl => pl.enchant == targetPlayer.number)
-                     ? "Wolf Shaman"
-                     : targetPlayer.disguised
+        let role = targetPlayer.disguised
                      ? "Illusionist"
+                     : gamePlayer.role !== "Wolf Seer" && game.players.find(pl => pl.enchant == targetPlayer.number)
+                     ? "Wolf Shaman"
                      : targetPlayer.role
         
         message.author.send(
@@ -194,6 +194,11 @@ module.exports = {
                 : ""
             }`
           )
+        fn.addLog(
+          game,
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} checked ${
+          targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+        )
       }
       gamePlayer.usedAbilityTonight = true
     }

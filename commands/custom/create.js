@@ -212,7 +212,7 @@ module.exports = {
       messagesSince++
       if (inputRole.toLowerCase() == "back") {
         if (i == 0) {
-          await message.channel.send("uhhh wot?")
+          await message.author.send("uhhh wot?")
           i--
           continue;
         }
@@ -441,6 +441,68 @@ module.exports = {
       privateSuccess = true
     }
     
+    //INSTRUCTIONS
+    let instructions = null
+    while (!instructions) {
+      if (
+        currentGame.gameID.match(/^betatest\_.*?$/gi) ||
+        currentGame.gameID.match(/^devtest\_.*?$/gi)
+      ) {
+        let instructionPrompt = await message.author.send(
+          new Discord.MessageEmbed()
+            .setTitle("Custom Game Setup")
+            .setDescription(
+              `Would you like to add instructions to be displayed on Night 1?`
+            )
+        )
+
+        await instructionPrompt.react(fn.getEmoji(client, "green tick"))
+        await instructionPrompt.react(fn.getEmoji(client, "red tick"))
+        let pReactions = await instructionPrompt
+          .awaitReactions(
+            (r, u) =>
+              (r.emoji.id == fn.getEmoji(client, "green_tick").id ||
+                r.emoji.id == fn.getEmoji(client, "red_tick").id) &&
+              u.id == message.author.id,
+            { time: 30 * 1000, max: 1, errors: ["time"] }
+          )
+          .catch(() => {})
+        if (!pReactions)
+          return await message.author.send(
+            new Discord.MessageEmbed()
+              .setColor("RED")
+              .setTitle("Prompt timed out.")
+          )
+        let pReaction = pReactions.first().emoji
+        if (pReaction.id == fn.getEmoji(client, "green_tick").id) {
+          let instructionsmsg = await message.author.send(
+            new Discord.MessageEmbed()
+              .setTitle("Instructions")
+              .setDescription(`Send your instructions now!`)
+          )
+
+          let instructions = await instructionsmsg.channel
+            .awaitMessages(msg => msg.author.id == message.author.id, {
+              time: 120 * 1000,
+              max: 1,
+              errors: ["time"]
+            })
+            .catch(() => {})
+          if (!instructions)
+            return await message.author.send(
+              new Discord.MessageEmbed()
+                .setColor("RED")
+                .setTitle("Prompt timed out.")
+            )
+          instructions = instructions.first().content.split(" ")
+          currentGame.instructions = instructions
+        } else {
+          instructions = "No instructions provided"
+          currentGame.instructions = "No instructions provided"
+        }
+      } else break;
+    }
+    
     await message.author.send(
       new Discord.MessageEmbed()
         .setTitle('Created new Custom Game!')
@@ -454,7 +516,8 @@ module.exports = {
           `**Time:** Night ${currentGame.config.nightTime}s / Day ${currentGame.config.dayTime}s / Voting ${currentGame.config.votingTime}s\n` +
           `**Death Reveal:** ${currentGame.config.deathReveal}\n` +
           `**Talismans:** ${currentGame.config.talismans ? "Enabled" : "Disabled"}\n` +
-          `**Private:** ${currentGame.config.private}\n`
+          `**Private:** ${currentGame.config.private}\n` + 
+          `${currentGame.instructions ? `**Instructions:** true` : ""}`
         )
     )
     

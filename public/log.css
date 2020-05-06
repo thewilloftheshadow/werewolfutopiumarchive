@@ -4,10 +4,12 @@ body{
 pre {
   white-space: pre-wrap;
   color: white;
+  font-size: 15px;
 /*   padding: 1em; */
 }
 .error{
-  color: #FF0000;
+  background-color: #FF0000;
+  color: #FFFFFF;
 }
 .phase{
   color: #1dabff;
@@ -24,6 +26,6 @@ pre {
 .leave{
   color: #F04947;
 }
-.win{
+.result{
   color: #FDDD88;
 }

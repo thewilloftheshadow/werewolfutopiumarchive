@@ -13,12 +13,12 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "shop",
   run: async (client, message, args) => {
-    let embeds = [new Discord.MessageEmbed().setTitle("Werewolf Utopium Shop").setColor(0x7289da)]
+    let embeds = [new Discord.MessageEmbed().setTitle("Werewolf Utopium | Shop").setColor(0x7289da)]
     
     for (let shopitem in shop){
       let item = shop[shopitem]
       if (embeds[embeds.length-1].fields.length == 10)
-        embeds.push(new Discord.MessageEmbed().setTitle("Werewolf Utopium Shop").setColor(0x7289da))
+        embeds.push(new Discord.MessageEmbed().setTitle("Werewolf Utopium | Shop").setColor(0x7289da))
       // console.log(fn.getEmoji(client, (item.emoji ? item.emoji : item.name)))
       embeds[embeds.length - 1].addField(
         `${

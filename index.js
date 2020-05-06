@@ -6,7 +6,8 @@ const Discord = require('discord.js'),
       fs = require("fs"),
       moment = require('moment'),
       fetch = require('node-fetch'),
-      db = require("quick.db")
+      db = require("quick.db"),
+      os = require('os')
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
@@ -35,11 +36,14 @@ const token = process.env.DISCORD_BOT_TOKEN
 
 /* --- ALL GLOBAL CONSTANTS & FUNCTIONS --- */
 
-client.login(token)
+client.login(token).then(() => {
+  fn.addLog(`MAIN`, `Werewolf Utopium bot has logged in.`)
+})
 
 client.once('ready', async () => {
   client.allinvites = await client.guilds.cache.get("522638136635817986").fetchInvites()
   console.log(`${fn.time()} | ${client.user.username} is up!`)
+  fn.addLog(`MAIN`, `Werewolf Utopium bot is now ready.`)
   
   client.user.setPresence({ activity: { name: 'for Werewolf Simulation Games' , type: "WATCHING"}, status: 'idle' })
 
@@ -52,7 +56,8 @@ client.once('ready', async () => {
     let activeGames = Games.filter(game => game.currentPhase < 999)
     if (!activeGames.length) return
     activeGames.forEach(game => {
-      console.log(game.players)
+      // console.log(game.players)
+      if (!game.players.length) return;
       game.players.forEach(p =>
         client.users.cache
           .get(p.id)
@@ -75,9 +80,12 @@ client.once('ready', async () => {
   //Check if there are logs that need to be written
   setInterval(() => {
     let alllogs = logs.all()
-    alllogs.forEach(log => {
-      fn.writeLogs(log.ID)
-    })
+    if (alllogs.length) {
+      alllogs.forEach(log => {
+        fn.writeLogs(log.ID)
+      })
+      fn.addLog(`MAIN`, `Logs have been written for ${alllogs.map(log => log.ID)}`)
+    }
   }, 120000) //2 minutes
   
   // UPDATE PROGRESS CHANNEL
@@ -189,9 +197,9 @@ client.once('ready', async () => {
         `> ${games.get("quick").filter(g => g.mode == "custom" && !g.gameID.match(/^(dev|beta)test_/i)).length} Custom Games\n` +
         `> ${games.get("quick").filter(g => g.mode == "custom" && g.gameID.match(/^betatest_/i)).length} Test Games\n` +
         `**Roles Count**: ${Object.values(roles).length}\n` +
-        `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.AVAILABLE).length} Available | ` +
-          `${Object.values(roles).filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length} To Be Tested | ` +
-          `${Object.values(roles).filter(r => r.tag & tags.ROLE.UNAVAILABLE).length} Unavailable\n` +
+        `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.AVAILABLE).length} Available\n` +
+        `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.TO_BE_TESTED).length} To Be Tested\n` +
+        `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.UNAVAILABLE).length} Unavailable\n` +
         `**Member Count**: ${prog.guild.members.cache.size}\n` +
         `> ${prog.guild.members.cache.filter(m => !m.user.bot).size} Humans (${prog.guild.members.cache.filter(m => !m.user.bot && m.user.presence.status !== "offline").size} Online)\n` +
         `> ${prog.guild.members.cache.filter(m => m.user.bot).size} Bots\n`
@@ -201,6 +209,12 @@ client.once('ready', async () => {
       .setTimestamp()
     serverStats.edit(serverStatsEmbed)
   }, 1000*60*1)
+  
+  setInterval(() => {
+    // let cpu = process.cpuUsage().system + process.cpuUsage().user
+    // let cpupercent = cpu / parseInt(fs.readFileSync('/sys/fs/cgroup/cpu/cpu.cfs_period_us').toString(),10)
+    // console.log(cpupercent)
+  }, 10000)
 })
 
 client.on('inviteCreate', async invite => {
@@ -216,6 +230,7 @@ client.on('guildMemberAdd', async member => {
   client.allinvites = guildInvites
   const invite = guildInvites.find(inv => inv.uses > oldinv.get(inv.code).uses)
   const inviter = client.users.cache.get(invite.inviter.id)
+  if(!inviter) return
   if(!players.get(member.user.id)) players.set(member.user.id, {
     xp: 0,
     coins: 0,
@@ -366,10 +381,12 @@ client.on('message', async message => {
         .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
         .addField("Reason", "Sending messages too fast")
     )
+    fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was sending messages too fast!`)
     return undefined
   }
 
   let input = message.cleanContent
+  let origInput = message.cleanContent
   
   input = input.replace(/\\?\|\\?\|(.|\s)*?\\?\|\\?\|/g, "$1")
       .replace(/\\?~\\?~(.|\s)*?\\?~\\?~/g, "$1")
@@ -388,7 +405,7 @@ client.on('message', async message => {
               "dick","cock","dicc","cocc","nigg","niga","masterbate","anal","anus",
               "jerk off","jack off","jerkoff","jackoff","semen","a\\$\\$",
               "n1g","c0c","dumbass","asshole","butthole","nazi"]
-             // ["fuck","fuk","fak","fck","shit","shat","sex","s3x","horny","ass",
+             // ["fuck","fuk","fak","fck","shit","shat","sex","s3x","horny",
              //  "pussy","arse","penis","vagina","viagra","dick","cock","dicc","fucc",
              //  "cocc","nigg","niga","masterbate","anal","anus","jerk off","jack off",
              //  "jerkoff","jackoff","corona","piss","semen","a\\$\\$","n1g","c0c",
@@ -406,9 +423,11 @@ client.on('message', async message => {
         .setDescription(message.content)
         .addField("Reason", "Profanity")
     )
+    fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was sending profanity!`)
   }
       
   input = input.split(/\n/g)
+  origInput = origInput.split(/\n/g)
   
   if (input.length > 5) {
     await message.channel.send("Your message is not sent for the following reason: **Too many lines in one message.**")
@@ -418,6 +437,7 @@ client.on('message', async message => {
         // .setDescription(message.content)
         .addField("Reason", "Too many lines in one message")
     )
+    fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was sending too many lines in one message!`)
     return undefined
   }
   
@@ -433,7 +453,21 @@ client.on('message', async message => {
           .setDescription(content)
           .addField("Reason", "Message too long")
       )
+      fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was sending a message too long!`)
       continue;
+    }
+    
+    if (content.match(/[A-Z]/g).length >= content.match(/[a-z]/g).length && content.length >= 10) {
+      await message.channel.send("You are auto-warned for the following reason: **Please do not use too many capital letters!**")
+      client.channels.cache.get("699144758525952000").send(
+        new Discord.MessageEmbed()
+          .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
+          .setDescription(content)
+          .addField("Reason", "Too many caps")
+      )
+      fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was using too many caps!`)
+      content = content.toLowerCase()
+      // continue;
     }
     
     if (gamePlayer.role == "Drunk" && game.currentPhase < 999) {
@@ -461,6 +495,7 @@ client.on('message', async message => {
     if (game.currentPhase == -.5){
       fn.addLog(game, `Message from ${nicknames.get(message.author.id)} was not sent as game was starting: ${content}`)
       return await message.author.send("Your message was not sent for the following reason: **The game is starting!**")
+      // fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was sending profanity!`)
     }
     
     if (game.currentPhase >= 999)
@@ -469,7 +504,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `**${gamePlayer.number} ${nicknames.get(message.author.id)}** ${fn.getEmoji(client, gamePlayer.role)}: ${content}`
         )
-        fn.addLog(game, `[POST][DEAD] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
+        fn.addLog(game, `[POST] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
       else {
@@ -477,7 +512,7 @@ client.on('message', async message => {
           client, game.players.filter(p => !p.left && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}*** ${fn.getEmoji(client, gamePlayer.role)}: *${content}*`
         )
-        fn.addLog(game, `[POST] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
+        fn.addLog(game, `[POST][DEAD] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
 
@@ -600,5 +635,12 @@ client.on('message', async message => {
       )
   )
 })
+
+// SpyFall interaction
+// client.on('message', async message => {
+//   if (message.author.id !== "707402227005784074") return;
+  
+//   // if (message.content.startsWith(""))
+// })
 
 require("./server.js")(client) //starts web server

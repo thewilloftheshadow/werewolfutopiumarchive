@@ -70,9 +70,12 @@ module.exports = {
         )
         fn.addLog(
           game,
-          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to kill ${
-          nicknames.get(game.players[vote - 1].id)
-          }${game.players[vote - 1].role}.`)
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+            gamePlayer.id
+          )} voted to kill ${vote} ${nicknames.get(
+            game.players[vote - 1].id
+          )} (${game.players[vote - 1].role}).`
+        )
         
         gamePlayer.killedTonight = true
       } else 
@@ -136,9 +139,9 @@ module.exports = {
       
       fn.addLog(
         game,
-        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to lynch ${
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to lynch ${vote} ${
         nicknames.get(game.players[vote - 1].id)
-        }${game.players[vote - 1].role}.`)
+        } (${game.players[vote - 1].role}).`)
     }
     QuickGames[index] = game
     

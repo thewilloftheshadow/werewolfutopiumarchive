@@ -25,12 +25,13 @@ module.exports = {
           game = QuickGames.find(g => g.gameID == player.currentGame),
           index = QuickGames.indexOf(game),
           gamePlayer = game.players.find(player => player.id == message.author.id)
-    game.players.forEach(player => {
-      player.send(
+    game.players.forEach(p => {
+      if(p.id === message.author.id) return
+      client.users.cache.get(p.id).send(
       new Discord.MessageEmbed()
       .setTitle("Roses for you")
       .setDescription(
-        `You were given a rose from a bouquet by ${message.author}!`
+        `You were given a rose from a bouquet by ${nicknames.get(message.author.id)} in Game #${player.currentGame}!`
       )
       .setThumbnail(fn.getEmoji(client, "Rose Bouquet").url)
     )

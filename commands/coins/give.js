@@ -12,7 +12,7 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "give",
   run: async (client, message, args, shared) => {
-    return;
+    return await message.channel.send("Giving coins is disabled right now :(")
     let thisPlayer = players.get(message.author.id)
     let targetPlayer
     if (!args[0])
@@ -50,20 +50,20 @@ module.exports = {
     players.add(`${targetPlayer.id}.coins`, input)
     await message.channel.send(
       new Discord.MessageEmbed()
-        .setTitle(`Coins for you!`)
-        .setDescription(
-          `Successfully transferred ${input} ${fn.getEmoji(client, "Coin")} to ${nicknames.get(targetPlayer.id)}!\n` +
-          `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")}.\n` +
-          `${nicknames.get(targetPlayer.id)} now has ${players.get(`${targetPlayer.id}.coins`)} ${fn.getEmoji(client, "Coin")}.`
-        )
+      .setTitle(`Coins for you!`)
+      .setDescription(
+        `Successfully transferred ${input} ${fn.getEmoji(client, "Coin")} to ${nicknames.get(targetPlayer.id)}!\n` +
+        `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")}.\n` +
+        `${nicknames.get(targetPlayer.id)} now has ${players.get(`${targetPlayer.id}.coins`)} ${fn.getEmoji(client, "Coin")}.`
+      )
     )
     await targetPlayer.send(
       new Discord.MessageEmbed()
-        .setTitle("Moar coins!")
-        .setDescription(
-          `${nicknames.get(message.author.id)} transferred ${input} ${fn.getEmoji(client, "Coin")} to you.\n` +
-          `You now have ${players.get(`${targetPlayer.id}.coins`)} ${fn.getEmoji(client, "Coin")}.`
-        )
+      .setTitle("Moar coins!")
+      .setDescription(
+        `${nicknames.get(message.author.id)} transferred ${input} ${fn.getEmoji(client, "Coin")} to you.\n` +
+        `You now have ${players.get(`${targetPlayer.id}.coins`)} ${fn.getEmoji(client, "Coin")}.`
+      )
     )
   }
 }

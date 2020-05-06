@@ -62,6 +62,13 @@ module.exports = {
       )
       dousedPlayer.killedBy = gamePlayer.number
     }
+    
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} has ignited the gasoline and killed ${dousedPlayers.map(x => `${x.number} ${nicknames.get(x.id)} (${x.role})`).join(", ")}.`
+    )
 
     game = fn.death(client, game, dousedPlayers.map(x => x.number))
     gamePlayer.killedTonight = true

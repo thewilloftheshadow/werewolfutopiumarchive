@@ -158,7 +158,7 @@ const broadcastTo = (client, users, content) => {
   
   for (var user of users) 
     getUser(client, user).send(
-      typeof content == "string" && content.match(new RegExp(`\\b${game.players.find(p => p.id == user).number}\\b`, "gi")) ?
+      typeof content == "string" && content.match(new RegExp(`(?<!Night |Day )\\b${game.players.find(p => p.id == user).number}\\b`, "gi")) ?
         `> ${content}` : content
     ).catch(() => {})
   
@@ -220,7 +220,7 @@ const gameEmbed = (client, game) => {
                   p.alive ? "" : " <:Death:668750728650555402>"
                 } ${
                   p.initialRole && p.initialRole !== p.role
-                    ? `${getEmoji(client, p.role)} ➨ `
+                    ? `${getEmoji(client, p.initialRole)} ➨ `
                     : ""
                 }${getEmoji(client, p.role)}${
                   p.couple ? ` ${getEmoji(client, "Cupid Lovers")}` : ""
@@ -246,25 +246,26 @@ const gameEmbed = (client, game) => {
 }
 
 const death = (client, game, killed, suicide = false) => {
-  console.log(killed)
+  // console.log(killed)
   if (killed == []) return game
   let deadPlayers
   if (killed instanceof Array) deadPlayers = game.players.filter(p => killed.includes(p.number))
   else deadPlayers = [game.players.find(p => p.number == killed)]
-  console.log(deadPlayers)
+  // console.log(deadPlayers)
+  
   for (var deadPlayer of deadPlayers) {
     if (suicide !== "corr"){
       // DOPPEL TAKE ROLE
       game.running = "doppelganger taking new role"
       let doppels = game.players.filter(p => p.alive && p.role == "Doppelganger" && p.selected == deadPlayer.number)
       for (var doppel of doppels) {
-        let gamePlayer = deepClone(deadPlayer)
-        ['number','id','headhunter','lastAction','roleRevealed','initialRole'].forEach( x => delete gamePlayer[x])
+        let gamePlayer = deepClone(deadPlayer);
+        ['number','id','headhunter','lastAction','roleRevealed','initialRole','alive'].forEach( x => delete gamePlayer[x])
         doppel = Object.assign(doppel, gamePlayer)
         getUser(client, doppel.id).send(
           new Discord.MessageEmbed()
             .setTitle("Welp.")
-            .setThumbnail(getEmoji(client, deadPlayer.role))
+            .setThumbnail(getEmoji(client, deadPlayer.role).url)
             .setDescription(
               `**${deadPlayer.number} ${nicknames.get(deadPlayer.id)} ${getEmoji(
                 client,
@@ -277,6 +278,15 @@ const death = (client, game, killed, suicide = false) => {
                 "U"
               ].includes(deadPlayer.role[0])} ${deadPlayer.role}!`
             )
+        )
+        
+        addLog(
+          game,
+          `Doppelganger ${
+            doppel.number
+          } ${nicknames.get(doppel.id)} inherited the role and abilities of ${
+            deadPlayer.number
+          } ${nicknames.get(deadPlayer.id)} (${deadPlayer.role}) as they died.`
         )
       }
     }
@@ -313,6 +323,15 @@ const death = (client, game, killed, suicide = false) => {
               )
           )
           revealedPlayer.roleRevealed = revealedPlayer.role
+          
+          addLog(
+            game,
+            `The last will of Loudmouth ${
+              deadPlayer.number
+            } ${nicknames.get(deadPlayer.id)} was to reveal ${
+              revealedPlayer.number
+            } ${nicknames.get(revealedPlayer.id)} (${revealedPlayer.role}).`
+          )
         }
       }
 
@@ -361,6 +380,15 @@ const death = (client, game, killed, suicide = false) => {
                 : ""
             }** is dead!`
           )
+          
+          addLog(
+            game,
+            `The death of ${deadPlayer.role} ${
+              deadPlayer.number
+            } ${nicknames.get(deadPlayer.id)} was avenged on ${
+              avengedPlayer.number
+            } ${nicknames.get(avengedPlayer.id)} (${avengedPlayer.role}).`
+          )
 
           game = death(client, game, avengedPlayer.number)
         }
@@ -387,6 +415,11 @@ const death = (client, game, killed, suicide = false) => {
                 ? ` ${getEmoji(client, otherLover.role)}`
                 : ""
             }** lost the love of their life and has suicided!`
+          )
+          
+          addLog(
+            game,
+            `${otherLover.role} ${otherLover.number} ${nicknames.get(otherLover.id)} lost their love of their life and suicided.`
           )
 
           game = death(client, game, otherLover.number)
@@ -420,8 +453,16 @@ const death = (client, game, killed, suicide = false) => {
             }** committed suicide!`
           )
 
-          game = death(client, game, sectMember.number)
         }
+        game = death(client, game, sectMembers.map(p => p.number))
+        addLog(
+          game,
+          `Sect Members ${sectMembers.map(
+            p => `${p.number} ${nicknames.get(p.id)} (${p.role})`
+          )} suicided when Sect Leader ${deadPlayer.number} ${nicknames.get(
+            deadPlayer.id
+          )} died.`
+        )
       }
     }
 
@@ -439,6 +480,14 @@ const death = (client, game, killed, suicide = false) => {
             .setThumbnail(getEmoji(client, "Seer").url)
             .setDescription("The Seer was killed. You are now a Seer!")
         )
+        addLog(
+          game,
+          `Seer Apprentice ${chosenOne.number} ${nicknames.get(
+            chosenOne.id
+          )} became a Seer after their master ${
+            deadPlayer.number
+          } ${nicknames.get(deadPlayer.id)} died.`
+        )
       }
     }
 
@@ -446,6 +495,7 @@ const death = (client, game, killed, suicide = false) => {
     if (game.players.find(p => p.role == "Soul Collector" && p.alive && p.box.includes(deadPlayer.number)) &&
         roles[deadPlayer.role].team == "Village" && !deadPlayer.sect && deadPlayer.killedBy &&
         ["Village","Werewolves"].includes(roles[game.players[deadPlayer.killedBy-1].role].team)) {
+      let sc = game.players.find(p => p.role == "Soul Collector" && p.alive && p.box.includes(deadPlayer.number))
       deadPlayer.boxed = true
       broadcastTo(
         client, game.players.filter(p => !p.left),
@@ -457,7 +507,38 @@ const death = (client, game, killed, suicide = false) => {
             " They cannot talk to the Medium or the dead, and cannot be revived until the Soul Collector is dead!"
           )
       )
+      addLog(
+        game,
+        `Soul Collector ${sc.number} ${nicknames.get(sc.id)} took the soul of ${
+          deadPlayer.number
+        } ${nicknames.get(deadPlayer.id)} (${deadPlayer.role}).`
+      )
     }
+  }
+          
+  game.running = "test for tie after any death"
+  let alive = game.players.filter(p => p.alive)
+  if (
+    !alive.length
+  ) {
+    game.running = "tie end"
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Death").url)
+        .setDescription(`It was a tie. There are no winners.`)
+    )
+    game.running = "give tie xp"
+    addXP(game, game.players.filter(p => !p.suicide), 15)
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(game, [])
+    addLog(
+      game,
+      `[RESULT] The game ended in a tie. No one won!`
+    )
   }
 
   return game
@@ -468,13 +549,16 @@ const createTalisman = async (client, role, level) => {
   if (!role) return undefined
   const canvas = Canvas.createCanvas(128, 128);
   const ctx = canvas.getContext('2d');
-  if(!level) level = ""
-  if(typeof level != "number") level = parseInt(level, 10)
-  if(level == 1 || level < 15) level = 1
-  if(level == 2 || level <= 20) level = 2
-  if(level == 3 || level <= 25) level = 3
-  if(level == 4 || level <= 30) level = 4
-  const background = await Canvas.loadImage(getEmoji(client, `Talisman${level == 1 ? "" : `_${level}`}`).url)
+  // if(!level) level = 1
+  // if(typeof level != "number") level = parseInt(level, 10)
+  // if(level == 1 || level < 15) level = 1
+  // if(level == 2 || level <= 20) level = 2
+  // if(level == 3 || level <= 25) level = 3
+  // if(level == 4 || level <= 30) level = 4
+  // let name = `Talisman${level == 1 ? "" : `_${level}`}`
+  name = `Talisman`
+  console.log(name)
+  const background = await Canvas.loadImage(getEmoji(client, name).url)
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   
   const icon = await Canvas.loadImage(getEmoji(client, role.name).url+"?size=64");
@@ -520,7 +604,7 @@ const addLog = (logid, msg) => {
 const writeLogs = (logid) => {
   if(typeof logid === "object") logid = logid.gameID
   if(typeof logid === "number") logid = logid.toString()
-  if(!typeof logid === "string") throw new TypeError('First parameter must be a game object or game ID')
+  if(!typeof logid === "string") throw new TypeError('First parameter must be a game object or log ID')
   if(!logid) return
   let fulllog = logs.get(logid)
   if(!fulllog) return false

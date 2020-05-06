@@ -11,7 +11,6 @@ const fn = require('/app/util/fn'),
 
 module.exports = {
   name: "avenge",
-  aliases: ["tag"],
   gameroles: ["Junior Werewolf", "Avenger"],
   run: async (client, message, args, shared) => {
     let player = players.get(message.author.id)

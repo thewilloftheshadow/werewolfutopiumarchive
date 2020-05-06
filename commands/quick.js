@@ -44,7 +44,7 @@ module.exports = {
       let count = games.add("count", 1)
       let roles = quickGameRoles[Math.floor(Math.random()*quickGameRoles.length)]
       await fn.addLog(count, `New game: ${count}`)
-      await fn.addLog(count, `Game roles: ${roles.join(", ")}\n`)
+      await fn.addLog(count, `Game roles: ${roles.join(", ")}`)
       currentGame = {
         mode: "quick",
         gameID: count,

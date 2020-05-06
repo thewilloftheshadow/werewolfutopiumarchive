@@ -63,6 +63,12 @@ module.exports = {
       nicknames.get(targetPlayer.id)}** to be converted into a werewolf!`
     )
     
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected ${
+      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}) to be converted into a werewolf!`
+    )
+    
     QuickGames[index] = game
 
     games.set("quick", QuickGames)

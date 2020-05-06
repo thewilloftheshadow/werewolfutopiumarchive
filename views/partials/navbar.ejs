@@ -34,12 +34,19 @@
       <li class="nav-item">
         <a class="nav-link" href="https://status.werewolf-utopium.tk">Status</a>
       </li>
-      <% if(user && user.viewLogs){ %>
+      <% if(user){ %>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="logmenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Logs</a>
+        <div class="dropdown-menu" aria-labelledby="logmenu">
+          <a class="nav-link" onClick="getLog()" href="#">Get Log</a>
+          <a href="/logs" class="nav-link">View all logs</a>
+        </div>
+      </li>
+      <li class="nav-item">
+        
+      </li>
       <% } %>
       <% if(user && ["336389636878368770","658481926213992498","439223656200273932","529121242716831748"].includes(user.id)){ %>
-      <li class="nav-item">
-        <a class="nav-link" onClick="getLog()" href="#">Logs</a>
-      </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="devmenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
         <div class="dropdown-menu" aria-labelledby="devmenu">
@@ -65,7 +72,9 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="usermenu">
           <a class="dropdown-item" href="/profile/<%- user.id %>">View Profile</a>
+          <% if(user && ["336389636878368770","658481926213992498","439223656200273932","529121242716831748"].includes(user.id)){ %>
           <a class="dropdown-item" href="/info">Log raw user data</a>
+          <% } %>
           <a class="dropdown-item" href="/logout">Logout</a>
         </div>
       </li>

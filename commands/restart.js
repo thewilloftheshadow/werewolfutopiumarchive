@@ -29,6 +29,7 @@ module.exports = {
       temp.set("gamealert", false)
     } else {
       activeGames.forEach(game => {
+        if (!game.players.length) return;
         game.players.forEach(p => client.users.cache.get(p.id).send("The bot is currently rebooting. It will not respond until it has finished. Don't worry, your game will pick back up right where it left off!"))
         fn.addLog(game, "-divider-")
         fn.addLog(game, `Bot restart in progress, initated by ${message.author.tag}.`)
@@ -36,6 +37,7 @@ module.exports = {
       temp.set("gamealert", true)
     }
     if(message.channel.id != message.author.id) temp.set("rebootchan", message.channel.id)
+    fn.addLog("MAIN", `Bot restart in progress, initated by ${message.author.tag}.`)
     await message.channel.send("Rebooting bot, please wait...")
     await fn.sleep(5000)
     client.user.setStatus('offline')

@@ -74,6 +74,12 @@ module.exports = {
       gamePlayer.killedTonight = true
       targetPlayer.killedBy = gamePlayer.number
     }
+      
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} shot ${
+      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+    )
     
     if (game.config.deathReveal) targetPlayer.roleRevealed = targetPlayer.role
     gamePlayer.abil1 -= 1

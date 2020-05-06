@@ -12,6 +12,23 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "add",
   run: async (client, message, args, shared) => {
+    if (
+      !client.guilds.cache
+        .get("522638136635817986")
+        .members.cache.get(message.author.id)
+        .roles.cache.find(r =>
+          [
+            "*",
+            "βTester Helper",
+            "Mini Moderator",
+            "Moderator",
+            "Bot Helper",
+            "Developer"
+          ].includes(r.name)
+        )
+    )
+      return undefined
+    
     if (!client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => r.name.includes("Moderator")))
       return await message.channel.send("You do not have permissions to add coins! Use `w!coins give` to give coins.")
     

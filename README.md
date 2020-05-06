@@ -1,11 +1,11 @@
 # Werewolf Utopium
 
 ## Developers
-LuciferianThomas (LuciferianThomas#0666)   
-thewilloftheshadow (TheShadow#8124) ([ShadowDevelopment](https://github.com/thewilloftheshadow))
+[LuciferianThomas](https://glitch.com/@LuciferianThomas) (LuciferianThomas#0666)   
+[thewilloftheshadow](https://glitch.com/@thewilloftheshadow) (TheShadow#8124) ([ShadowDevelopment](https://github.com/thewilloftheshadow))
 
 ## Helpers
-SomethingMysterious (SomethingMysterious#3933)
+[SomethingMysterious](https://glitch.com/@SomethingMysterious) (SomethingMysterious#3933)
 
 ## Retired
-AESINGH (Ashish#0380) 
+[3061LRTAGSPKJMORMRT](https://glitch.com/@3061LRTAGSPKJMORMRT) (Ashish#0380) 

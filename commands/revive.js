@@ -59,6 +59,12 @@ module.exports = {
       } You selected **${target} ${nicknames.get(targetPlayer.id)}** to be revived.`
     )
     
+    fn.addLog(
+      game,
+      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} selected to revive ${
+      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+    )
+    
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

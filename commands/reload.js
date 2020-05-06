@@ -49,6 +49,7 @@ module.exports = {
       delete require.cache[require.resolve(command)]
       message.channel.send(`File \`${command}\` is ready to be used. Be sure to reload any commands that need this file to fully apply the changes.`)
       
+      fn.addLog("MAIN", `${message.author.tag} reloaded \`${command}\`.`)
     } else {
     
       let commandfile = client.commands.get(command);
@@ -58,12 +59,18 @@ module.exports = {
       delete require.cache[require.resolve(`/app/commands/${commandfile.name}.js`)]
 
       if(command === "shop") delete require.cache[require.resolve(`/app/util/shop.js`)]
+      if(command === "roles") delete require.cache[require.resolve(`/app/util/roles.js`)]
+      if (["coins","custom","games","items","logs","roses","talisman","use"].includes(command)) {
+        let filesInFolder = fs.readdirSync(`/app/commands/${command}`).filter(file => file.endsWith('.js'))
+        filesInFolder.forEach(file => delete require.cache[require.resolve(`/app/commands/${command}/${file}`)])
+      }
 
       let props = require(`/app/commands/${commandfile.name}`);
-      console.log(`Reload: Command "${command}" loaded`);
+      // console.log(`Reload: Command "${command}" loaded`);
       client.commands.set(props.name, props);    
 
       message.channel.send(`Command \`${command.toLowerCase()}\` successfully reloaded.`);
+      fn.addLog("MAIN", `${message.author.tag} reloaded \`${command}\`.`)
     }
     
 	}

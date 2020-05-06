@@ -79,7 +79,7 @@ module.exports = client => {
               }
               for (var j = 0; j < game.players.length; j++) {
                 if (!game.players[j].alive) continue;
-                fn.addLog(game, `${j+1} ${nicknames.get(game.players[0].id)} had ${lynchCount[j+1]} votes.`)
+                fn.addLog(game, `${j+1} ${nicknames.get(game.players[j].id)} had ${lynchCount[j+1] || 0} votes.`)
               }
               if (lynchCount.length) {
                 let max = lynchCount.reduce((m, n) => Math.max(m, n))
@@ -187,6 +187,32 @@ module.exports = client => {
                     // lynchedPlayer.killedBy = 17
 
                     game = fn.death(client, game, lynchedPlayer.number)
+          
+                    game.running = "test for tie after lynch"
+                    let alive = game.players.filter(p => p.alive)
+                    if (
+                      !alive.length
+                    ) {
+                      game.running = "tie end"
+                      game.currentPhase = 999
+                      fn.broadcastTo(
+                        client,
+                        game.players.filter(p => !p.left),
+                        new Discord.MessageEmbed()
+                          .setTitle("Game has ended.")
+                          .setThumbnail(fn.getEmoji(client, "Death").url)
+                          .setDescription(`It was a tie. There are no winners.`)
+                      )
+                      game.running = "give tie xp"
+                      fn.addXP(game, game.players.filter(p => !p.suicide), 15)
+                      fn.addXP(game, game.players.filter(p => !p.left), 15)
+                      fn.addWin(game, [])
+                      fn.addLog(
+                        game,
+                        `[RESULT] The game ended in a tie. No one won!`
+                      )
+                      continue
+                    }
 
                     // FOOL WIN CONDITIONS
                     game.running = "test for fool win condition"
@@ -288,7 +314,7 @@ module.exports = client => {
           if (game.currentPhase % 3 == 0) {
             fn.addLog(game, '-divider2-')
             fn.addLog(game, "The sun is rising...")
-            fn.addLog(game, '-divider2-')
+            // fn.addLog(game, '-divider2-')
             if (game.currentPhase == 0) {
               // DOPPELGANGER AUTOSELECT
               game.running = "doppelganger check selection"
@@ -319,7 +345,7 @@ module.exports = client => {
               fn.broadcastTo(
                 client,
                 game.players.filter(p => !p.left),
-                `<:Medium_Revive:660667751253278730> Medium has revived **${
+                `${fn.getEmoji(client, "Medium_Revive")} Medium has revived **${
                   revivedPlayer.number
                 } ${nicknames.get(revivedPlayer.id)}**.`
               )
@@ -458,7 +484,7 @@ module.exports = client => {
               )
 
               if (
-                !game.players
+                game.players.find(p => p.role == "Kitten Wolf") && !game.players
                   .filter(p => p.alive && p.role == "Kitten Wolf")
                   .map(p => p.usedAbilityTonight)
                   .includes(attackedPlayer.number)
@@ -472,7 +498,7 @@ module.exports = client => {
                   )} instead of killing them.`
                 )
               }
-              if (
+              else if (
                 roles[attackedPlayer.role].cat == "Killer" ||
                 (attackedPlayer.role == "Red Lady" &&
                   attackedPlayer.visitedTonight && !game.frenzy)
@@ -734,7 +760,7 @@ module.exports = client => {
                           game.players.filter(p => !p.left),
                           `The werewolves killed **${
                             protector.number
-                          } ${fn.getUser(client, protector.id)}${
+                          } ${nicknames.get(protector.id)}${
                             game.config.deathReveal
                               ? ` ${fn.getEmoji(client, protector.role)}`
                               : ""
@@ -864,7 +890,7 @@ module.exports = client => {
                     game.players.filter(p => !p.left),
                     `The werewolves killed **${
                       attackedPlayer.number
-                    } ${fn.getUser(client, attackedPlayer.id)}${
+                    } ${nicknames.get(attackedPlayer.id)}${
                       game.config.deathReveal
                         ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
                         : ""
@@ -1360,6 +1386,17 @@ module.exports = client => {
                     `You were scratched by the kitten wolf. You are now a werewolf!` +
                       `Check out who your teammates are in \`w!game\`.`
                   )
+                      
+                  fn.addLog(
+                    game,
+                    `Red Lady ${rl.number} ${nicknames.get(
+                      rl.id
+                    )} was scratched by Kitten Wolf ${
+                      kww.number
+                    } ${nicknames.get(kww.id)} when visiting ${
+                      attackedPlayer.number
+                    } ${nicknames.get(attackedPlayer.id)} and is now a Werewolf.`
+                  )
                   convertRLs(rl)
                 }
               }
@@ -1381,9 +1418,9 @@ module.exports = client => {
                 
                 fn.addLog(
                   game,
-                  `Kitten Wolf ${kww.number} ${nicknames.get(kww.id)} could not convert ${attackedPlayer.role} ${
+                  `Kitten Wolf ${kww.number} ${nicknames.get(kww.id)} could not convert ${
                     attackedPlayer.number
-                  } ${nicknames.get(attackedPlayer.id)}.`
+                  } ${nicknames.get(attackedPlayer.id)} (${attackedPlayer.role}).`
                 )
               }
               else if (attackedPlayer.protectors.length) {
@@ -1491,11 +1528,11 @@ module.exports = client => {
                         protector.id
                       )} was scratched by Kitten Wolf ${
                         kww.number
-                      } ${nicknames.get(kww.id)} whilst protecting ${
-                        attackedPlayer.role
-                      } ${attackedPlayer.number} ${nicknames.get(
+                      } ${nicknames.get(kww.id)} whilst protecting ${attackedPlayer.number} ${nicknames.get(
                         attackedPlayer.id
-                      )}.`
+                      )} (${
+                        attackedPlayer.role
+                      }).`
                     )
 
                     convertRLs(protector)
@@ -1526,9 +1563,9 @@ module.exports = client => {
                   game,
                   `${attackedPlayer.role} ${
                     attackedPlayer.number
-                  } ${nicknames.get(attackedPlayer.id)} was converted into a Werewolf by Kitten Wolf ${
+                  } ${nicknames.get(attackedPlayer.id)} was scratched by Kitten Wolf ${
                     kww.number
-                  } ${nicknames.get(kww.id)}'s scratch.`
+                  } ${nicknames.get(kww.id)} and is now a Werewolf.`
                 )
                 
                 convertRLs(attackedPlayer)
@@ -1564,10 +1601,7 @@ module.exports = client => {
                         .filter(p => p.sect)
                         .map(
                           p =>
-                            `${p.number} ${nicknames.get(p.id)} ${fn.getEmoji(
-                              client,
-                              p.role
-                            )}${
+                            `${p.number} ${nicknames.get(p.id)} ${
                               !p.alive ? ` ${fn.getEmoji(client, "Death")}` : ""
                             }`
                         )
@@ -1600,12 +1634,32 @@ module.exports = client => {
                         )
                     )
                 )
-              } else
+                
+                fn.addLog(
+                  game,
+                  `${sectTarget.role} ${
+                    sectTarget.number
+                  } ${nicknames.get(sectTarget.id)} was turned into the sect of ${
+                    sl.number
+                  } ${nicknames.get(sl.id)}.`
+                )
+              }
+              else {
                 fn.getUser(client, sl.id).send(
                   `**${sectTarget.number} ${nicknames.get(
                     sectTarget.id
                   )}** cannot be sected!`
                 )
+                
+                fn.addLog(
+                  game,
+                  `Sect Leader ${
+                    sl.number
+                  } ${nicknames.get(sl.id)} tried to turn ${
+                    sectTarget.number
+                  } ${nicknames.get(sectTarget.id)} (${sectTarget.role}) into their sect but failed.`
+                )
+              }
             }
 
             // SPIRIT SEER RESULTS
@@ -1619,7 +1673,7 @@ module.exports = client => {
               )
               console.log(spz)
               console.log(targets)
-              if (targets[0].killedTonight || targets[1].killedTonight)
+              if (targets[0].killedTonight || targets[1].killedTonight){
                 fn.getUser(client, spz.id).send(
                   new Discord.MessageEmbed()
                     .setTitle("They had an evil soul...")
@@ -1632,7 +1686,19 @@ module.exports = client => {
                       )}** killed last night!`
                     )
                 )
-              else
+                
+                fn.addLog(
+                  game,
+                  `Spirit Seer ${
+                    spz.number
+                  } ${nicknames.get(spz.id)} found that either of ${targets[0].number} ${nicknames.get(
+                    targets[0].id
+                  )} or ${targets[1].number} ${nicknames.get(
+                    targets[1].id
+                  )} killed last night.`
+                )
+              }
+              else {
                 fn.getUser(client, spz.id).send(
                   new Discord.MessageEmbed()
                     .setTitle("Good for tonight")
@@ -1647,6 +1713,18 @@ module.exports = client => {
                       )}** killed last night.`
                     )
                 )
+                
+                fn.addLog(
+                  game,
+                  `Spirit Seer ${
+                    spz.number
+                  } ${nicknames.get(spz.id)} found that neither of ${targets[0].number} ${nicknames.get(
+                    targets[0].id
+                  )} or ${targets[1].number} ${nicknames.get(
+                    targets[1].id
+                  )} killed last night.`
+                )
+              }
             }
 
             // SHERIFF RESULTS
@@ -1661,6 +1739,7 @@ module.exports = client => {
 
               let one = Math.floor(Math.random() * 2) == 1
               let killedBy = game.players[target.killedBy - 1]
+              let suspects = [killedBy]
               let other = game.players.filter(
                 p =>
                   p.alive &&
@@ -1669,43 +1748,33 @@ module.exports = client => {
               )
               if (other.length) {
                 let random = other[Math.floor(Math.random() * other.length)]
-
-                fn.getUser(client, sheriff.id).send(
-                  new Discord.MessageEmbed()
-                    .setTitle("There was blood...")
-                    .setThumbnail(fn.getEmoji(client, "Sheriff Suspect").url)
-                    .setDescription(
-                      one
-                        ? `**${killedBy.number} ${nicknames.get(
-                            killedBy.id
-                          )}** or **${random.number} ${nicknames.get(
-                            random.id
-                          )}** killed **${target.number} ${nicknames.get(
-                            target.id
-                          )}** last night.`
-                        : `**${random.number} ${nicknames.get(
-                            random.id
-                          )}** or **${killedBy.number} ${nicknames.get(
-                            killedBy.id
-                          )}** killed **${target.number} ${nicknames.get(
-                            target.id
-                          )}** last night.`
-                    )
-                )
-              } else {
-                fn.getUser(client, sheriff.id).send(
-                  new Discord.MessageEmbed()
-                    .setTitle("You were up for something...")
-                    .setThumbnail(fn.getEmoji(client, "Sheriff Suspect").url)
-                    .setDescription(
-                      `**${killedBy.number} ${nicknames.get(
-                        killedBy.id
-                      )}** killed **${target.number} ${nicknames.get(
-                        target.id
-                      )}** last night.`
-                    )
-                )
+                suspects.push(random)
+                suspects = game.players.filter(p => suspects.map(x => x.number).includes(p.number))
               }
+              
+              fn.getUser(client, sheriff.id).send(
+                new Discord.MessageEmbed()
+                  .setTitle("You were up for something...")
+                  .setThumbnail(fn.getEmoji(client, "Sheriff Suspect").url)
+                  .setDescription(
+                    `${suspects.map(p => `**${p.number} ${nicknames.get(
+                      p.id
+                    )}**`).join(' or ')} killed **${target.number} ${nicknames.get(
+                      target.id
+                    )}** last night.`
+                  )
+              )
+                
+              fn.addLog(
+                game,
+                `Sheriff ${sheriff.number} ${nicknames.get(
+                  sheriff.id
+                )} found that ${suspects
+                  .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                  .join(" or ")} killed ${target.number} ${nicknames.get(
+                  target.id
+                )} last night.`
+              )
             }
 
             // GRUMPY GRANDMA MUTE
@@ -1733,6 +1802,15 @@ module.exports = client => {
                   muted.number
                 } ${nicknames.get(muted.id)}**!` +
                   `They cannot speak or vote today.`
+              )
+                
+              fn.addLog(
+                game,
+                `Grumpy Grandma ${gg.number} ${nicknames.get(
+                  gg.id
+                )} forbid ${
+                  muted.number
+                } ${nicknames.get(muted.id)} (${muted.role}) from speaking today.`
               )
             }
 
@@ -1838,6 +1916,16 @@ module.exports = client => {
                     )}** has been disguised!`
                   )
               )
+                
+              fn.addLog(
+                game,
+                `Illusionist ${illu.number} ${nicknames.get(
+                  illu.id
+                )} disguised ${
+                  disguisedPlayer.number
+                } ${nicknames.get(disguisedPlayer.id)} (${disguisedPlayer.role}) as an Illusionist.`
+              )
+              
               let disguiseRL = (player) => {
                 for (var rl of game.players.filter(p => p.role == "Red Lady" && p.usedAbilityTonight == disguisedPlayer.number)) {
                   rl.disguised = true
@@ -1852,6 +1940,15 @@ module.exports = client => {
                           rl.id
                         )}** has been disguised!`
                       )
+                  )
+                
+                  fn.addLog(
+                    game,
+                    `Illusionist ${illu.number} ${nicknames.get(
+                      illu.id
+                    )} rl ${
+                      disguisedPlayer.number
+                    } ${nicknames.get(rl.id)} (${rl.role}) as an Illusionist.`
                   )
                   disguiseRL(rl)
                 }
@@ -1872,19 +1969,21 @@ module.exports = client => {
               let doused = arso.usedAbilityTonight
                 .map(p => game.players[p - 1])
                 .filter(p => p.alive)
+              let dousedPlayers = []
               let douseRL = (player) => {
                 for (var rl of game.players.filter(p => p.alive && p.role == "Red Lady" && p.usedAbilityTonight == player.number)) {
                   if (!arso.doused) arso.doused = []
                   arso.doused.push(rl.number)
                   game.lastDeath = game.currentPhase
-                  fn.getUser(client, arso.id).send(
-                    new Discord.MessageEmbed()
-                      .setTitle("Medium Rare")
-                      .setThumbnail(fn.getEmoji(client, "Arsonist Douse").url)
-                      .setDescription(
-                        `**${rl.number} ${nicknames.get(rl.id)}** has been doused with gasoline!`
-                      )
-                  )
+                  dousedPlayers.push(rl)
+                  // fn.getUser(client, arso.id).send(
+                  //   new Discord.MessageEmbed()
+                  //     .setTitle("Medium Rare")
+                  //     .setThumbnail(fn.getEmoji(client, "Arsonist Douse").url)
+                  //     .setDescription(
+                  //       `**${rl.number} ${nicknames.get(rl.id)}** has been doused with gasoline!`
+                  //     )
+                  // )
                 }
               }
               for (var dousedPlayer of doused) {
@@ -1892,18 +1991,28 @@ module.exports = client => {
                 if (dousedPlayer.role == "Red Lady" && dousedPlayer.usedAbilityTonight) continue;
                 arso.doused.push(dousedPlayer.number)
                 game.lastDeath = game.currentPhase
-                fn.getUser(client, arso.id).send(
-                  new Discord.MessageEmbed()
-                    .setTitle("Medium Rare")
-                    .setThumbnail(fn.getEmoji(client, "Arsonist Douse").url)
-                    .setDescription(
-                      `**${dousedPlayer.number} ${nicknames.get(
-                        dousedPlayer.id
-                      )}** has been doused with gasoline!`
-                    )
-                )
+                dousedPlayers.push(dousedPlayer)
                 douseRL(dousedPlayer)
               }
+              fn.getUser(client, arso.id).send(
+                new Discord.MessageEmbed()
+                  .setTitle("Medium Rare")
+                  .setThumbnail(fn.getEmoji(client, "Arsonist Douse").url)
+                  .setDescription(
+                    `${dousedPlayers.map(p => `**${p.number} ${nicknames.get(
+                      p.id
+                    )}**`)} ${dousedPlayers.length == 1 ? "has" : "have"} been doused with gasoline!`
+                  )
+              )
+                
+              fn.addLog(
+                game,
+                `Arsonist ${arso.number} ${nicknames.get(
+                  arso.id
+                )} doused ${dousedPlayers.map(p => `${p.number} ${nicknames.get(
+                  p.id
+                )} ${p.role}`).join(", ")} with gasoline.`
+              )
             }
 
             // ZOMBIE BITE
@@ -1972,20 +2081,11 @@ module.exports = client => {
               p => p.alive && p.role == "Corruptor" && p.usedAbilityTonight
             )
             for (var corr of corrs) {
-              let glitched = game.players[corr.usedAbilityTonight - 1]
+              let glitched = game.players[corr.usedAbilityTonight - 1],
+                  glitchedPlayers = []
               if (!glitched.alive) continue;
               glitched.mute = corr.number
               corr.glitched = [glitched.number]
-              fn.getUser(client, corr.id).send(
-                new Discord.MessageEmbed()
-                  .setTitle("Glitching")
-                  .setThumbnail(fn.getEmoji(client, "Corruptor Glitch").url)
-                  .setDescription(
-                    `**${glitched.number} ${nicknames.get(
-                      glitched.id
-                    )}** has been glitched!`
-                  )
-              )
               fn.getUser(client, glitched.id).send(
                 new Discord.MessageEmbed()
                   .setTitle("Glitched")
@@ -1994,6 +2094,7 @@ module.exports = client => {
                     `You have been glitched by a corruptor! You cannot speak or vote today and will die at the end of the day.`
                   )
               )
+              glitchedPlayers.push(glitched)
                 
               let corruptRLs = (player) => {
                 let rls = game.players.filter(rl => rl.role == "Red Lady" && rl.usedAbilityTonight == player.number && rl.alive)
@@ -2001,16 +2102,17 @@ module.exports = client => {
                   if (!rl.alive) continue;
                   rl.mute = corr.number
                   corr.glitched.push(rl.number)
-                  fn.getUser(client, corr.id).send(
-                    new Discord.MessageEmbed()
-                      .setTitle("Glitching")
-                      .setThumbnail(fn.getEmoji(client, "Corruptor Glitch").url)
-                      .setDescription(
-                        `**${rl.number} ${nicknames.get(
-                          rl.id
-                        )}** has been glitched!`
-                      )
-                  )
+                  // fn.getUser(client, corr.id).send(
+                  //   new Discord.MessageEmbed()
+                  //     .setTitle("Glitching")
+                  //     .setThumbnail(fn.getEmoji(client, "Corruptor Glitch").url)
+                  //     .setDescription(
+                  //       `**${rl.number} ${nicknames.get(
+                  //         rl.id
+                  //       )}** has been glitched!`
+                  //     )
+                  // )
+                  glitchedPlayers.push(glitched)
                   fn.getUser(client, rl.id).send(
                     new Discord.MessageEmbed()
                       .setTitle("Glitched")
@@ -2023,6 +2125,26 @@ module.exports = client => {
                 }
               }
               corruptRLs(glitched)
+              
+              fn.getUser(client, corr.id).send(
+                new Discord.MessageEmbed()
+                  .setTitle("Glitching")
+                  .setThumbnail(fn.getEmoji(client, "Corruptor Glitch").url)
+                  .setDescription(
+                    `${glitchedPlayers.map(p => `**${p.number} ${nicknames.get(
+                      p.id
+                    )}**`)} has been glitched!`
+                  )
+              )
+              
+              fn.addLog(
+                game,
+                `Corruptor ${corr.number} ${nicknames.get(
+                  corr.id
+                )} corrupted ${glitchedPlayers
+                  .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                  .join(", ")}.`
+              )
             }
 
             if (game.frenzy) game.frenzy = false
@@ -2045,38 +2167,49 @@ module.exports = client => {
             game.players[j].vote = null
             if (game.currentPhase % 3 == 2) {
               game.players[j].mute = false
-              if (
-                game.players[j].role == "Tough Guy" &&
-                !game.players[j].health
-              ) {
-                game.running = "kill attacked tg"
-                Object.assign(game.players[j], {
-                  health: 1,
-                  alive: false,
-                  roleRevealed: game.players[j].role
-                })
-
-                fn.broadcastTo(
-                  client,
-                  game.players.filter(p => !p.left),
-                  `**${game.players[j].number} ${nicknames.get(
-                    game.players[j].id
-                  )} ${fn.getEmoji(
-                    client,
-                    "Tough Guy"
-                  )}** was wounded last night and has died now.`
-                )
-                game = fn.death(client, game, game.players[j].number)
-              }
             }
           }
           
           if (game.currentPhase % 3 == 2) {
+            game.running = "kill attacked tg"
+            let killedtgs = []
+            for (var tg of game.players.filter(p => p.role == "Tough Guy" && p.alive && !p.health)) {
+              Object.assign(tg, {
+                health: 1,
+                alive: false,
+                roleRevealed: tg.role
+              })
+
+              fn.broadcastTo(
+                client,
+                game.players.filter(p => !p.left),
+                `**${tg.number} ${nicknames.get(
+                  tg.id
+                )} ${fn.getEmoji(
+                  client,
+                  "Tough Guy"
+                )}** was wounded last night and has died now.`
+              )
+              
+              killedtgs.push(tg)
+              
+              fn.addLog(
+                game,
+                `Tough Guy ${tg.number} ${nicknames.get(
+                  tg.id
+                )} died of wounds.`
+              )
+            }
+            
+            game = fn.death(client, game, killedtgs.map(p => p.number))
+            
+            game.running = "kill glitched player"
+            let corruptedDeaths = []
             for (var corr of game.players.filter(p => p.role == "Corruptor" && p.glitched && p.alive)) {
               for (var glitchedPlayer of corr.glitched) {
                 let glitched = game.players[glitchedPlayer-1]
                 if (!glitched.alive) continue;
-                game.running = "kill glitched player"
+                corruptedDeaths.push(glitched)
                 game.lastDeath = game.currentPhase
                 Object.assign(glitched, {
                   alive: false,
@@ -2091,11 +2224,17 @@ module.exports = client => {
                     client, "Unknown"
                   )}** was glitched and has died now.`
                 )
-
-                game = fn.death(client, game, glitched.number, "corr")
+              
+                fn.addLog(
+                  game,
+                  `${glitched.role} ${glitched.number} ${nicknames.get(
+                    tg.id
+                  )} was glitched and died.`
+                )
               }
               delete corr.glitched
             }
+            game = fn.death(client, game, corruptedDeaths.map(p => p.number), "corr")
           }
 
           let alive = game.players.filter(p => p.alive),
@@ -2122,6 +2261,10 @@ module.exports = client => {
             fn.addXP(game, game.players.filter(p => !p.suicide), 15)
             fn.addXP(game, game.players.filter(p => !p.left), 15)
             fn.addWin(game, [])
+            fn.addLog(
+              game,
+              `[RESULT] The game ended in a tie. No one won!`
+            )
             continue
           }
 
@@ -2184,6 +2327,12 @@ module.exports = client => {
                 .filter(p => !p.suicide && roles[p.role].team != "Village")
                 .map(p => p.number)
             )
+            fn.addLog(
+              game,
+              `[RESULT] The President was killed. All but the village win!\n[RESULT] Winners: ${game.players.filter(
+                p => !(roles[p.role].team == "Village" && !p.sect)
+              )}`
+            )
             continue;
           }
 
@@ -2212,9 +2361,15 @@ module.exports = client => {
                 )
             )
             game.running = "give xp and win for soul collector"
-            fn.addXP(game, [sc], 15)
+            fn.addXP(game, [sc], 100)
             fn.addXP(game, game.players.filter(p => !p.left), 15)
             fn.addWin(game, alive.filter(p => p.sect).map(p => p.number))
+            fn.addLog(
+              game,
+              `[RESULT] Soul Collector ${sc.number} ${nicknames.get(
+                sc.id
+              )} win.`
+            )
             continue
           }
 
@@ -2224,6 +2379,7 @@ module.exports = client => {
             alive.filter(p => !p.couple && p.role !== "Cupid").length == 0
           ) {
             let lovers = alive.filter(p => p.couple)
+            let cupid = game.players.filter(p => p.role == "Cupid" && !p.suicide)
             game.currentPhase = 999
             fn.broadcastTo(
               client,
@@ -2232,7 +2388,11 @@ module.exports = client => {
                 .setTitle("Game has ended.")
                 .setThumbnail(fn.getEmoji(client, "Cupid").url)
                 .setDescription(
-                  `The Love Couple **${lovers[0].number} ${nicknames.get(
+                  `${
+                    game.players.filter(p => p.role == "Cupid" && !p.suicide)
+                      ? `Cupid **${cupid.number} ${nicknames.get(cupid.id)}** and the `
+                      : ""
+                  }Love Couple **${lovers[0].number} ${nicknames.get(
                     lovers[0].id
                   )} ${fn.getEmoji(client, lovers[0].role)}** and **${
                     lovers[1].number
@@ -2250,7 +2410,18 @@ module.exports = client => {
               95
             )
             fn.addXP(game, game.players.filter(p => !p.left), 15)
-            fn.addWin(game, alive.filter(p => p.sect).map(p => p.number))
+            fn.addWin(game, game.players.filter(p => p.couple || (p.role == "Cupid" && !p.suicide)).map(p => p.number))
+            fn.addLog(
+              game,
+              `[RESULT] The ${
+                game.players.filter(p => p.role == "Cupid" && !p.suicide)
+                  ? "Cupid and the "
+                  : ""
+              }Love Couple win.\n[RESULT] Winners: ${game.players
+                .filter(p => p.couple || (p.role == "Cupid" && !p.suicide))
+                .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                .join(", ")}`
+            )
             continue
           }
 
@@ -2271,7 +2442,14 @@ module.exports = client => {
               75
             )
             fn.addXP(game, game.players.filter(p => !p.left), 15)
-            fn.addWin(game, alive.filter(p => p.sect).map(p => p.number))
+            fn.addWin(game, game.players.filter(p => p.role == "Zombie" && !p.suicide).map(p => p.number))
+            fn.addLog(
+              game,
+              `[RESULT] The zombies win.\n[RESULT] Winners: ${game.players
+                .filter(p => p.role == "Zombie" && !p.suicide)
+                .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                .join(", ")}`
+            )
             continue
           }
 
@@ -2296,7 +2474,14 @@ module.exports = client => {
               70
             )
             fn.addXP(game, game.players.filter(p => !p.left), 15)
-            fn.addWin(game, alive.filter(p => p.sect).map(p => p.number))
+            fn.addWin(game, game.players.filter(p => p.sect && !p.suicide).map(p => p.number))
+            fn.addLog(
+              game,
+              `[RESULT] The sect win.\n[RESULT] Winners: ${game.players
+                .filter(p => p.sect && !p.suicide)
+                .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                .join(", ")}`
+            )
             continue
           }
 
@@ -2354,7 +2539,7 @@ module.exports = client => {
               "Solo"
             )
             fn.addLog(game, `-divider-`)
-            fn.addLog(game, `${alive.find(p => roles[p.role].team == "Solo").role} ${
+            fn.addLog(game, `[RESULT] ${alive.find(p => roles[p.role].team == "Solo").role} ${
                     alive.find(p => roles[p.role].team == "Solo").number
                   } ${nicknames.get(
                     alive.find(p => roles[p.role].team == "Solo").id
@@ -2401,7 +2586,13 @@ module.exports = client => {
               "Werewolves"
             )
             fn.addLog(game, `-divider-`)
-            fn.addLog(game, `The werewolves won.`)
+            fn.addLog(
+              game,
+              `[RESULT] The werewolves win.\n[RESULT] Winners: ${game.players
+                .filter(p => !p.suicide && roles[p.role].team == "Werewolves")
+                .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                .join(", ")}`
+            )
             continue
           }
 
@@ -2450,7 +2641,21 @@ module.exports = client => {
               "Village"
             )
             fn.addLog(game, `-divider-`)
-            fn.addLog(game, `The village won.`)
+            fn.addLog(
+              game,
+              `[RESULT] The villagers win.\n[RESULT] Winners: ${game.players
+                .filter(
+                  p =>
+                    !p.suicide &&
+                    !p.sect &&
+                    (roles[p.role].team == "Village" ||
+                      (p.role == "Headhunter" &&
+                        !game.players.find(pl => pl.headhunter == p.number)
+                          .alive))
+                )
+                .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+                .join(", ")}`
+            )
             continue
           }
 
@@ -2462,7 +2667,7 @@ module.exports = client => {
               game.players.filter(p => !p.left),
               "There has been no deaths for two days. Three consecutive days without deaths will result in a tie."
             )
-            fn.addLog(game, `[WARN] There has been no deaths for two days.`)
+            fn.addLog(game, `There has been no deaths for two days.`)
           }
 
           // fn.updateLogs(client, game)
@@ -2479,25 +2684,73 @@ module.exports = client => {
             "s"
           )
 
-          game.running = "broadcast phase msg for dead"
-          fn.broadcastTo(
-            client,
-            game.players.filter(p => !p.left && !p.alive),
-            game.currentPhase % 3 == 0
-              ? `Night ${Math.floor(game.currentPhase / 3) + 1} has started!`
-              : game.currentPhase % 3 == 1
-              ? new Discord.MessageEmbed()
-                  .setTitle(
-                    `Day ${Math.floor(game.currentPhase / 3) + 1} has started!`
-                  )
-                  .setThumbnail(fn.getEmoji(client, "Day").url)
-                  .setDescription("Start discussing!")
-              : !game.noVoting
-              ? `Voting time has started. ${Math.floor(
-                  game.players.filter(player => player.alive).length / 2
-                )} votes are required to lynch a player.\nType \`w!vote [number]\` to vote against a player.`
-              : "There will be no voting today!"
-          )
+
+          game.running = "broadcast phase msg for alive"
+          switch (game.currentPhase % 3) {
+            case 0:
+              game.shade = false
+              for (var player of game.players.filter(
+                p =>
+                  !p.left && !p.alive
+              )) {
+                fn.getUser(client, player.id).send(
+                  new Discord.MessageEmbed()
+                    .setTitle(
+                      `Night ${Math.floor(game.currentPhase / 3) +
+                        1} has started!`
+                    )
+                    .setThumbnail(fn.getEmoji(client, "Night").url)
+                )
+              }
+              break
+            case 1:
+              for (var player of game.players.filter(p => !p.alive && !p.left)) {
+                fn.getUser(client, player.id).send(
+                  new Discord.MessageEmbed()
+                    .setTitle(
+                      `Day ${Math.floor(game.currentPhase / 3) +
+                        1} has started!`
+                    )
+                    .setThumbnail(fn.getEmoji(client, "Day").url)
+                )
+              }
+              if (game.shade)
+                fn.broadcastTo(
+                  client, game.players.filter(p => !p.alive && !p.left),
+                  new Discord.MessageEmbed()
+                    .setTitle("Shady Things")  
+                    .setThumbnail(fn.getEmoji(client, "Shadow Wolf Shade").url)
+                    .setDescription(
+                      `${fn.getEmoji(client, "Shadow Wolf")} Shadow Wolf manipulated today's voting!`
+                    )
+                )
+              break
+            case 2:
+              if (!game.noVoting)
+                fn.broadcastTo(
+                  client,
+                  game.players.filter(p => !p.alive && !p.left),
+                  new Discord.MessageEmbed()
+                    .setTitle(`Voting time has started!`)
+                    .setThumbnail(fn.getEmoji(client, "Voting").url)
+                    .setDescription(
+                      `${Math.floor(
+                        game.players.filter(player => player.alive).length / 2
+                      )} votes are required to lynch a player.\nType \`w!vote [number]\` to vote against a player.`
+                    )
+                )
+              else
+                fn.broadcastTo(
+                  client,
+                  game.players.filter(p => !p.alive && !p.left),
+                  new Discord.MessageEmbed()
+                    .setTitle("Peace For Today")
+                    .setThumbnail(fn.getEmoji(client, "Pacifist Reveal").url)
+                    .setDescription(`There is no voting today! ✌`)
+                )
+              break
+          }
+
 
           game.running = "broadcast phase msg for alive"
           switch (game.currentPhase % 3) {
@@ -2617,6 +2870,15 @@ module.exports = client => {
                     )}** has been nightmared and cannot use their abilities!`
                   )
               )
+              
+              fn.addLog(
+                game,
+                `Nightmare Werewolf ${nmww.number} ${nicknames.get(
+                  nmww.id
+                )} gave ${nmtarget.number} ${nicknames.get(
+                  nmtarget.id
+                )} (${nmtarget.role}) a nightmare and they cannot use their abilities.`
+              )
             }
 
             if (game.players.find(p => p.role == "Jailer")) {
@@ -2675,6 +2937,15 @@ module.exports = client => {
                         `You are now jailed.\nYou can talk to the jailer to prove your innocence.`
                       )
                   )
+              
+                  fn.addLog(
+                    game,
+                    `Jailer ${jailer.number} ${nicknames.get(
+                      jailer.id
+                    )} put ${jailed.number} ${nicknames.get(
+                      jailed.id
+                    )} (${jailed.role}) in jail.`
+                  )
                 } else game.players[jailed.number - 1].jailed = false
               } else if (jailer.alive) {
                 fn.getUser(client, jailer.id).send(
@@ -2709,6 +2980,11 @@ module.exports = client => {
                     fn.getEmoji(client, "Werewolf Berserk Frenzy").url
                   )
                   .setDescription("It's frenzy night!")
+              )
+              
+              fn.addLog(
+                game,
+                `Werewolf Frenzy is activated tonight.`
               )
             }
 
@@ -2753,7 +3029,7 @@ module.exports = client => {
                 )}\`\`\``
               )
           )
-          fn.addLog(game, `Game was terminated at \`${game.running}\`.`)
+          fn.addLog(game, `[ERROR] Game was terminated at \`${game.running}\`.`)
           fn.addLog(game, "[ERROR] " + error.stack.replace(/ {4}/g, "            "))
           game.currentPhase = 999
           // fn.addXP(game, game.players, 15)

@@ -60,7 +60,15 @@ module.exports = {
       }
     }
     message.channel.send("You have selected players " + args.map(x => `**${game.players[x-1].number} ${nicknames.get(game.players[x-1].id)}**`).join(", ") + " to collect their souls if they die!")
-    QuickGames[index] = game
+    fn.addLog( game,
+      `[ACTION] Soul Collector ${gamePlayer.number} ${nicknames.get(
+        gamePlayer.id
+      )} selected ${game.players
+        .filter(p => gamePlayer.box.includes(p.number))
+        .map(p => `${p.number} ${nicknames.get(p.id)}`)
+        .join(", ")} to collect their souls when they die.`
+    )
+    // QuickGames[index] = game
 
     games.set("quick", QuickGames)
   }

@@ -229,6 +229,15 @@ module.exports = async (client, game) => { try {
       fn.gameEmbed(client, game)
     )
   
+  if(game.instructions)
+    await fn.broadcastTo(
+      client, game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setColor("WHITE")
+        .setTitle("📋 Instructions")
+        .setDescription(game.instructions)
+    )
+  
   game.lastDeath = 0
   game.nextPhase = moment().add(30, "s")
   
@@ -253,7 +262,7 @@ module.exports = async (client, game) => { try {
         }\`\`\``
       )
   )
-  fn.addLog(game, `Game was terminated at \`start the game\`.`)
+  fn.addLog(game, `[ERROR] Game was terminated at \`start the game\`.`)
   fn.addLog(game, `[ERROR] ${error.stack.replace(/ {4}/g, "            ")}`)
   
   game.currentPhase = 999

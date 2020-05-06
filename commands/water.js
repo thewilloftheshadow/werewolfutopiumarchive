@@ -64,9 +64,12 @@ module.exports = {
       )
       fn.addLog(
         game,
-        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} has thrown holy water at and killed **${targetPlayer.number} ${
-        nicknames.get(targetPlayer.id)
-        } ${targetPlayer.role}`)
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+          gamePlayer.id
+        )} has thrown holy water at and killed ${
+          targetPlayer.number
+        } ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+      )
       
       game = fn.death(client, game, targetPlayer.number)
     }
@@ -81,11 +84,18 @@ module.exports = {
           nicknames.get(targetPlayer.id)
         }** and killed themselves. They are not a werewolf!`
       )
+      
       fn.addLog(
         game,
-        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} tried to throw holy water on **${targetPlayer.number} ${
-        nicknames.get(targetPlayer.id)
-        }** and killed themselves. They are not a werewolf!`)
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+          gamePlayer.id
+        )} tried to throw holy water on ${targetPlayer.number} ${nicknames.get(
+          targetPlayer.id
+        )} (${targetPlayer.role}) and killed themselves. ${targetPlayer.number} ${nicknames.get(
+          targetPlayer.id
+        )} is not a werewolf!`
+      )
+      
       gamePlayer.killedBy = targetPlayer.number
       
       game = fn.death(client, game, gamePlayer.number)
