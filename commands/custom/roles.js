@@ -27,7 +27,7 @@ module.exports = {
     if (!target)
       return await message.channel.send(`${fn.getEmoji(client, "red_tick")} Target not found.`)
     target = target.id
-    if(!players.get(target+".custom") || !players.get(target+".inventory.Custom Maker")) return message.reply("you don't have the Custom Maker! Buy it in the shop first")
+    if(!players.get(target+".custom") || !players.get(target+".inventory.custom maker")) return message.reply("you don't have the Custom Maker! Buy it in the shop first")
     
     let embed = new Discord.MessageEmbed()
     .setTitle(`Custom Roles for ${nicknames.get(target)}`)

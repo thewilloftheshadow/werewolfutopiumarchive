@@ -9,7 +9,7 @@ const games = new db.table("Games"),
       temp = new db.table("Temp"),
       authdb = new db.table("authdb"),
       logs = new db.table("Logs"),
-      api = new db.table("api")
+      apidb = new db.table("api")
 
 const config = require('/app/util/config'),
       fn = require('/app/util/fn'),

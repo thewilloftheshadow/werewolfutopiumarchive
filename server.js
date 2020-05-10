@@ -253,7 +253,7 @@ module.exports = client => {
     })
 
     app.get("/invite", (req, res) => {
-      res.redirect("https://discord.gg/M62npYk")
+      res.redirect("https://discord.gg/CV7hVgt")
     })
 
     app.get("/auth/discord", (req, res) => {
@@ -399,16 +399,19 @@ module.exports = client => {
       res.render(__dirname + "/views/roles.ejs", pass)
     })
 
-    app.get("/status", checkAuth, devonly, statusMonitor.pageRoute)
+    // app.get("/status", checkAuth, devonly, statusMonitor.pageRoute)
     
     //Begin /api routes
     api.all('*', (req, res) => {
-      if(!req.headers.wuapi) res.status(403).send("The API can only be accessed an API key. If you need assistance, contact TheShadow#8124")
+      if(!req.headers.wuapi){
+        fn.addLog("API", `New API request to ${req.path} from an unauthorized client at ${req.ip}.`)
+        return res.status(401).send("The API can only be accessed with an API key. If you need assistance, contact TheShadow#8124")
+      }
       let user = apidb.get(req.headers.wuapi)
       if(!user){
-        res.status(403).send("Invalid API key. If you need assistance, contact TheShadow#8124")
+        return res.status(403).send("Invalid API key. If you need assistance, contact TheShadow#8124")
       } else {
-        fn.addLog("API", `New API request to ${req.path} from the ${user} client.`)
+        fn.addLog("API", `New API request to ${req.path} from the ${user.client} client.`)
         req.next()
       }
     })
@@ -426,15 +429,35 @@ module.exports = client => {
     })
     
     api.post("/addcoins/:userid", apiWrite, async (req, res) => {
-      if(!req.body.amount) res.sendStatus(400)
-      players.add(req.params.userid+".coins", parseInt(req.body.amount, 10))
-      res.sendStatus(200)
+      let amount = req.data ? req.data.amount : req.body.amount
+      players.add(req.params.userid+".coins", parseInt(amount, 10))
+      return res.status(200).send(`Added ${amount} coin${amount > 1 ? "s" : ""} to ${req.params.userid}`)
     })
     
-    api.post("/addcoins/:userid", apiWrite, async (req, res) => {
-      if(!req.body.amount) res.sendStatus(400)
-      players.add(req.params.userid+".roses", parseInt(req.body.amount, 10))
-      res.sendStatus(200)
+    api.post("/addroses/:userid", apiWrite, async (req, res) => {
+      let amount = req.data.amount ? req.data.amount : req.body.amount
+      players.add(req.params.userid+".coins", parseInt(req.params.amount, 10))
+      return res.status(200).send(`Added ${amount} rose${amount > 1 ? "s" : ""} to ${req.params.userid}`)
+    })
+    
+    api.post("/restart", apiWrite, async (req, res) => {
+      res.status(200).send(`Restart for ${client.user.username} initiated`)
+      cmd.run("refresh")
+    })
+    
+    api.post("/add*", async (req, res) => {
+      res.status(400).send(`400 Missing user ID parameter`)
+    })
+    
+    api.get("/add*", async (req, res) => {
+      res.status(405).send("405 Method Not Allowed")
+    })
+    
+    app.all("*", async (req, res) => {
+      res.status(404).send("404 Not Found")
+    })
+    api.all("*", async (req, res) => {
+      res.status(404).send("404 Not Found")
     })
 
     function apiWrite(req, res, next) {

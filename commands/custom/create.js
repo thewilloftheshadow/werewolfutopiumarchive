@@ -28,7 +28,7 @@ module.exports = {
     if (players.get(`${message.author.id}.prompting`)) 
       return await message.author.send("You have an active prompt already!")
     
-    // players.set(`${message.author.id}.prompting`, true)
+    players.set(`${message.author.id}.prompting`, true)
     
     // if (!games.get("count")) games.set("count", 0)
     if (!games.get("quick")) games.set("quick", [])
@@ -443,7 +443,7 @@ module.exports = {
     
     //INSTRUCTIONS
     let instructions = null
-    while (!instructions) {
+    
       if (
         currentGame.gameID.match(/^betatest\_.*?$/gi) ||
         currentGame.gameID.match(/^devtest\_.*?$/gi)
@@ -494,14 +494,14 @@ module.exports = {
                 .setColor("RED")
                 .setTitle("Prompt timed out.")
             )
-          instructions = instructions.first().content.split(" ")
+          instructions = instructions.first().content
           currentGame.instructions = instructions
         } else {
           instructions = "No instructions provided"
           currentGame.instructions = "No instructions provided"
         }
-      } else break;
-    }
+      }
+    
     
     await message.author.send(
       new Discord.MessageEmbed()

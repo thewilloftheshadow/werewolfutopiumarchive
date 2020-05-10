@@ -654,7 +654,7 @@ let roles = {
     attr: { abil1: 1 },
     cgp : "1000c",
     tag : tags.ROLE.SOLO_KILLER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Illusionist": {
   	desc: "Each night you can disguise a player." +
@@ -754,7 +754,7 @@ let roles = {
     desc: "One of: Fool, Headhunter or Soul Collector",
     abbr: ["rv"],
     cat : "Random",
-    tag : tags.ROLE.TO_BE_TESTED,
+    tag : tags.ROLE.AVAILABLE,
     cgp : "250c",
   },
   "Random Killer": {
@@ -762,7 +762,7 @@ let roles = {
           " Sect Leader, Serial Killer, Zombie",
     abbr: ["rk"],
     cat : "Random",
-    tag : tags.ROLE.TO_BE_TESTED,
+    tag : tags.ROLE.AVAILABLE,
     cgp : "250c",
   },
   

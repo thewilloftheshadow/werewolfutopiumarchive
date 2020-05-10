@@ -516,30 +516,30 @@ const death = (client, game, killed, suicide = false) => {
     }
   }
           
-  game.running = "test for tie after any death"
-  let alive = game.players.filter(p => p.alive)
-  if (
-    !alive.length
-  ) {
-    game.running = "tie end"
-    game.currentPhase = 999
-    broadcastTo(
-      client,
-      game.players.filter(p => !p.left),
-      new Discord.MessageEmbed()
-        .setTitle("Game has ended.")
-        .setThumbnail(getEmoji(client, "Death").url)
-        .setDescription(`It was a tie. There are no winners.`)
-    )
-    game.running = "give tie xp"
-    addXP(game, game.players.filter(p => !p.suicide), 15)
-    addXP(game, game.players.filter(p => !p.left), 15)
-    addWin(game, [])
-    addLog(
-      game,
-      `[RESULT] The game ended in a tie. No one won!`
-    )
-  }
+  // game.running = "test for tie after any death"
+  // let alive = game.players.filter(p => p.alive)
+  // if (
+  //   !alive.length
+  // ) {
+  //   game.running = "tie end"
+  //   game.currentPhase = 999
+  //   broadcastTo(
+  //     client,
+  //     game.players.filter(p => !p.left),
+  //     new Discord.MessageEmbed()
+  //       .setTitle("Game has ended.")
+  //       .setThumbnail(getEmoji(client, "Death").url)
+  //       .setDescription(`It was a tie. There are no winners.`)
+  //   )
+  //   game.running = "give tie xp"
+  //   addXP(game, game.players.filter(p => !p.suicide), 15)
+  //   addXP(game, game.players.filter(p => !p.left), 15)
+  //   addWin(game, [])
+  //   addLog(
+  //     game,
+  //     `[RESULT] The game ended in a tie. No one won!`
+  //   )
+  // }
 
   return game
 }

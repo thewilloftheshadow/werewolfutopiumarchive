@@ -52,6 +52,7 @@ module.exports = {
     
     players.add(`${targetPlayer.id}.inventory.talisman.${role.name}`, am)
     let talisman = await fn.createTalisman(client, role.name)
+    fn.addLog("items", `${message.author.tag} added ${am} ${role.name} talisman(s) to ${nicknames.get(targetPlayer.id)}, giving them a total of ${players.get(`${targetPlayer.id}.inventory.talisman.${role.name}`)} ${role.name} talisman(s)`)
     
     
     await message.channel.send(

@@ -21,6 +21,9 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
+    if (game.currentPhase == -0.5)
+      return await message.channel.send("Please wait until the game has complete its starting sequence!")
+    
     message.author.send(
       new Discord.MessageEmbed()
         .setTitle(game.mode == 'custom' ? game.name : `Game #${game.gameID}`)

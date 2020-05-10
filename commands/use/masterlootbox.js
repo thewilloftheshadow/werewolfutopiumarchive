@@ -27,7 +27,7 @@ module.exports = {
     else am = 1
     let item = shop["master lootbox"]
     let rb = players.get(message.author.id+".inventory."+item.itemid)
-    if(rb < 1) return await message.channel.send(`You do not have any Master Lootboxes.`)
+    if((rb || 0) < 1) return await message.channel.send(`You do not have any Master Lootboxes.`)
     let player = players.get(message.author.id)
     players.subtract(message.author.id+".inventory.master lootbox", 1)
     
@@ -88,6 +88,7 @@ module.exports = {
     }
     
     await message.channel.send(embed)
+    fn.addLog("items", `${message.author.tag} used ${am} ${item.name}(s) to ${nicknames.get(message.author.id)}, leaving them with a total of ${players.get(`${message.author.id}.inventory.${item.itemid}`)} ${item.name}(s). ${embed.description}`)
     
   }
 }

@@ -44,6 +44,7 @@ module.exports = {
       return await message.channel.send(`Nope. You can't **give zero roses**!`)
     
     players.add(`${targetPlayer.id}.roses`, input)
+    fn.addLog("roses", `${message.author.tag} added ${input} rose(s) to ${nicknames.get(targetPlayer.id)}, giving them a total of ${players.get(`${targetPlayer.id}.roses`)} roses(s).`)
     
     let reason = args.slice(2).join(' ')
     

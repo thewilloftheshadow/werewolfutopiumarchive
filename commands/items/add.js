@@ -44,6 +44,7 @@ module.exports = {
     if(!item) return message.channel.send(`${fn.getEmoji(client, "red_tick")} Invalid item.`)
     
     players.add(`${targetPlayer.id}.inventory.${item.itemid}`, am)
+    fn.addLog("items", `${message.author.tag} added ${am} ${item.name}(s) to ${nicknames.get(targetPlayer.id)}, giving them a total of ${players.get(`${targetPlayer.id}.inventory.${item.itemid}`)} ${item.name}(s).`)
     
     
     await message.channel.send(

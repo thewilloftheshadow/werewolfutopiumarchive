@@ -14,10 +14,8 @@ module.exports = {
   name: "bouquet",
   aliases: ["rose bouquet"],
   run: async (client, message, args, shared) => {
-    //return;
-    console.log(args)
+    if(!message.author.id === "439223656200273932") return await message.channel.send("Sorry! Roses are unable to be given to people right now")
     let rb = players.get(message.author.id+".inventory.rose bouquet")
-    console.log(rb)
     if(!rb || rb < 1) return await message.channel.send(`Hey there! You can't give out ${fn.getEmoji(client, "Rose_Bouquet")} Rose Bouquets if you haven't bought any! Go buy some in the shop first!`)
     let player = players.get(message.author.id)
     if (!player.currentGame) return await message.channel.send(`You can only give out ${fn.getEmoji(client, "Rose_Bouquet")} Rose Bouquets when you are in a game!`)
@@ -36,8 +34,10 @@ module.exports = {
       .setThumbnail(fn.getEmoji(client, "Rose Bouquet").url)
     )
       players.add(player.id+".roses", 1)
+      fn.addLog("roses", `${nicknames.get(message.author.id)} gave ${1} Rose to ${nicknames.get(p.id)}, leaving them with a total of ${players.get(`${message.author.id}.inventory.rose`)} Rose(s). ${nicknames.get(p.id)} now has ${players.get(p.id+".roses")} Roses.`)
     })
     await message.channel.send(`Success! You've given a ${fn.getEmoji(client, "Rose Bouquet")} rose to everyone in Game #${player.currentGame}!`)
-    players.subtract(message.author.id+"inventory.rose bouquet", 1)
+    players.subtract(message.author.id+".inventory.rose bouquet", 1)
+    fn.addLog("items", `${nicknames.get(message.author.id)} used 1 Rose Bouquet, leaving them with a total of ${players.get(`${message.author.id}.inventory.rose bouquet`)} Rose Bouquet(s)`)
   }
 }

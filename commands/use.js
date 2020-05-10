@@ -31,6 +31,7 @@ module.exports = {
       input = args[0]
     }
     let item = shop[input]
+    if(input === "bouquet") item = shop["rose bouquet"]
     if(!item) return message.channel.send(`${fn.getEmoji(client, "red_tick")} Invalid item.`)
     let rb = players.get(message.author.id+".inventory."+item.itemid)
     if(rb < 1) return await message.channel.send(`You do not have any ${item.name}${item.plural}s.`)

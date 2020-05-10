@@ -46,6 +46,9 @@ module.exports = {
     input = Math.min(input, players.get(`${targetPlayer.id}.roses`))
     
     players.subtract(`${targetPlayer.id}.roses`, input)
+    let item = {name: "Rose"}
+    fn.addLog("roses", `${message.author.tag} removed ${input} rose(s) to ${nicknames.get(targetPlayer.id)}, leaving them with a total of ${players.get(`${targetPlayer.id}.roses`)} roses(s).`)
+    
     
     let reason = args.slice(2).join(' ')
     

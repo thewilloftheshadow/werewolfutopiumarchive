@@ -14,7 +14,7 @@ module.exports = {
   name: "buy",
   aliases: ["purchase"],
   run: async (client, message, args) => {
-    let m = await message.channel.send("** **")
+    // let m = await message.channel.send("** **")
     let am = parseInt(args[args.length - 1], 10)
     if (!Number.isNaN(am)) args.pop()
     else am = 1
@@ -22,21 +22,26 @@ module.exports = {
     let item = shop[args.join(" ").toLowerCase()],
         player = players.get(message.author.id)
     if (!item)
-      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} Invalid item`))
+      return await message.channel.send(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} Invalid item`))
     
     if (item.unavailable && ![ "336389636878368770", "439223656200273932" ].includes(message.author.id))
-      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} That item is currently unavailable to purchase`))
+      return await message.channel.send(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} That item is currently unavailable to purchase`))
     
     if (item.name === "Custom Maker" && players.get(`${message.author.id}.inventory.${item.itemid}`))
-      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have the Custom Maker item!`))
+      return await message.channel.send(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have the Custom Maker item!`))
     if (item.name === "Private Channel" && players.get(`${message.author.id}.inventory.${item.itemid}`))
-      return await m.edit(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have a private channel!`))
+      return await message.channel.send(new Discord.MessageEmbed().setDescription(`${fn.getEmoji(client, "red_tick")} You already have a private channel!`))
     if (item.name === "Custom Maker" && am > 1)
       am = 1
     
     let role = null
     if(item.name === "Talisman"){
-      m.edit(new Discord.MessageEmbed().setTitle("Choose a role").setDescription("What role do you want your talisman to be?").setThumbnail(fn.getEmoji(client, "Talisman").url))
+      let m = await message.channel.send(
+        new Discord.MessageEmbed()
+          .setTitle("Choose a role")
+          .setDescription("What role do you want your talisman to be?")
+          .setThumbnail(fn.getEmoji(client, "Talisman").url)
+      )
       //message.channel.send("What role do you want your talisman to be?")
       let inputRole = await message.channel
         .awaitMessages(msg => msg.author.id == message.author.id, {
@@ -47,7 +52,7 @@ module.exports = {
         .catch(() => {})
 
       if (!inputRole) return await m.edit(new Discord.MessageEmbed().setDescription("Timed out, please try again."))
-      inputRole.first().delete()
+      //inputRole.first().delete()
       inputRole = inputRole.first().content.replace(/(_|\s+)/g, " ")
 
       role = Object.values(roles).find(
@@ -69,28 +74,33 @@ module.exports = {
     
     let currency = item.currency
     let curremoji = currency == "coins" ? "Coin" : "Rose"
-    if (player[currency] < price) return await m.edit(
-      new Discord.MessageEmbed()
-      .setTitle("Uh oh!")
-      .setDescription(
-        `You have insufficent coins to purchase ${am} ${item.name}${
-        am > 1 ? "'s" : ""
-        }. You have ${player[currency]} ${fn.getEmoji(
-          client,
-          curremoji
-        )}, but you need ${price} ${fn.getEmoji(client, curremoji)}.`
-      )
-      .setThumbnail(
-        item.name === "Talisman"
-        ? "attachment://" + attachment.name
-        : fn.getEmoji(client, item.emoji ? item.emoji : item.name).url
-      )
-    )
+    if (player[currency] < price) {
+      let embed = new Discord.MessageEmbed()
+        .setTitle("Uh oh!")
+        .setDescription(
+          `You have insufficent coins to purchase ${am} ${item.name}${
+            am > 1 ? "'s" : ""
+          }. You have ${player[currency]} ${fn.getEmoji(
+            client,
+            curremoji
+          )}, but you need ${price} ${fn.getEmoji(client, curremoji)}.`
+        )
+        .setThumbnail(
+          item.name === "Talisman"
+            ? "attachment://" + attachment.name
+            : fn.getEmoji(client, item.emoji ? item.emoji : item.name).url
+        )
+      if (currency == "roses")
+        embed.setFooter(
+          "Only received roses count when purchasing items! You can check your balance in `w!profile`!"
+        )
+      return await message.channel.send(embed)
+    }
     
     
-    await m.delete()
+    // await m.delete()
     let e2 = attachment ? new Discord.MessageEmbed().attachFiles([attachment]) : new Discord.MessageEmbed()
-    m = await message.channel.send(
+    let m = await message.channel.send(
       e2.setTitle("Confirmation")
         .setDescription(
           `Are you sure you want to purchase ${am} ${
@@ -146,14 +156,14 @@ module.exports = {
         )
       )
       let nameInput = await namePrompt.channel
-      .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
-      .catch(() => {})
-      if (!nameInput)
-        return await message.channel.send(
-          new Discord.MessageEmbed()
-          .setColor("RED")
-          .setTitle("Prompt timed out.")
-        )
+        .awaitMessages(msg => msg.author.id == message.author.id, { time: 30*1000, max: 1, errors: ["time"] })
+        .catch(() => {})
+        if (!nameInput)
+          return await message.channel.send(
+            new Discord.MessageEmbed()
+            .setColor("RED")
+            .setTitle("Prompt timed out.")
+          )
       name = nameInput.first().content
       nameInput.first().delete().catch(()=>{})
       let newchan = await client.guilds.cache.get("522638136635817986").channels.create(name.replace(/[^a-z0-9-]/g, '').toLowerCase(), {
@@ -175,8 +185,11 @@ module.exports = {
     
     //players.subtract(message.author.id+".coins", price) 
     players.subtract(message.author.id+"."+currency, price)
+    fn.addLog("items", `${nicknames.get(message.author.id)} purchased ${am} ${role ? role.name + " " : ""}${
+            item.name
+          }${am > 1 ? item.plural : ""}.`)
     // message.channel.send(`Success! You have purchased ${am} ${role ? role.name + " " : ""}${item.name}${am > 1 ? "s" : ""}`)
-    await m.edit(
+    await message.channel.send(
       new Discord.MessageEmbed()
         .setTitle("Success!")
         .setDescription(
@@ -189,6 +202,7 @@ module.exports = {
             ? await fn.createTalisman(client, role.name)
             : fn.getEmoji(client, item.emoji ? item.emoji : item.name).url + "?size=64"
         )
-    )  
+    )
+    
   }
 }

@@ -43,6 +43,10 @@ module.exports = {
         )} more.`
       )
     
+    if (players.get(`${message.author.id}.prompting`)) 
+      return await message.author.send("You have an active prompt already!")
+    players.set(`${message.author.id}.prompting`, true)
+    
     let conf = await message.author.send(`Changing your username costs 100 ${fn.getEmoji(client, "Coin")}. Proceed?`)
     await conf.react(fn.getEmoji(client, "green_tick"))
     let reactions = await conf.awaitReactions(
@@ -80,8 +84,8 @@ module.exports = {
         !usedNicknames.includes(response.toLowerCase())
       )
         input = response.replace(/_/g, "\\_")
-      else if (response.length > (players.get(message.author.id+".length") || 14))
-        await m.channel.send("This username is too long! The maximum number of characters is " + (players.get(message.author.id+".length") || 15))
+      else if (response.length > (player.usernameLength || 14))
+        await m.channel.send("This username is too long! The maximum number of characters is " + (player.usernameLength || 15))
       else if (response.length < 3)
         await m.channel.send("This username is too short!")
       else if (!response.match(/^[a-z0-9\_]{3,14}$/i))

@@ -27,20 +27,20 @@ module.exports = {
     else am = 1
     let item = shop["apprentice lootbox"]
     let rb = players.get(message.author.id+".inventory."+item.itemid)
-    if(rb < 1) return await message.channel.send(`You do not have any Apprentice Lootboxes.`)
+    if((rb || 0) < 1) return await message.channel.send(`You do not have any Apprentice Lootboxes.`)
     let player = players.get(message.author.id)
     players.subtract(message.author.id+".inventory.apprentice lootbox", 1)
     
     let items = [
       {
-        weight: 10,
+        weight: 7,
         item: "coin",
-        possibleValues: numArray(10, 10, 15)
+        possibleValues: numArray(15, 15, 15)
       },
       {
         weight: 5,
         item: "rose",
-        possibleValues: numArray(3, 1, 12)
+        possibleValues: numArray(5, 1, 20)
       },
       {
         weight: 3,
@@ -64,14 +64,14 @@ module.exports = {
     
     switch (bonusItem.item) {
       case "talisman":
-        let roles = ["Aura Seer", "Medium", "Jailer", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", "Bodyguard", "Gunner", "Wolf Shaman", "Aura Seer", "Cursed", "Wolf Seer", "Priest"]
+        let roles = ["Mayor","Beast Hunter","Detective","Fortune Teller","Marksman","Red Lady","Sheriff","Witch","Avenger","Werewolf Berserk","Guardian Wolf","Junior Werewolf","Arsonist","Bomber","Zombie"]
         let selectedRole = roles[Math.floor(roles.length*Math.random())]
         let talisman = await fn.createTalisman(client, selectedRole)
         players.add(message.author.id+".inventory.talisman."+selectedRole, bonusItemAmt)
         embed
           .attachFiles([talisman])
           .setThumbnail(`attachment://${talisman.name}`)
-          .setDescription(`${nicknames.get(message.author.id)} has received a ${selectedRole} Talisman from an apprentice lootbox.`)
+          .setDescription(`${nicknames.get(message.author.id)} has received 3 ${selectedRole} Talismans from an apprentice lootbox.`)
         break;
       case "coin":
         players.add(message.author.id+".coins", bonusItemAmt)
@@ -88,6 +88,7 @@ module.exports = {
     }
     
     await message.channel.send(embed)
+    fn.addLog("items", `${message.author.tag} used ${am} ${item.name}(s) to ${nicknames.get(message.author.id)}, leaving them with a total of ${players.get(`${message.author.id}.inventory.${item.itemid}`)} ${item.name}(s). ${embed.description}`)
     
   }
 }

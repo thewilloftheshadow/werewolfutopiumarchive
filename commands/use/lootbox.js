@@ -27,7 +27,7 @@ module.exports = {
     else am = 1
     let item = shop["lootbox"]
     let rb = players.get(message.author.id+".inventory."+item.itemid)
-    if(rb < 1) return await message.channel.send(`You do not have any lootboxes.`)
+    if((rb || 0) < 1) return await message.channel.send(`You do not have any lootboxes.`)
     let player = players.get(message.author.id)
     players.subtract(message.author.id+".inventory.lootbox", 1)
     
@@ -71,7 +71,7 @@ module.exports = {
         embed
           .attachFiles([talisman])
           .setThumbnail(`attachment://${talisman.name}`)
-          .setDescription(`${nicknames.get(message.author.id)} has received a ${selectedRole} Talisman from a lootbox.`)
+          .setDescription(`${nicknames.get(message.author.id)} has received 3 ${selectedRole} Talismans from a lootbox.`)
         break;
       case "coin":
         players.add(message.author.id+".coins", bonusItemAmt)
@@ -88,6 +88,7 @@ module.exports = {
     }
     
     await message.channel.send(embed)
+    fn.addLog("items", `${message.author.tag} used ${am} ${item.name}(s) to ${nicknames.get(message.author.id)}, leaving them with a total of ${players.get(`${message.author.id}.inventory.${item.itemid}`)} ${item.name}(s). ${embed.description}`)
     
   }
 }

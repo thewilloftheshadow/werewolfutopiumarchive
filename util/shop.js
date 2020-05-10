@@ -1,33 +1,36 @@
 module.exports = {
   "lootbox": {
-    price: 50,
+    price: 10,
     name: "Lootbox",
     description: "Just a common lootbox with ordinary stuff",
     itemid: "lootbox",
-    unavailable: true,
+    unavailable: false,
     emoji: "lootbox",
-    currency: "coins",
-    plural: "es"
+    currency: "roses",
+    plural: "es",
+    aliases: ["lb"]
   },
   "apprentice lootbox": {
-    price: 75,
+    price: 20,
     name: "Apprentice Lootbox",
     description: "The medium-tier lootbox, with sorta good stuff.",
     itemid: "apprentice lootbox",
-    unavailable: true,
+    unavailable: false,
     emoji: "apprentice lootbox",
-    currency: "coins",
-    plural: "es"
+    currency: "roses",
+    plural: "es",
+    aliases: ["alb","applb"]
   },
   "master lootbox": {
-    price: 100,
+    price: 1e+99,
     name: "Master Lootbox",
     description: "The high-tier lootbox, with the pro-gamer stuff.",
     itemid: "master lootbox",
-    unavailable: true,
+    unavailable: false,
     emoji: "master lootbox",
-    currency: "coins",
-    plural: "es"
+    currency: "roses",
+    plural: "es",
+    aliases: ["mlb", "masterlb"]
   },
   "rose": {
     price: 25,
@@ -48,7 +51,8 @@ module.exports = {
     unavailable: true,
     emoji: "rose bouquet",
     currency: "coins",
-    plural: "s"
+    plural: "s",
+    aliases: ["bouquet"]
   },
   "custom maker": {
     price: 1500,
@@ -59,7 +63,8 @@ module.exports = {
     unavailable: false,
     emoji: "random",
     currency: "coins",
-    plural: ""
+    plural: "",
+    aliases: ["cmi"]
   },
   "private channel": {
     price: 3000,
@@ -70,7 +75,8 @@ module.exports = {
     unavailable: false,
     emoji: "Private",
     currency: "coins",
-    plural: ""
+    plural: "",
+    // aliases: ["prv"]
   },
   "talisman": {
     price: 25,

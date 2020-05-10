@@ -998,17 +998,228 @@ module.exports = client => {
             }
             
             // CANNIBAL EAT
-//             let eatenall = []
-//             for (var canni of cannis) {
-//               if (!canni.usedAbilityTonight) canni.abil1++
-//               else {
-//                 let eatenPlayers = game.players.filter(p => p.alive && canni.usedAbilityTonight.includes(p.number))
+            let canniKilled = []
+            for (var canni of cannis) {
+              if (canni.usedAbilityTonight) {
+                let eatenPlayers = game.players.filter(p => p.alive && canni.usedAbilityTonight.includes(p.number))
                 
-//                 for (var eaten of eatenPlayers) {
-                  
-//                 }
-//               }
-//             }
+                for (var attackedPlayer of eatenPlayers) {
+                  canni.abil1--
+                  if (
+                    attackedPlayer.protectors.length ||
+                    (attackedPlayer.role == "Red Lady" &&
+                      attackedPlayer.visitedTonight)
+                  ) {
+                    fn.getUser(client, canni.id).send(
+                      `**${attackedPlayer.number} ${nicknames.get(
+                        attackedPlayer.id
+                      )}** cannot be killed!`
+                    )
+
+                    if (
+                      attackedPlayer.role == "Red Lady" &&
+                      attackedPlayer.visitedTonight
+                    ) {
+                      fn.addLog(
+                        game,
+                        `Cannibal ${canni.number} ${nicknames.get(canni.id)} couldn't kill Red Lady ${
+                        attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} as they weren't home.`
+                      )
+                      continue;
+                    }
+
+                    for (var x of attackedPlayer.protectors) {
+                      game.running = "protect from cannibal attack"
+
+                      let protector = game.players[x - 1]
+
+                      if (protector.role == "Jailer") {}
+                      else if (protector.role == "Doctor") {
+                        game.running = "protect from canni attack for doc"
+                        fn.getUser(client, protector.id).send(
+                          new Discord.MessageEmbed()
+                            .setAuthor(
+                              "Protection",
+                              fn.getEmoji("Doctor_Protection").url
+                            )
+                            .setDescription(
+                              `Your protection saved **${
+                                attackedPlayer.number
+                              } ${nicknames.get(attackedPlayer.id)}** last night!`
+                            )
+                        )
+                        fn.addLog(
+                          game,
+                          `Doctor ${protector.number} ${nicknames.get(protector.id)} saved ${
+                          attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} from Cannibal ${
+                          canni.number} ${nicknames.get(canni.id)}'s attack.`
+                        )
+                      }
+                      else if (protector.role == "Beast Hunter") {
+                        game.running = "protect from canni attack for bh"
+                        protector.trap.status = -1
+
+                        fn.getUser(client, protector.id).send(
+                          new Discord.MessageEmbed()
+                            .setAuthor(
+                              "Trap Triggered!",
+                              fn.getEmoji(client, "Beast Hunter TrapInactive").url
+                            )
+                            .setDescription(
+                              "Your target was too string to be killed!"
+                            )
+                        )
+                        fn.addLog(
+                          game,
+                          `Beast Hunter ${protector.number} ${nicknames.get(protector.id)}'s trap saved ${
+                          attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} from Cannibal ${
+                          canni.number} ${nicknames.get(canni.id)}'s attack.`
+                        )
+                      }
+                      else if (protector.role == "Witch") {
+                        game.running = "protect from canni attack for witch"
+                        protector.abil1 = 0
+
+                        fn.getUser(client, protector.id).send(
+                          new Discord.MessageEmbed()
+                            .setAuthor("Elixir", fn.getEmoji("Witch Elixir").url)
+                            .setDescription("Last night your potion saved a life!")
+                        )
+
+                        fn.addLog(
+                          game,
+                          `Witch ${protector.number} ${nicknames.get(protector.id)} saved ${
+                          attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} from Cannibal ${
+                          canni.number} ${nicknames.get(canni.id)}'s attack with their elixir potion.`
+                        )
+                      }
+                      // FORGER'S SHIELD
+                      else if (protector.role == "Bodyguard") {
+                        game.running = "protect from canni attack for bg"
+                        protector.health -= 1
+                        if (protector.health) {
+                          fn.getUser(client, protector.id).send(
+                            new Discord.MessageEmbed()
+                              .setTitle(
+                                `fn.getEmoji(client, "Bodyguard_Protect") Attacked!`
+                              )
+                              .setDescription(
+                                "You fought off an attack last night and survived.\n" +
+                                  "Next time you are attacked you will die."
+                              )
+                          )
+
+                          fn.addLog(
+                            game,
+                            `Bodyguard ${protector.number} ${nicknames.get(
+                              protector.id
+                            )} fought off from Cannibal ${
+                              canni.number
+                            } ${nicknames.get(canni.id)}'s attack on ${
+                              attackedPlayer.number
+                            } ${nicknames.get(attackedPlayer.id)}.`
+                          )
+                        } else {
+                          game.running = "kill bg protector - attacker canni"
+                          game.lastDeath = game.currentPhase
+                          protector.alive = false
+                          protector.killedBy = canni.number
+                          if (game.config.deathReveal)
+                            protector.roleRevealed = protector.role
+                          fn.broadcastTo(
+                            client,
+                            game.players.filter(p => !p.left),
+                            `The cannibal ate **${
+                              protector.number
+                            } ${nicknames.get(protector.id)}${
+                              game.config.deathReveal
+                                ? ` ${fn.getEmoji(client, protector.role)}`
+                                : ""
+                            }**.`
+                          )
+
+                          fn.addLog(
+                            game,
+                            `Bodyguard ${protector.number} ${nicknames.get(protector.id)} was stabbed to death when saving ${
+                            attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} from Cannibal ${
+                            canni.number} ${nicknames.get(canni.id)}'s attack.`
+                          )
+
+                          canniKilled.push(protector.number)
+
+                          // game = fn.death(client, game, protector.number)
+                        }
+                      }
+                      else if (protector.role == "Tough Guy") {
+                        game.running = "protect from canni attack for tg"
+                        protector.health = 0
+
+                        fn.getUser(client, protector.id).send(
+                          new Discord.MessageEmbed()
+                            .setAuthor(
+                              "Attacked!",
+                              fn.getEmoji(client, "Bodyguard Protect").url
+                            )
+                            .setDescription(
+                              `You protected **${
+                                attackedPlayer.number
+                              } ${nicknames.get(
+                                attackedPlayer.id
+                              )}** who was attacked by **${
+                                canni.number
+                              } ${nicknames.get(canni.id)} ${fn.getEmoji(
+                                client,
+                                canni.role
+                              )}**.\n` +
+                                "You have been wounded and will die at the end of the day."
+                            )
+                        )
+
+                        fn.addLog(
+                          game,
+                          `Tough Guy ${protector.number} ${nicknames.get(protector.id)} was wounded when saving ${
+                          attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} from Cannibal ${
+                          canni.number} ${nicknames.get(canni.id)}'s attack.`
+                        )
+                      }
+                    }
+                  }
+                  else {
+                    game.running = "kill canni-attacked player"
+                    game.lastDeath = game.currentPhase
+                    attackedPlayer.alive = false
+                    attackedPlayer.killedBy = canni.number
+                    if (game.config.deathReveal)
+                      attackedPlayer.roleRevealed = attackedPlayer.role
+                    fn.broadcastTo(
+                      client,
+                      game.players.filter(p => !p.left).map(p => p.id),
+                      `The cannibal ate **${
+                        attackedPlayer.number
+                      } ${nicknames.get(attackedPlayer.id)}${
+                        game.config.deathReveal
+                          ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
+                          : ""
+                      }**.`
+                    )
+
+                    fn.addLog(
+                      game,
+                      `${attackedPlayer.number} ${nicknames.get(
+                        attackedPlayer.id
+                      )} was eaten by Cannibal ${
+                        canni.number
+                      } ${nicknames.get(canni.id)}.`
+                    )
+
+                    canniKilled.push(attackedPlayer.number)
+                    // game = fn.death(client, game, attackedPlayer.number)
+                  }
+                }
+              }
+              if (canni.abil1 < 5) canni.abil1++
+            }
+            fn.death(client, game, canniKilled)
             
             // BANDIT KILL
 

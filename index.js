@@ -7,7 +7,10 @@ const Discord = require('discord.js'),
       moment = require('moment'),
       fetch = require('node-fetch'),
       db = require("quick.db"),
-      os = require('os')
+      os = require('os'),
+      cron = require('cron'),
+      cmd = require("node-cmd")
+
 
 const games = new db.table("Games"),
       players = new db.table("Players"),
@@ -22,6 +25,7 @@ const roles = require("/app/util/roles"),
 
 /* --- ALL GLOBAL CONSTANTS & FUNCTIONS --- */
 const client = new Discord.Client(),
+      CronJob = cron.CronJob,
       config = require('/app/util/config'),
       fn = require('/app/util/fn')
 
@@ -45,11 +49,11 @@ client.once('ready', async () => {
   console.log(`${fn.time()} | ${client.user.username} is up!`)
   fn.addLog(`MAIN`, `Werewolf Utopium bot is now ready.`)
   
-  client.user.setPresence({ activity: { name: 'for Werewolf Simulation Games' , type: "WATCHING"}, status: 'idle' })
+  client.user.setPresence({ activity: { name: 'Werewolf Online' , type: "PLAYING"}, status: 'idle' })
 
   require('/app/process/game.js')(client)
   
-  //alert players in game if w!restart was used
+  //alert players in game if w!restart or auto-restart was used
   let gamealert = temp.get("gamealert")
   if (gamealert) {
     let Games = games.get("quick")
@@ -76,6 +80,37 @@ client.once('ready', async () => {
     temp.delete("rebootchan")
     client.channels.cache.get(rebootchan).send("Bot has successfully been restarted!").catch(() => temp.delete("rebootchan"))
   }
+  
+  //Setup auto-restart job
+  const autoRestart = new CronJob("0 */6 * * *", async function() {
+    if (!games.get("quick")) games.set("quick", [])
+    let Games = games.get("quick")
+    let activeGames = Games.filter(game => game.currentPhase < 999)
+    if (!activeGames.length) {
+      temp.set("gamealert", false)
+    } else {
+      activeGames.forEach(game => {
+        if (!game.players.length) return
+        game.players.forEach(p =>
+          client.users.cache
+            .get(p.id)
+            .send(
+              "The bot is currently rebooting. It will not respond until it has finished. Don't worry, your game will pick back up right where it left off!"
+            )
+        )
+        fn.addLog(game, "-divider-")
+        fn.addLog(game, `Automatic bot restart in progress.`)
+      })
+      temp.set("gamealert", true)
+    }
+    fn.addLog("MAIN", `Automatic bot restart in progress.`)
+    await fn.sleep(5000)
+    client.user.setStatus("offline")
+    cmd.run("refresh")
+  })
+  
+  //start auto-restart job
+  autoRestart.start();
   
   //Check if there are logs that need to be written
   setInterval(() => {
@@ -334,6 +369,8 @@ client.on('message', async message => {
     message.delete().catch(error => {})
 		try {
 			await command.run(client, message, args, shared)
+      if (players.get(`${message.author.id}.prompting`))
+        players.delete(`${message.author.id}.prompting`)
 		} catch (error) {
 			await client.channels.cache.get("664285087839420416").send(
         new Discord.MessageEmbed()
@@ -372,6 +409,7 @@ client.on('message', async message => {
   
   if (message.channel.type !== "dm" || message.author.bot) return;
   if (message.content.toLowerCase().startsWith('w!') || message.content.toLowerCase() == "w!") return;
+  if (player.prompting) return;
   
   let pastMessages = (await message.channel.messages.fetch({ limit: 30 })).filter(m => m.author.id == message.author.id).first(6)
   if (pastMessages.length == 6 && new Date(pastMessages[pastMessages.length-1].createdTimestamp + 5000) >= new Date()) {
@@ -457,13 +495,13 @@ client.on('message', async message => {
       continue;
     }
     
-    if (content.match(/[A-Z]/g).length >= content.match(/[a-z]/g).length && content.length >= 10) {
-      await message.channel.send("You are auto-warned for the following reason: **Please do not use too many capital letters!**")
+    if ((content.match(/[A-Z]/g)||[]).length.length >= (content.match(/[a-z]/g)||[]).length && content.length >= 10) {
+      await message.channel.send("You are auto-warned for the following reason: **Please do not use too many capl letters!**")
       client.channels.cache.get("699144758525952000").send(
         new Discord.MessageEmbed()
           .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)
           .setDescription(content)
-          .addField("Reason", "Too many caps")
+          .addField("Reason","Too many caps")
       )
       fn.addLog(game, `[WARN] ${nicknames.get(message.author.id)} was using too many caps!`)
       content = content.toLowerCase()
@@ -643,4 +681,4 @@ client.on('message', async message => {
 //   // if (message.content.startsWith(""))
 // })
 
-require("./server.js")(client) //starts web server
+require("./server.js")(client)

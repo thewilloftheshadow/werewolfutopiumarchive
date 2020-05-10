@@ -51,7 +51,7 @@ module.exports = async (client, game) => { try {
           .setTitle("Talisman Used")
           .setDescription(`You used a ${role} Talisman.`)
       )
-      fn.addLog(game, `**${nicknames.get(thisPlayer.id)}** used a ${role} Talisman`)
+      fn.addLog(game, `${nicknames.get(thisPlayer.id)} used a ${role} Talisman.`)
     }
     Object.assign(game.players[i], {alive: true, protectors: []})
     
@@ -76,7 +76,7 @@ module.exports = async (client, game) => { try {
         thisPlayer.health = 1; break;
       case "Medium": case "Jailer": case "Priest": case "Flower Child": 
       case "Werewolf Berserk": case "Kitten Wolf": case "Guardian Wolf":
-      case "Pacifist": case "Wolf Pacifist": case "Shadow Wolf":
+      case "Pacifist": case "Wolf Pacifist": case "Shadow Wolf": case "Cannibal":
         thisPlayer.abil1 = 1; break;
       case "Gunner": case "Marksman":
       case "Nightmare Werewolf":
@@ -229,7 +229,7 @@ module.exports = async (client, game) => { try {
       fn.gameEmbed(client, game)
     )
   
-  if(game.instructions)
+  if(game.instructions){
     await fn.broadcastTo(
       client, game.players.filter(p => !p.left),
       new Discord.MessageEmbed()
@@ -237,6 +237,10 @@ module.exports = async (client, game) => { try {
         .setTitle("📋 Instructions")
         .setDescription(game.instructions)
     )
+    fn.addLog(game, "-divider2-")
+    fn.addLog(game, "Instructions:\n"+game.instructions)
+    fn.addLog(game, "-divider2-")
+  }
   
   game.lastDeath = 0
   game.nextPhase = moment().add(30, "s")
