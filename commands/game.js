@@ -24,8 +24,7 @@ module.exports = {
     if (game.currentPhase == -0.5)
       return await message.channel.send("Please wait until the game has complete its starting sequence!")
     
-    message.author.send(
-      new Discord.MessageEmbed()
+    let embed = new Discord.MessageEmbed()
         .setTitle(game.mode == 'custom' ? game.name : `Game #${game.gameID}`)
         .addField(
           `Players [${game.players.length}]`,
@@ -62,7 +61,9 @@ module.exports = {
                   }`
               ).join("\n")
         )
-        .addField(
+    
+    if (game.spectators.length) embed.addField(`Spectators [${game.spectators.length}]`, game.spectators.map(id => nicknames.get(id)).join("\n"))
+        embed.addField(
           `Roles`,
           game.originalRoles
             // .sort((a, b) => {
@@ -72,7 +73,7 @@ module.exports = {
             .map(r => `${fn.getEmoji(client, r)} ${r}`)
             .join("\n")
         )
-      
-    )
+      message.author.send(embed)
+    
   }
 }

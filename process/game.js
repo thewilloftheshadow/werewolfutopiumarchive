@@ -400,9 +400,9 @@ module.exports = client => {
                 )
               else if (
                 protector.role == "Beast Hunter" &&
-                protector.trap.status
+                protector.trap && (protector.trapAct || 999) <= game.currentPhase
               )
-                game.players[protector.trap.player - 1].protectors.push(
+                game.players[protector.trap - 1].protectors.push(
                   protector.number
                 )
               else if (
@@ -484,10 +484,7 @@ module.exports = client => {
               )
 
               if (
-                game.players.find(p => p.role == "Kitten Wolf") && !game.players
-                  .filter(p => p.alive && p.role == "Kitten Wolf")
-                  .map(p => p.usedAbilityTonight)
-                  .includes(attackedPlayer.number)
+                game.players.find(p => p.role == "Kitten Wolf" && p.alive && p.usedAbilityTonight == attackedPlayer.number)
               ) {
                 game.running = "ignore ww kill for kww conversion"
 
@@ -691,6 +688,9 @@ module.exports = client => {
                           attackedPlayer.id
                         )} with the other werewolves.`
                       )
+                      
+                      delete protector.trap
+                      delete protector.trapAct
 
                       game = fn.death(client, game, weakestWW.number)
                     }
@@ -1057,7 +1057,9 @@ module.exports = client => {
                       }
                       else if (protector.role == "Beast Hunter") {
                         game.running = "protect from canni attack for bh"
-                        protector.trap.status = -1
+                      
+                        delete protector.trap
+                        delete protector.trapAct
 
                         fn.getUser(client, protector.id).send(
                           new Discord.MessageEmbed()
@@ -1066,7 +1068,7 @@ module.exports = client => {
                               fn.getEmoji(client, "Beast Hunter TrapInactive").url
                             )
                             .setDescription(
-                              "Your target was too string to be killed!"
+                              "Your target was protected by a trap!"
                             )
                         )
                         fn.addLog(
@@ -1282,7 +1284,6 @@ module.exports = client => {
                   }
                   else if (protector.role == "Beast Hunter") {
                     game.running = "protect from sk attack for bh"
-                    protector.trap.status = -1
 
                     fn.getUser(client, protector.id).send(
                       new Discord.MessageEmbed()
@@ -1300,6 +1301,9 @@ module.exports = client => {
                       attackedPlayer.number} ${nicknames.get(attackedPlayer.id)} from Serial Killer ${
                       sk.number} ${nicknames.get(sk.id)}'s attack.`
                     )
+                      
+                    delete protector.trap
+                    delete protector.trapAct
                   }
                   else if (protector.role == "Witch") {
                     game.running = "protect from sk attack for witch"
@@ -1635,7 +1639,7 @@ module.exports = client => {
                 )
               }
               else if (attackedPlayer.protectors.length) {
-                if (attackedPlayer.protectors.find()) fn.broadcastTo(
+                fn.broadcastTo(
                   client, game.players.filter(p => !p.left && (roles[p.role].tag & tags.ROLE.SEEN_AS_WEREWOLF)),
                   `Kitten Wolf tried to convert **${attackedPlayer.number} ${nicknames.get(attackedPlayer.id)}**!` +
                   ` They were either protected, a Headhunter's target, or not a villager.`
@@ -1690,6 +1694,9 @@ module.exports = client => {
                         attackedPlayer.id
                       )}.`
                     )
+                    
+                    delete protector.trap
+                    delete protector.trapAct
 
                     game = fn.death(client, game, kww.number)
                   }

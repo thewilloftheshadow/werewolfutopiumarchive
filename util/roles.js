@@ -51,7 +51,7 @@ let roles = {
     cgp : "250c",
     nite: "Select a player to place your trap on (`w!trap [player]`). You can place the trap on yourself.",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   },
   "Bodyguard": {
     desc: "You can choose one player to protect every night." +
@@ -214,15 +214,15 @@ let roles = {
     team: "Village",
     abbr: ["mm"],
     cat : "Regular Villager",
-    day : "Kill your target (`w!shoot`) if you find them suspicious.\n" +
+    day : "Kill your target (`w!kill`) if you find them suspicious.\n" +
           "**⚠️ If your target is a villager, your shot will backfire and kill you!**",
     nite: "Mark a player as your target (`w!mark [player]`).\n" +
-          "After the next day, you can kill your target (`w!shoot`) if you find them suspicious.\n" +
+          "After the next day, you can kill your target (`w!kill`) if you find them suspicious.\n" +
           "**⚠️ If your target is a villager, your shot will backfire and kill you!**",
     attr: { abil1: 2 },
     cgp : "250c",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
+          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
   }, 
   "Mayor": {
   	desc: "Once during the game you can reveal your role which will make your vote count double during the rest of the game.",

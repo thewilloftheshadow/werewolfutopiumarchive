@@ -1,7 +1,9 @@
 const Discord = require('discord.js'),
       moment = require('moment'),
       db = require("quick.db"),
-      handybag = require("handybag")
+      handybag = require("handybag"),
+      os = require('os'),
+      osutils = require('os-utils');
 
 const games = new db.table("Games"),
       players = new db.table("Players"),

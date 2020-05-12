@@ -18,9 +18,9 @@ module.exports = {
     let allPlayers = players.all().map(x => {
       if (typeof x.data == 'string') x.data = JSON.parse(x.data)
       let data = {}
-      data.roses = x.data.roses
-      data.coins = x.data.coins
-      data.xp = x.data.xp
+      data.roses = x.data.roses || 0
+      data.coins = x.data.coins || 0
+      data.xp = x.data.xp || 0
       data.id = x.ID
       data.nickname = nicknames.get(x.ID) || (client.users.cache.get(x.ID) ? `* ${client.users.cache.get(x.ID).username}` : "* Unknown User")
       return data
@@ -31,16 +31,22 @@ module.exports = {
       else if (a[args[0].toLowerCase()] > b[args[0].toLowerCase()]) return -1
       if (a.wins < b.wins) return 1
       else if (a.wins > b.wins) return -1
+      if (a.nickname == "* Unknown User") return 1
+      if (a.nickname.startsWith("*") && !b.nickname.startsWith("*")) return 1
+      else if (!a.nickname.startsWith("*") && b.nickname.startsWith("*")) return -1
       if (a.nickname.toLowerCase() > b.nickname.toLowerCase()) return 1
       else if (a.nickname.toLowerCase() < b.nickname.toLowerCase()) return -1
     })
     
     // message.author.send(JSON.stringify(sortedPlayers, null, 2), {code: "fix", split: true})
     
+    console.log(sortedPlayers)
+    
     let embeds = []
     
     for (var [i, player] of sortedPlayers.entries()) {
       if (i % 10 == 0) embeds.push(new Discord.MessageEmbed().setDescription(""))
+      // if(player[args[0].toLowerCase()] == 0 || player[args[0].toLowerCase()] == undefined) continue;
       embeds[embeds.length - 1].description += `${
         i == 0
           ? ":first_place: "
@@ -49,7 +55,7 @@ module.exports = {
           : i == 2
           ? ":third_place: "
           : `\`${i+1}\` `
-      }${player.nickname}${player.id == message.author.id ? " (**you**)" : ""} [\`${player[args[0].toLowerCase()]}\`]\n`
+    }${player.nickname}${player.id == message.author.id ? " (**you**)" : ""} [\`${player[args[0].toLowerCase()] || 0}\`]\n`
     }
     
     for (var [i, embed] of embeds.entries()) {

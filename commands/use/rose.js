@@ -24,7 +24,7 @@ module.exports = {
       let target = parseInt(args[0])
       if (isNaN(target) || target > game.players.length || target < 1)
         return await message.author.send("Invalid target.") 
-      let r = fn.getUser(client, game.players[target-1])      
+      let r = fn.getUser(client, game.players[target-1].id)      
     if (r.id == message.author.id)
       return await message.channel.send("I know you are lonely, but please don't do that. I'm sure we can find you some friends to give roses to.")
     

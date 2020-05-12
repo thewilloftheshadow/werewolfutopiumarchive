@@ -81,11 +81,13 @@ module.exports = {
       .setDescription(`\`w!start\` - Vote to start the game (4 people required)\n\`w!game\` - See the player list and the list of roles in the game\n\`w!leave\` - Leave the game. **Warning: Doing this after the game starts is considered suiciding**`)
     )
     
+    let embed = new Discord.MessageEmbed()
+      .setAuthor(`${nicknames.get(message.author.id).replace(/\\_/g, "_")} joined the game.`, message.author.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))         
+      .addField(`Current Players [${currentGame.players.length}]`, currentGame.players.map(player => nicknames.get(player.id)).join("\n"))
+    if (currentGame.spectators.length) embed.addField(`Current Spectators [${currentGame.spectators.length}]`, currentGame.spectators.map(id => nicknames.get(id)).join("\n"))
     fn.broadcastTo(
       client, currentGame.players.filter(p => p.id !== message.author.id),
-      new Discord.MessageEmbed()
-        .setAuthor(`${nicknames.get(message.author.id).replace(/\\_/g, "_")} joined the game.`, message.author.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))         
-        .addField(`Current Players [${currentGame.players.length}]`, currentGame.players.map(player => nicknames.get(player.id)).join("\n"))
+      embed
     )
     
     fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)

@@ -8,6 +8,7 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "help",
   run: async (client, message, args) => {
+    if(args[0] === "staff") return
     await message.channel.send(
       new Discord.MessageEmbed()
         .setTitle("Help Menu")

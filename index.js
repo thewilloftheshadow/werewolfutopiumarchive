@@ -237,7 +237,8 @@ client.once('ready', async () => {
         `> ${Object.values(roles).filter(r => r.tag & tags.ROLE.UNAVAILABLE).length} Unavailable\n` +
         `**Member Count**: ${prog.guild.members.cache.size}\n` +
         `> ${prog.guild.members.cache.filter(m => !m.user.bot).size} Humans (${prog.guild.members.cache.filter(m => !m.user.bot && m.user.presence.status !== "offline").size} Online)\n` +
-        `> ${prog.guild.members.cache.filter(m => m.user.bot).size} Bots\n`
+        `> ${prog.guild.members.cache.filter(m => m.user.bot).size} Bots\n` +
+        `\n\n[Jump to Top](https://discordapp.com/channels/522638136635817986/640533861154947082/680260825952288782)`
       )
       //.addField
       .setFooter("Updated")
@@ -402,9 +403,11 @@ client.on('message', async message => {
   let game = QG.find(game => game.gameID == player.currentGame)
   if (!game) return undefined;
   let gamePlayer = game.players.find(player => player.id == message.author.id)
-  
-  gamePlayer.lastAction = moment()
-  gamePlayer.prompted = false
+
+  if (gamePlayer) {
+    gamePlayer.lastAction = moment()
+    gamePlayer.prompted = false
+  }
   games.set("quick", QG)
   
   if (message.channel.type !== "dm" || message.author.bot) return;
@@ -508,7 +511,7 @@ client.on('message', async message => {
       // continue;
     }
     
-    if (gamePlayer.role == "Drunk" && game.currentPhase < 999) {
+    if (gamePlayer && gamePlayer.role == "Drunk" && game.currentPhase < 999) {
       content = content.split(/\s/g)
       for (var x = 0; x < Math.floor(Math.random()*content.length*2); x++) {
         let swapI1 = Math.floor(Math.random()*content.length)
@@ -526,8 +529,8 @@ client.on('message', async message => {
     if (i !== 0) await fn.wait(Math.ceil(content.length/10)*750)
 
     if (game.currentPhase == -1) {
-      fn.broadcast(client, game, `**${nicknames.get(message.author.id)}**: ${content}`, [message.author.id])
-      fn.addLog(game, `[PRE] ${nicknames.get(message.author.id)}: ${content}`)
+      fn.broadcast(client, game, `${game.spectators.includes(message.author.id) ? "*" : ""}**${nicknames.get(message.author.id)}**${game.spectators.includes(message.author.id) ? "*: *" : ": "}${content}${game.spectators.includes(message.author.id) ? "*" : ""}`, [message.author.id], true)
+      fn.addLog(game, `[PRE] ${nicknames.get(message.author.id)}${game.spectators.includes(message.author.id) ? " (Spectator)" : ""}: ${content}`)
       continue;
     }
     if (game.currentPhase == -.5){
@@ -540,22 +543,22 @@ client.on('message', async message => {
       if (gamePlayer.alive) {
         fn.broadcastTo(
           client, game.players.filter(p => !p.left && p.id != message.author.id),
-          `**${gamePlayer.number} ${nicknames.get(message.author.id)}** ${fn.getEmoji(client, gamePlayer.role)}: ${content}`
+          `**${gamePlayer.number} ${nicknames.get(message.author.id)}** ${fn.getEmoji(client, gamePlayer.role)}: ${content}`, true
         )
-        fn.addLog(game, `[POST] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
+        fn.addLog(game, `[POST] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer ? gamePlayer.role : ""}): ${content}`)
         continue;
       }
       else {
         fn.broadcastTo(
           client, game.players.filter(p => !p.left && p.id != message.author.id),
-          `***${gamePlayer.number} ${nicknames.get(message.author.id)}*** ${fn.getEmoji(client, gamePlayer.role)}: *${content}*`
+          `***${gamePlayer.number} ${nicknames.get(message.author.id)}*** ${game.spectators.includes(message.author.id) ? " (Spectator)" : ""} ${gamePlayer ? fn.getEmoji(client, gamePlayer.role) : ""}: *${content}*`, true
         )
         fn.addLog(game, `[POST][DEAD] ${gamePlayer.number} ${nicknames.get(message.author.id)} (${gamePlayer.role}): ${content}`)
         continue;
       }
 
-    if (gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Grumpy Grandma" && gamePlayer.alive) content = "..."
-    if (gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Corruptor" && gamePlayer.alive) return;
+    if (gamePlayer && gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Grumpy Grandma" && gamePlayer.alive) content = "..."
+    if (gamePlayer && gamePlayer.mute && game.players[gamePlayer.mute-1].role == "Corruptor" && gamePlayer.alive) return;
 
     if (game.currentPhase % 3 != 0)
       if (gamePlayer.alive) {
@@ -567,7 +570,14 @@ client.on('message', async message => {
         continue;
       }
       else if (!gamePlayer.alive && gamePlayer.boxed && game.players.find(p => p.role == "Soul Collector" && p.alive)) return undefined
-      else {
+      else if(game.spectators.includes(message.author.id)){
+        fn.broadcastTo(
+          client, game.players.filter(p => !p.left && !p.alive && p.id != message.author.id),
+          `***${gamePlayer.number} ${nicknames.get(message.author.id)} (Spectator)***: *${content}*`
+        )
+        fn.addLog(game, `[DEAD] ${gamePlayer.number} ${nicknames.get(message.author.id)} (Spectator): ${content}`)
+        continue;
+      } else {
         fn.broadcastTo(
           client, game.players.filter(p => !p.left && !p.alive && p.id != message.author.id),
           `***${gamePlayer.number} ${nicknames.get(message.author.id)}***${gamePlayer.roleRevealed ? ` ${fn.getEmoji(client, gamePlayer.roleRevealed)}` : ""}: *${content}*`

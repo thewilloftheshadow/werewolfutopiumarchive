@@ -9,6 +9,8 @@ const session = require("express-session")
 const passport = require("passport")
 const probe = require("probe-image-size")
 const cmd = require("node-cmd")
+const expressWs = require('express-ws')(app);
+
 
 const statusMonitor = require("express-status-monitor")({
   title: "Werewolf Utopium Status",
@@ -72,7 +74,7 @@ passport.use(
     (accessToken, refreshToken, profile, done) => {
       process.nextTick(() => {
         done(null, profile)
-        console.log("New login!", profile)
+        console.log(`New login from ${nicknames.get(profile.id)} | ${profile.username}#${profile.discriminator} (${profile.id})`)
         fn.addLog(`MAIN`, `New login on werewolf-utopium.tk from ${profile.username}#${profile.discriminator} (${profile.id})`)
       })
     }
@@ -115,6 +117,8 @@ app.use(require("body-parser").urlencoded({ extended: true }))
 app.use(passport.initialize())
 app.use(passport.session())
 app.set("view engine", "ejs")
+const sitemap = require('express-sitemap')();
+sitemap.generate(app);
 
 const api = require('express').Router();
 app.use('/api', api);
@@ -181,6 +185,17 @@ module.exports = client => {
       // }
     })
 
+    app.ws("/ws", (ws, req) => {
+      ws.on('message', function (message) {
+        console.log(`New message: ${message}`)
+      })
+    })
+    
+    app.get("/ws", (req, res) => {
+      res.render(__dirname + "/views/ws.ejs")
+    })
+    
+    
     app.get("/", (req, res) => {
       let pass = { user: null, player: null, path: req.path }
       if (req.user) {

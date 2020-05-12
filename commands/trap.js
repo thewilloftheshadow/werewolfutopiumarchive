@@ -55,14 +55,14 @@ module.exports = {
     let targetPlayer = game.players[target - 1]
     if (!targetPlayer.alive)
       return await message.author.send("You cannot trap a dead player.")
-    if (targetPlayer.number == gamePlayer.number)
-      return await message.author.send("You cannot trap on yourself.")
+   // if (targetPlayer.number == gamePlayer.number)
+   //   return await message.author.send("You cannot trap on yourself.")
 
     message.author.send(
       `${fn.getEmoji(
         client,
         "Beast_Hunter_TrapInactive"
-      )} You have chosen to trap **${target}**.`
+      )} You have chosen to trap **${target} ${nicknames.get(targetPlayer.id)}**. Your trap will activate next night.`
     )
     fn.addLog(
       game,
@@ -73,8 +73,10 @@ module.exports = {
       } ${nicknames.get(targetPlayer.id)}.`
     )
 
-    gamePlayer.nextTrap = target
-    QuickGames[index] = game
+    gamePlayer.trap = target
+    gamePlayer.trapAct = game.currentPhase + 3
+    
+    // QuickGames[index] = game
 
     games.set("quick", QuickGames)
   }

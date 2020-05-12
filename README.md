@@ -8,4 +8,12 @@
 [SomethingMysterious](https://glitch.com/@SomethingMysterious) (SomethingMysterious#3933)
 
 ## Retired
-[3061LRTAGSPKJMORMRT](https://glitch.com/@3061LRTAGSPKJMORMRT) (Ashish#0380) 
+[3061LRTAGSPKJMORMRT](https://glitch.com/@3061LRTAGSPKJMORMRT) (Ashish#0380)  
+
+SKREE WTH happened to discord it wont load  
+
+OMG  
+THOMAS GET OVER HERE XD   
+GAH WHATEVER  
+reeeeeeeeeeeeee  
+stupid internet  

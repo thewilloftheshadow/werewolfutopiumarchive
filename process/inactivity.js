@@ -11,7 +11,7 @@ const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
 module.exports = (client, game) => {
-  if (`${game.gameID}`.match(/^devtest_/i) && game.currentPhase >= 999) return;
+  if (`${game.gameID}`.match(/^devtest_/i) && game.currentPhase < 999) return;
   for (let pl = 0; pl < game.players.length; pl++) {
     if (game.currentPhase == -1) {
       if (!fn.getUser(client, game.players[pl].id) || moment(game.players[pl].lastAction).add(3, 'm') <= moment()) {
@@ -37,16 +37,17 @@ module.exports = (client, game) => {
                 game.players
                   .map(p => nicknames.get(p.id))
                   .join("\n")
-              )
+              ), true
           )
     
         if (game.currentPhase == -1 && game.mode == "custom" && game.createdBy == leftPlayer) {
           fn.broadcastTo(
             client, game.players,
-            `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`
+            `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`, true
           )
           game.players.forEach(p => players.set(`${p.id}.currentGame`, 0))
-          fn.addLog(game, `All players were removed from ${game.name} [${game.gameID}] as the game creator left.`)
+          game.spectators.forEach(p => players.set(`${p}.currentGame`, 0))
+          fn.addLog(game, `All players and spectators were removed from ${game.name} [${game.gameID}] as the game creator left.`)
           let QuickGames = games.get("quick")
           QuickGames.splice(QuickGames.indexOf(QuickGames.find(g => g.gameID == game.gameID)), 1)
           games.set("quick", QuickGames)
@@ -101,7 +102,7 @@ module.exports = (client, game) => {
               !game.players.filter(p => p.alive && p.role == "Corruptor").map(p => p.number).includes(game.players[pl].mute)
                 ? ` ${fn.getEmoji(client, game.players[pl].role)}`
                 : ` ${fn.getEmoji(client, "Unknown")}`
-          }** suicided.`
+          }** suicided.`, true
         )
 
         game = fn.death(client, game, game.players[pl].number, true)

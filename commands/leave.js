@@ -19,6 +19,22 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(p => p.id == message.author.id)
     
+    if(game.spectators.includes(message.author.id)){
+      let m = await message.author.send(
+        "Are you sure you want to stop spectating the game?"
+      )
+      m.react(fn.getEmoji(client, "green_tick"))
+      let reactions = await m.awaitReactions(
+        (r, u) => r.emoji.id == fn.getEmoji(client, "green_tick").id &&
+                  u.id == message.author.id,
+        { max: 1, time: 5000, errors: ["time"] }
+      ).catch(() => {})
+      if (!reactions) return await message.author.send("Prompt cancelled.")
+      QuickGames = games.get("quick")
+      game = QuickGames.find(g => g.gameID == player.currentGame)
+      game.players.splice(game.spectators.indexOf(game.spectators.find(p => p == message.author.id)), 1)
+    } else 
+    
     if (game.currentPhase == -1) {
       let m = await message.author.send(
         "Are you sure you want to leave the game?" +
@@ -63,20 +79,20 @@ module.exports = {
           gamePlayer.roleRevealed = "Unknown"
           fn.broadcastTo(
             client, game.players.filter(p => !p.left),
-            `Corrupted player **${gamePlayer.number} ${nicknames.get(gamePlayer.id)} ${fn.getEmoji(client, "Unknown")}** suicided.`
+            `Corrupted player **${gamePlayer.number} ${nicknames.get(gamePlayer.id)} ${fn.getEmoji(client, "Unknown")}** suicided.`, true
           )
         }
         else {
           gamePlayer.roleRevealed = gamePlayer.role
           fn.broadcastTo(
             client, game.players.filter(p => !p.left),
-            `**${gamePlayer.number} ${nicknames.get(gamePlayer.id)} ${fn.getEmoji(client, gamePlayer.roleRevealed)}** suicided.`
+            `**${gamePlayer.number} ${nicknames.get(gamePlayer.id)} ${fn.getEmoji(client, gamePlayer.roleRevealed)}** suicided.`, true
           )
         }
       }
       else fn.broadcastTo(
         client, game.players.filter(p => !p.left),
-        `**${gamePlayer.number} ${nicknames.get(gamePlayer.id)} ${fn.getEmoji(client, "Unknown")}** suicided.`
+        `**${gamePlayer.number} ${nicknames.get(gamePlayer.id)} ${fn.getEmoji(client, "Unknown")}** suicided.`, true
       )
 
       game = fn.death(client, game, gamePlayer.number, true)
@@ -95,16 +111,17 @@ module.exports = {
               `Players [${game.players.length}]`,
               game.players.map(p => nicknames.get(p.id)).join("\n")
             ) :
-          `**${gamePlayer.number} ${nicknames.get(message.author.id)}** left the game.`
+          `**${gamePlayer.number} ${nicknames.get(message.author.id)}** left the game.`, true
       )
     }
     
     if (game.currentPhase == -1 && game.mode == "custom" && game.createdBy == message.author.id) {
       fn.broadcastTo(
         client, game.players,
-        `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`
+        `You have been removed from ${game.name} [\`${game.gameID}\`] as the game creator left.`, true
       )
       game.players.forEach(p => players.set(`${p.id}.currentGame`, 0))
+      game.spectators.forEach(p => players.set(`${p}.currentGame`, 0))
       QuickGames.splice(QuickGames.indexOf(QuickGames.find(g => g.gameID == game.gameID)), 1)
     }
 

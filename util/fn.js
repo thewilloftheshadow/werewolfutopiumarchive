@@ -141,16 +141,22 @@ const sleep = (ms) => {
 }
 
 
-const broadcast = async (client, game, content, ignore = []) => {
+const broadcast = async (client, game, content, ignore = [], spectators = false) => {
   for (var player of game.players) 
     if (!ignore.includes(player.id))
       await client.users.cache.get(player.id).send(
         typeof content == "string" && content.match(new RegExp(`\\b${player.number}\\b`, "gi")) ?
           `> ${content}` : content
       ).catch(() => {})
+  if(spectators){
+    await game.spectators.forEach(async s => {
+      if (!ignore.includes(s))
+        getUser(client, s).send(content).catch(() => {})
+    })
+  }
 }
 
-const broadcastTo = (client, users, content) => {
+const broadcastTo = (client, users, content, spectators = false) => {
   if (typeof users[0] !== "string") users = users.map(x => x.id)
   
   let game = games.get("quick").find(g => g.gameID == players.get(`${users[0]}.currentGame`))
@@ -161,6 +167,10 @@ const broadcastTo = (client, users, content) => {
       typeof content == "string" && content.match(new RegExp(`(?<!Night |Day )\\b${game.players.find(p => p.id == user).number}\\b`, "gi")) ?
         `> ${content}` : content
     ).catch(() => {})
+  
+  if (game && spectators) {
+    game.spectators.forEach(x => getUser(client, x).send(content))
+  }
   
   // client.channels.get("677694502915276831").send()
 }
@@ -201,7 +211,7 @@ const addWin = (game, winners, team) => {
 }
 
 const gameEmbed = (client, game) => {
-  return new Discord.MessageEmbed()
+  let embed = new Discord.MessageEmbed()
     .setTitle(
       game.mode == "custom"
         ? `${game.name} [\`${game.gameID}\`]`
@@ -243,6 +253,7 @@ const gameEmbed = (client, game) => {
       "Roles",
       game.originalRoles.map(r => `${getEmoji(client, r)}`).join(" ")
     )
+  if(game.spectators.length > 0) embed.addField("Spectators", game.spectators.map(p => nicknames.get(p)).join("\n"), true)
 }
 
 const death = (client, game, killed, suicide = false) => {
@@ -599,6 +610,7 @@ const addLog = (logid, msg) => {
   msg = msg.replace(/\\/g,"")
   msg = msg.replace(/\n/g,`\n${time()} | `)
   logs.push(logid, msg)
+  if (logs.get(logid).length >= 50) writeLogs(logid)
 }
 
 const writeLogs = (logid) => {
@@ -613,6 +625,11 @@ const writeLogs = (logid) => {
     logs.delete(logid)
   });
 }
+
+// const giveChar = () => {
+//   let wordList = []
+//   let word = wordList[Math.floor(Math.random()*wordList.length)]
+// }
 
 module.exports = {
   time: time,

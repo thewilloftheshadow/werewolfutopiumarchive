@@ -51,8 +51,7 @@ module.exports = {
       
       fn.addLog("MAIN", `${message.author.tag} reloaded \`${command}\`.`)
     } else {
-    
-      let commandfile = client.commands.get(command);
+      let commandfile = client.commands.get(command) || client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(command))
       if (!commandfile) return message.author.send("Unable to find that command.");
       client.commands.delete(command);
 
@@ -69,8 +68,8 @@ module.exports = {
       // console.log(`Reload: Command "${command}" loaded`);
       client.commands.set(props.name, props);    
 
-      message.channel.send(`Command \`${command.toLowerCase()}\` successfully reloaded.`);
-      fn.addLog("MAIN", `${message.author.tag} reloaded \`${command}\`.`)
+      message.channel.send(`Command \`${commandfile.name}\` successfully reloaded.`);
+      fn.addLog("MAIN", `${message.author.tag} reloaded \`${commandfile.name}\`.`)
     }
     
 	}
