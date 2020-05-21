@@ -12,7 +12,7 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "shoot",
   aliases: ["execute"],
-  gameroles: ["Gunner", "Jailer"],
+  gameroles: ["Gunner", "Jailer", "Marksman"],
   run: async (client, message, args, shared) => {
     let player = players.get(message.author.id)
     if (!player.currentGame) 
@@ -23,7 +23,7 @@ module.exports = {
         index = QuickGames.indexOf(game),
         gamePlayer = game.players.find(player => player.id == message.author.id)
     
-    if (!["Gunner","Jailer"].includes(gamePlayer.role))
+    if (!["Gunner","Jailer","Marksman"].includes(gamePlayer.role))
       return await message.author.send("You do not have the abilities to shoot a player.")
     if (gamePlayer.role !== "Jailer" && shared.commandName == "execute")
       return await message.author.send("Only the Jailer can execute their prisoners!")
@@ -47,46 +47,117 @@ module.exports = {
     if (game.currentPhase >= 999)
       return await message.author.send("The game is over! You can no longer use your actions.")
     
-    let target = parseInt(args[0])
-    if (gamePlayer.role == "Jailer") target = game.players.find(p => p.jailed && p.alive).number
-    let targetPlayer = game.players[target-1]
-    if (isNaN(target) || target > game.players.length || target < 1)
-      return await message.author.send("Invalid target.")
-    if (!targetPlayer.alive)
-      return await message.author.send("You cannot shoot a dead player.")
-    if (target == gamePlayer.number)
-      return await message.react(fn.getEmoji(client, "harold"))
-    
-    if (!gamePlayer.sect && targetPlayer.role == "President")
-      return await message.author.send("You cannot shoot the President!")
-    
-    targetPlayer.alive = false
-    if (gamePlayer.role == "Gunner") {
-      fn.broadcastTo(
-        client, game.players.filter(p => !p.left).map(p => p.id), 
-        `<:Gunner_Shoot:660666399332630549> Gunner **${gamePlayer.number} ${nicknames.get(message.author.id)}** shot **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
-      gamePlayer.roleRevealed = gamePlayer.role
+    if (gamePlayer.role == "Marksman") {
+      if (game.currentPhase == 0)
+        return await message.author.send(
+          "You can only mark a player on the first night!"
+        )
+
+      let target = gamePlayer.target
+      if (!target)
+        return await message.author.send(
+          "Please use `w!mark` to mark a player first."
+        )
+
+      if ((gamePlayer.tgtAct || 999) > game.currentPhase)
+        return await message.author.send(
+          "You can only shoot your arrow next night or after!"
+        )
+
+      let targetPlayer = game.players[target - 1]
+      if (roles[targetPlayer.role].team == "Village") {
+        gamePlayer.alive = false
+        if (game.config.deathReveal) gamePlayer.roleRevealed = gamePlayer.role
+
+        fn.broadcastTo(
+          client,
+          game.players.filter(p => !p.left).map(p => p.id),
+          `${fn.getEmoji(client, "Marksman_Shoot")} Marksman **${
+            gamePlayer.number
+          } ${nicknames.get(
+            message.author.id
+          )}** tried to shoot **${target} ${nicknames.get(targetPlayer.id)}${
+            game.config.deathReveal
+              ? ` ${fn.getEmoji(client, targetPlayer.role)}`
+              : ""
+          }**, but their shot backfired and killed themself!`
+        )
+        gamePlayer.roleRevealed = gamePlayer.role
+
+        fn.addLog(
+          game,
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+            gamePlayer.id
+          )} tried to shoot ${targetPlayer.number} ${nicknames.get(
+            targetPlayer.id
+          )} (${
+            targetPlayer.role
+          }), but the shot backfired and killed themself instead!.`
+        )
+        game = fn.death(client, game, gamePlayer.number)
+      } else {
+        targetPlayer.alive = false
+        if (game.config.deathReveal) targetPlayer.roleRevealed = targetPlayer.role
+        
+        fn.broadcastTo(
+          client, game.players.filter(p => !p.left).map(p => p.id), 
+          `${fn.getEmoji(client, "Marksman_Shoot")} Marksman **${gamePlayer.number} ${nicknames.get(message.author.id)}** shot **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
+        gamePlayer.roleRevealed = gamePlayer.role
+        
+        fn.addLog(
+          game,
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} shot ${
+          targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+        )
+        game = fn.death(client, game, targetPlayer.number)   
+      }
+        
+      gamePlayer.abil1 -= 1
+      game.lastDeath = game.currentPhase
+      delete gamePlayer.target
+      delete gamePlayer.tgtAct
     }
-    if (gamePlayer.role == "Jailer") {
-      fn.broadcastTo(
-        client, game.players.filter(p => !p.left).map(p => p.id), 
-        `<:Gunner_Shoot:660666399332630549> Jailer executed his prisoner **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
-      gamePlayer.killedTonight = true
-      targetPlayer.killedBy = gamePlayer.number
+    else {
+      let target = parseInt(args[0])
+      if (gamePlayer.role == "Jailer") target = game.players.find(p => p.jailed && p.alive).number
+      let targetPlayer = game.players[target-1]
+      if (isNaN(target) || target > game.players.length || target < 1)
+        return await message.author.send("Invalid target.")
+      if (!targetPlayer.alive)
+        return await message.author.send("You cannot shoot a dead player.")
+      if (target == gamePlayer.number)
+        return await message.react(fn.getEmoji(client, "harold"))
+
+      if (!gamePlayer.sect && targetPlayer.role == "President")
+        return await message.author.send("You cannot shoot the President!")
+
+      targetPlayer.alive = false
+      if (gamePlayer.role == "Gunner") {
+        fn.broadcastTo(
+          client, game.players.filter(p => !p.left).map(p => p.id), 
+          `${fn.getEmoji(client, "Gunner_Shoot")} Gunner **${gamePlayer.number} ${nicknames.get(message.author.id)}** shot **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
+        gamePlayer.roleRevealed = gamePlayer.role
+      }
+      if (gamePlayer.role == "Jailer") {
+        fn.broadcastTo(
+          client, game.players.filter(p => !p.left).map(p => p.id), 
+          `${fn.getEmoji(client, "Gunner_Shoot")} Jailer executed his prisoner **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
+        gamePlayer.killedTonight = true
+        targetPlayer.killedBy = gamePlayer.number
+      }
+
+      fn.addLog(
+        game,
+        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} shot ${
+        targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
+      )
+
+      if (game.config.deathReveal) targetPlayer.roleRevealed = targetPlayer.role
+      gamePlayer.abil1 -= 1
+      game.lastDeath = game.currentPhase
+      if (gamePlayer.role == "Gunner") gamePlayer.shotToday = true
+      game = fn.death(client, game, targetPlayer.number)
     }
-      
-    fn.addLog(
-      game,
-      `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} shot ${
-      targetPlayer.number} ${nicknames.get(targetPlayer.id)} (${targetPlayer.role}).`
-    )
-    
-    if (game.config.deathReveal) targetPlayer.roleRevealed = targetPlayer.role
-    gamePlayer.abil1 -= 1
-    game.lastDeath = game.currentPhase
-    if (gamePlayer.role == "Gunner") gamePlayer.shotToday = true
-    game = fn.death(client, game, targetPlayer.number)
-    
     QuickGames[index] = game
     
     games.set("quick", QuickGames)

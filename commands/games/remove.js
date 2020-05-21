@@ -46,16 +46,17 @@ module.exports = {
         new Discord.MessageEmbed()
           .setColor("RED")
           .setTitle("Game Terminated")
-          .setDescription(`This game has been terminated by staff. Please contact staff members for more information.`)
+          .setDescription(`This game has been terminated by staff. Please contact staff members for more information.`), true
       )
       
       fn.broadcastTo(
         client, removedGame.players.filter(p => !p.left),
-        fn.gameEmbed(client, removedGame)
+        fn.gameEmbed(client, removedGame), true
       )
       
       for (var removedPlayers of removedGame.players)
         players.set(`${removedPlayers.id}.currentGame`, 0)
+      removedGame.spectators.forEach(id => players.set(`${id}.currentGame`, 0))
     }
     
     await message.channel.send(`Successfully removed ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)

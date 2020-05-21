@@ -51,7 +51,7 @@ module.exports = client => {
               new Discord.MessageEmbed()
                 .setTitle("Lootbox")
                 .setThumbnail(fn.getEmoji(client, "Lootbox").url)
-                .setDescription(`Congratulations, you got a lootbox!`)
+                .setDescription(`Congratulations, you earned a lootbox!`)
             )
           }
         }
@@ -96,7 +96,7 @@ module.exports = client => {
                   fn.broadcastTo(
                     client,
                     game.players.filter(p => !p.left),
-                    "The village cannot decide on who to lynch."
+                    "The village cannot decide on who to lynch.", true
                   )
                   fn.addLog(game, "The village cannot decide on who to lynch.")
                 } else {
@@ -128,7 +128,7 @@ module.exports = client => {
                       game.players.filter(p => !p.left),
                       `**${lynchedPlayer.number} ${nicknames.get(
                         lynchedPlayer.id
-                      )}** cannot be lynched.`
+                      )}** cannot be lynched.`, true
                     )
                     
                     fn.addLog(
@@ -154,7 +154,7 @@ module.exports = client => {
                           `**${lynchedPlayer.number} ${nicknames.get(
                             lynchedPlayer.id
                           )}** is the Handsome Prince!`
-                        )
+                        ), true
                     )
                     lynchedPlayer.roleRevealed = lynchedPlayer.role
                     fn.addLog(
@@ -176,7 +176,7 @@ module.exports = client => {
                         game.config.deathReveal
                           ? ` ${fn.getEmoji(client, lynchedPlayer.role)}`
                           : ""
-                      }** was lynched by the village.`
+                      }** was lynched by the village.`, true
                     )
                     fn.addLog(
                       game,
@@ -201,7 +201,7 @@ module.exports = client => {
                         new Discord.MessageEmbed()
                           .setTitle("Game has ended.")
                           .setThumbnail(fn.getEmoji(client, "Death").url)
-                          .setDescription(`It was a tie. There are no winners.`)
+                          .setDescription(`It was a tie. There are no winners.`), true
                       )
                       game.running = "give tie xp"
                       fn.addXP(game, game.players.filter(p => !p.suicide), 15)
@@ -227,7 +227,7 @@ module.exports = client => {
                           .setDescription(
                             `Fool ${lynched} ${nicknames.get(
                               lynchedPlayer.id
-                            )} wins!`
+                            )} wins!`, true
                           )
                       )
                       fn.addLog(
@@ -263,7 +263,7 @@ module.exports = client => {
                             .setDescription(
                               `Headhunter **${
                                 headhunter.number
-                              } ${nicknames.get(headhunter.id)}** wins!`
+                              } ${nicknames.get(headhunter.id)}** wins!`, true
                             )
                         )
                         fn.addLog(
@@ -290,7 +290,7 @@ module.exports = client => {
                 fn.broadcastTo(
                   client,
                   game.players.filter(p => !p.left),
-                  "The village cannot decide on who to lynch."
+                  "The village cannot decide on who to lynch.", true
                 )
                 fn.addLog(
                   game,
@@ -347,7 +347,7 @@ module.exports = client => {
                 game.players.filter(p => !p.left),
                 `${fn.getEmoji(client, "Medium_Revive")} Medium has revived **${
                   revivedPlayer.number
-                } ${nicknames.get(revivedPlayer.id)}**.`
+                } ${nicknames.get(revivedPlayer.id)}**.`, true
               )
 
               revivedPlayer.alive = true
@@ -455,7 +455,7 @@ module.exports = client => {
               "Wolf Seer"
             ]
             let wwByStrength = game.players.filter(
-              p => p.alive && (roles[p.role].tag & tags.ROLE.SEEN_AS_WEREWOLF)
+              p => p.alive && wwStrength.includes(p.role)
             )
             wwByStrength.sort((a, b) => {
               if (wwStrength.indexOf(a.role) > wwStrength.indexOf(b.role))
@@ -496,7 +496,7 @@ module.exports = client => {
                 )
               }
               else if (
-                roles[attackedPlayer.role].cat == "Killer" ||
+                (roles[attackedPlayer.role].cat == "Killer" && !["Sect Leader","Zombie"].includes(attackedPlayer.role)) ||
                 (attackedPlayer.role == "Red Lady" &&
                   attackedPlayer.visitedTonight && !game.frenzy)
               ) {
@@ -566,7 +566,7 @@ module.exports = client => {
                         game.config.deathReveal
                           ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
                           : ""
-                      }**.`
+                      }**.`, true
                     )
 
                     game = fn.death(client, game, attackedPlayer.number)
@@ -600,7 +600,7 @@ module.exports = client => {
                         game.config.deathReveal
                           ? ` ${fn.getEmoji(client, protector.role)}`
                           : ""
-                      }**.`
+                      }**.`, true
                     )
                     
                     fn.addLog(
@@ -671,7 +671,7 @@ module.exports = client => {
                           game.config.deathReveal
                             ? fn.getEmoji(client, weakestWW.role)
                             : fn.getEmoji(client, "Fellow Werewolf")
-                        }**.`
+                        }**.`, true
                       )
                     
                       fn.addLog(
@@ -764,7 +764,7 @@ module.exports = client => {
                             game.config.deathReveal
                               ? ` ${fn.getEmoji(client, protector.role)}`
                               : ""
-                          }**.`
+                          }**.`, true
                         )
                     
                         fn.addLog(
@@ -983,7 +983,7 @@ module.exports = client => {
                     game.config.deathReveal
                       ? ` ${fn.getEmoji(client, attackedPlayer.role)}`
                       : ""
-                  }**.`
+                  }**.`, true
                 )
                 
                 fn.addLog(
@@ -1665,30 +1665,30 @@ module.exports = client => {
                     )
                   }
                   else if (protector.role == "Beast Hunter") {
-                    kww.alive = false
-                    if (game.config.deathReveal) kww.roleRevealed = kww.role
-                    else kww.roleRevealed = "Fellow Werewolf"
+//                     kww.alive = false
+//                     if (game.config.deathReveal) kww.roleRevealed = kww.role
+//                     else kww.roleRevealed = "Fellow Werewolf"
 
-                    fn.broadcastTo(
-                      client, game.players.filter(p => !p.left),
-                      `The beast hunter's trap killed **${kww.number} ${
-                        nicknames.get(kww.id)
-                      } ${
-                        game.config.deathReveal
-                          ? fn.getEmoji(client, kww.role)
-                          : fn.getEmoji(client, "Fellow Werewolf")
-                      }**.`
-                    )
+//                     fn.broadcastTo(
+//                       client, game.players.filter(p => !p.left),
+//                       `The beast hunter's trap killed **${kww.number} ${
+//                         nicknames.get(kww.id)
+//                       } ${
+//                         game.config.deathReveal
+//                           ? fn.getEmoji(client, kww.role)
+//                           : fn.getEmoji(client, "Fellow Werewolf")
+//                       }**.`
+//                     )
                 
                     fn.addLog(
                       game,
                       `Beast Hunter ${protector.number} ${nicknames.get(
                         protector.id
-                      )}'s trap killed Kitten Wolf ${
+                      )}'s trap prevented Kitten Wolf ${
                         kww.number
                       } ${nicknames.get(
                         kww.id
-                      )} when they were trying to scratch ${
+                      )} from scratching ${
                         attackedPlayer.role
                       } ${attackedPlayer.number} ${nicknames.get(
                         attackedPlayer.id
@@ -1698,7 +1698,7 @@ module.exports = client => {
                     delete protector.trap
                     delete protector.trapAct
 
-                    game = fn.death(client, game, kww.number)
+                    // game = fn.death(client, game, kww.number)
                   }
                   else if (protector.role == "Witch") {
                     protector.abil1 = 0
@@ -1796,8 +1796,11 @@ module.exports = client => {
             let sl = game.players.find(p => p.role == "Sect Leader" && p.alive)
             if (sl && sl.usedAbilityTonight) {
               let sectTarget = game.players[sl.usedAbilityTonight - 1]
+              
+              // if (sectTarget.protectors.find(p => game.players[p-1].role == "Beast Hunter"))
 
               if (
+                (!sectTarget.protectors || (sectTarget.protectors && !sectTarget.protectors.find(p => game.players[p-1].role == "Beast Hunter"))) &&
                 sectTarget.role !== "Cursed" &&
                 (roles[sectTarget.role].team == "Village" ||
                 ["Fool", "Headhunter"].includes(sectTarget.role))
@@ -3068,7 +3071,7 @@ module.exports = client => {
               nmtarget.nightmared = true
               fn.getUser(client, nmtarget.id).send(
                 new Discord.MessageEmbed()
-                  .setThumbnail(fn.getEmoji(client, "Nightmare"))
+                  .setThumbnail(fn.getEmoji(client, "Nightmare_Ghosts"))
                   .setTitle("Nightmared!")
                   .setDescription(
                     "You have been nightmared and cannot use your abilities tonight!\nGo to sleep!"

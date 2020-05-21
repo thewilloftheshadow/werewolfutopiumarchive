@@ -1,10 +1,8 @@
 const express = require("express")
 const app = express()
 const ejs = require("ejs")
-const path = require("path")
 const Strategy = require("passport-discord").Strategy
 const html = require("html")
-const http = require("http")
 const session = require("express-session")
 const passport = require("passport")
 const probe = require("probe-image-size")
@@ -111,14 +109,39 @@ const games = new db.table("Games"),
 
 const roles = require("/app/util/roles")
 
-app.use(express.static(path.join(__dirname, "/public")))
+app.use(express.static(__dirname+"/public"))
 app.use(require("cookie-parser")())
 app.use(require("body-parser").urlencoded({ extended: true }))
 app.use(passport.initialize())
 app.use(passport.session())
 app.set("view engine", "ejs")
-const sitemap = require('express-sitemap')();
-sitemap.generate(app);
+
+// const map = require("express-sitemap")
+// map({
+//   sitemap: "/app/public/sitemap.xml",
+//   robots: "/app/public/robots.txt",
+//   generate: app,
+//   sitemapSubmission: '/sitemap.xml',
+//   route: { 
+//     '/': {
+//       lastmod: moment().format("YYYY-MM-DD"),
+//       changefreq: 'always',
+//       priority: 1.0,
+//     },
+//     '/log': {
+//       disallow: true,
+//     },
+//     '/logs': {
+//       disallow: true,
+//     },
+//     '/roles': {
+//       lastmod: moment().format("YYYY-MM-DD"),
+//       changefreq: 'always',
+//       priority: 0.
+//     }
+//   },
+// }).toFile();
+
 
 const api = require('express').Router();
 app.use('/api', api);
@@ -164,25 +187,15 @@ module.exports = client => {
           req.next()
         }
       } catch (e) {}
-      // if (req.user) {
-      //   req.user.viewLogs = false
-      //   if (
-      //     client.guilds.cache
-      //       .get("522638136635817986")
-      //       .members.cache.get(req.user.id)
-      //       .roles.cache.find(r =>
-      //         [
-      //           "*",
-      //           "βTester Helper",
-      //           "Mini Moderator",
-      //           "Moderator",
-      //           "Bot Helper",
-      //           "Developer"
-      //         ].includes(r.name)
-      //       )
-      //   )
-      //     req.user.viewLogs = true
-      // }
+      if (req.user) {
+        req.user.inserver = false
+        if (
+          client.guilds.cache
+            .get("522638136635817986")
+            .members.cache.get(req.user.id)
+        )
+          req.user.inserver = true
+      }
     })
 
     app.ws("/ws", (ws, req) => {
@@ -317,15 +330,15 @@ module.exports = client => {
       res.sendFile("/app/json.sqlite")
     })
 
-    app.get("/oldlog/:id", checkAuth, viewLogs, async (req, res) => {
-      //if (!req.user.viewLogs) return res.redirect("/")
-      let file = "/app/logs/" + req.params.id + ".log"
-      if (fs.existsSync(file)) {
-        res.sendFile(file)
-      } else {
-        res.status(404).send("No logs with that ID were found.")
-      }
-    })
+    // app.get("/oldlog/:id", checkAuth, viewLogs, async (req, res) => {
+    //   //if (!req.user.viewLogs) return res.redirect("/")
+    //   let file = "/app/logs/" + req.params.id + ".log"
+    //   if (fs.existsSync(file)) {
+    //     res.sendFile(file)
+    //   } else {
+    //     res.status(404).send("No logs with that ID were found.")
+    //   }
+    // })
 
     app.get("/logs", checkAuth, viewLogs, async (req, res) => {
       

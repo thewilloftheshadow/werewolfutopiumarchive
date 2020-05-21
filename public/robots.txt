@@ -1,5 +1,7 @@
 User-Agent: *
+Allow: /
 Disallow: /api
-Disallow: /profile
-Disallow: /auth
+Disallow: /ws
+Disallow: /json.sqlite
 Disallow: /log
+Disallow: /logs

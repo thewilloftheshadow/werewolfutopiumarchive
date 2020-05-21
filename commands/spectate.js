@@ -12,6 +12,19 @@ const fn = require('/app/util/fn'),
 module.exports = {
   name: "spectate",
   run: async (client, message, args, shared) => {
+    if (
+      !client.guilds.cache
+      .get("522638136635817986")
+      .members.cache.get(message.author.id)
+      .roles.cache.find(r =>
+                        [
+        "*",
+        "Bot Helper",
+        "Developer"
+      ].includes(r.name)
+                       )
+    )
+      return undefined
     // if (!games.get("count")) games.set("count", 0)
     if (!games.get("quick")) games.set("quick", [])
     let Games = games.get("quick")

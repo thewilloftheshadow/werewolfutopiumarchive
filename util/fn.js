@@ -254,6 +254,7 @@ const gameEmbed = (client, game) => {
       game.originalRoles.map(r => `${getEmoji(client, r)}`).join(" ")
     )
   if(game.spectators.length > 0) embed.addField("Spectators", game.spectators.map(p => nicknames.get(p)).join("\n"), true)
+  return embed;
 }
 
 const death = (client, game, killed, suicide = false) => {

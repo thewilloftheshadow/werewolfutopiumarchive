@@ -8,7 +8,8 @@ module.exports = {
     emoji: "lootbox",
     currency: "roses",
     plural: "es",
-    aliases: ["lb"]
+    aliases: ["lb"],
+    hidden: false
   },
   "apprentice lootbox": {
     price: 20,
@@ -19,10 +20,11 @@ module.exports = {
     emoji: "apprentice lootbox",
     currency: "roses",
     plural: "es",
-    aliases: ["alb","applb"]
+    aliases: ["alb","applb"],
+    hidden: false
   },
   "master lootbox": {
-    price: 1e+99,
+    price: 9999999,
     name: "Master Lootbox",
     description: "The high-tier lootbox, with the pro-gamer stuff.",
     itemid: "master lootbox",
@@ -30,7 +32,8 @@ module.exports = {
     emoji: "master lootbox",
     currency: "roses",
     plural: "es",
-    aliases: ["mlb", "masterlb"]
+    aliases: ["mlb", "masterlb"],
+    hidden: false
   },
   "rose": {
     price: 25,
@@ -40,7 +43,8 @@ module.exports = {
     unavailable: false,
     emoji: "rose",
     currency: "coins",
-    plural: "s"
+    plural: "s",
+    hidden: false
   },
   "rose bouquet": {
     price: 250,
@@ -52,7 +56,8 @@ module.exports = {
     emoji: "rose bouquet",
     currency: "coins",
     plural: "s",
-    aliases: ["bouquet"]
+    aliases: ["bouquet"],
+    hidden: false
   },
   "custom maker": {
     price: 1500,
@@ -64,7 +69,8 @@ module.exports = {
     emoji: "random",
     currency: "coins",
     plural: "",
-    aliases: ["cmi"]
+    aliases: ["cmi"],
+    hidden: false
   },
   "private channel": {
     price: 3000,
@@ -76,6 +82,7 @@ module.exports = {
     emoji: "Private",
     currency: "coins",
     plural: "",
+    hidden: false
     // aliases: ["prv"]
   },
   "talisman": {
@@ -87,6 +94,19 @@ module.exports = {
     unavailable: false,
     emoji: "Talisman",
     currency: "coins",
-    plural: "s"
+    plural: "s",
+    hidden: false
+  },
+  "shadow lootbox": {
+    price: 1e+99,
+    name: "Shadow Lootbox",
+    description:
+    "A mystical item only able to be earned from special giveaways!",
+    itemid: "shadow lootbox",
+    unavailable: true,
+    emoji: "Shadow_Lootbox",
+    currency: "roses",
+    plural: "es",
+    hidden: true
   }
 }

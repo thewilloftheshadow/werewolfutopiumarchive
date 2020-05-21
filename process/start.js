@@ -120,6 +120,8 @@ module.exports = async (client, game) => { try {
     )
   }
   
+  
+  
   let headhunters = game.players.filter(p => p.role == "Headhunter")
   for (var i = 0; i < headhunters.length; i++) {
     let possibleTargets = game.players
@@ -216,7 +218,7 @@ module.exports = async (client, game) => { try {
       new Discord.MessageEmbed()
         .setTitle("President")
         .setThumbnail(fn.getEmoji(client, "President"))
-        .setDescription(`**${president.number} ${nicknames.get(president.id)}** is the President!`)
+        .setDescription(`**${president.number} ${nicknames.get(president.id)}** is the President!`), true
     )
     fn.addLog(game, `${president.number} ${nicknames.get(president.id)} is the President!`)
     

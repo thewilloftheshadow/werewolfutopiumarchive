@@ -51,7 +51,7 @@ let roles = {
     cgp : "250c",
     nite: "Select a player to place your trap on (`w!trap [player]`). You can place the trap on yourself.",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   },
   "Bodyguard": {
     desc: "You can choose one player to protect every night." +

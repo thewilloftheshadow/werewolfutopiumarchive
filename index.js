@@ -499,7 +499,7 @@ client.on('message', async message => {
     }
     
     if ((content.match(/[A-Z]/g)||[]).length.length >= (content.match(/[a-z]/g)||[]).length && content.length >= 10) {
-      await message.channel.send("You are auto-warned for the following reason: **Please do not use too many capl letters!**")
+      await message.channel.send("You are auto-warned for the following reason: **Please do not use too many capital letters!**")
       client.channels.cache.get("699144758525952000").send(
         new Discord.MessageEmbed()
           .setTitle(`**${nicknames.get(message.author.id)}** (${message.author.id}) was auto-warned in ${game.mode == 'custom' ? `${game.name} [\`${game.gameID}\`]` : `Game #${game.gameID}`}.`)

@@ -10,6 +10,8 @@ const fn = require('/app/util/fn'),
       roles = require("/app/util/roles"),
       tags = require("/app/util/tags")
 
+let restrictedCodes = ['main','coins','roses','items','wwo','utopium','api']
+
 module.exports = {
   name: "create",
   run: async (client, message, args, shared) => {
@@ -19,7 +21,7 @@ module.exports = {
         .get("522638136635817986")
         .members.cache.get(message.author.id)
         .roles.cache.find(
-          r => r.name == "ww cc" || ["βTester Helper","Developer"].includes(r.name)
+          r => ["βTester Helper","Developer"].includes(r.name)
         ) &&
       !players.get(`${message.author.id}.inventory.${"custom maker"}`)
     )
@@ -42,6 +44,15 @@ module.exports = {
       else prevGamePlayer.left = true
     }
     
+    let isBTH = !!client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(message.author.id)
+          .roles.cache.find(r => r.name == "βTester Helper"),
+        isDev = !!client.guilds.cache
+          .get("522638136635817986")
+          .members.cache.get(message.author.id)
+          .roles.cache.find(r => r.name == "Developer")
+    
     let currentGame = {
       mode: "custom",
       nextPhase: null,
@@ -49,7 +60,7 @@ module.exports = {
       originalRoles: [],
       players: [{
         id: message.author.id,
-        lastAction: moment()
+        lastAction: moment().add(2, "m")
       }],
       spectators: [],
       logs: "",
@@ -63,6 +74,66 @@ module.exports = {
         talismans: true
       },
       createdBy: message.author.id
+    }
+    
+    let isBeta = false
+    if (
+      isBTH &&
+      players.get(`${message.author.id}.inventory.${"custom maker"}`) &&
+      !players.get(`${message.author.id}.custom`).includes("CGCCAI")
+    ) {
+      let betaPrompt = await message.author.send(
+        new Discord.MessageEmbed()
+          .setTitle("Custom Game Setup")
+          .setDescription(`Are you creating a beta test game?`)
+      )
+      await betaPrompt.react(fn.getEmoji(client, "green tick"))
+      await betaPrompt.react(fn.getEmoji(client, "red tick"))
+      let reactions = await betaPrompt
+        .awaitReactions(
+          (r, u) =>
+            (r.emoji.id == fn.getEmoji(client, "green_tick").id ||
+              r.emoji.id == fn.getEmoji(client, "red_tick").id) &&
+            u.id == message.author.id,
+          { time: 30 * 1000, max: 1, errors: ["time"] }
+        )
+        .catch(() => {})
+      if (!reactions)
+        return await message.author.send(
+          new Discord.MessageEmbed()
+            .setColor("RED")
+            .setTitle("Prompt timed out.")
+        )
+      let reaction = reactions.first().emoji
+      if (reaction.id == fn.getEmoji(client, "green_tick").id) isBeta = true
+    }
+    
+    if (
+      (!isBTH ||
+        (isBTH &&
+          players.get(`${message.author.id}.inventory.${"custom maker"}`) &&
+          !isBeta)) &&
+      !isDev &&
+      !players.get(`${message.author.id}.custom`).includes("CGCCAI")
+    ) {
+      while (!currentGame.gameID) {
+        let gcInput = fn.randomString(8)
+
+        let usedGCs = games
+          .get("quick")
+          .filter(x => x.mode == "custom")
+          .map(x => x.gameID.toLowerCase())
+
+        console.log(gcInput)
+
+        if (
+          parseInt(gcInput) != gcInput &&
+          gcInput.match(/^[a-z0-9\_]{3,15}$/i) &&
+          !usedGCs.includes(gcInput.toLowerCase()) &&
+          !restrictedCodes.includes(gcInput.toLowerCase())
+        )
+          currentGame.gameID = gcInput
+      }
     }
     
     while (!currentGame.gameID) {
@@ -89,29 +160,25 @@ module.exports = {
       // console.log(usedGCs)
       
       if (
-        !client.guilds.cache
-          .get("522638136635817986")
-          .members.cache.get(message.author.id)
-          .roles.cache.find(r =>
-            ["βTester Helper", "Developer"].includes(r.name)
-          ) &&
+        !isBTH && !isDev &&
         gcInput.toLowerCase().match(/^betatest\_.*?$/i)
       )
         await gcPrompt.channel.send("You cannot create a beta test game!")
       else if (
-        client.guilds.cache
-          .get("522638136635817986")
-          .members.cache.get(message.author.id)
-          .roles.cache.find(r => r.name == "βTester Helper") &&
-        !client.guilds.cache
-          .get("522638136635817986")
-          .members.cache.get(message.author.id)
-          .roles.cache.find(r => r.name == "ww cc") &&
+        isBTH &&
         !players.get(`${message.author.id}.inventory.${"custom maker"}`) &&
-        gcInput.toLowerCase().match(/^betatest\_.*?$/i)
+        !gcInput.toLowerCase().match(/^betatest\_.*?$/i)
       )
         return await gcPrompt.channel.send(
           "Ahem. You don't have Custom Maker Item, do you?\nOr did you put in the wrong format? `BetaTest_X`"
+        )
+      else if (
+        isBTH && 
+        !(players.get(`${message.author.id}.custom`) || []).includes("CGCCAI") &&
+        !gcInput.toLowerCase().match(/^betatest\_.*?$/i)
+      )
+        return await gcPrompt.channel.send(
+          "You lied to me. You said you are making a beta test game.\nUnless you put in the wrong format? `BetaTest_X`"
         )
       else if (
         !client.guilds.cache
@@ -124,7 +191,8 @@ module.exports = {
       else if (
         parseInt(gcInput) != gcInput &&
         gcInput.match(/^[a-z0-9\_]{3,15}$/i) &&
-        !usedGCs.includes(gcInput.toLowerCase())
+        !usedGCs.includes(gcInput.toLowerCase()) &&
+        !restrictedCodes.includes(gcInput.toLowerCase())
       )
         currentGame.gameID = gcInput
       else if (parseInt(gcInput) == gcInput)
@@ -143,11 +211,16 @@ module.exports = {
         await gcPrompt.channel.send(
           "Your game code must only include alphanumerical characters and underscores."
         )
+      else if (restrictedCodes.includes(gcInput.toLowerCase()))
+        await gcPrompt.channel.send("Your game code is restricted from being used.")
       else if (usedGCs.includes(gcInput.toLowerCase()))
         await gcPrompt.channel.send("Your game code has been taken.")
       
-      if (gcInput.match(/^betatest\_.*?$/gi))
+      if (gcInput.match(/^betatest\_.*?$/gi)) {
         currentGame.name = `Beta Test ${gcInput.replace(/^betatest\_(.*?)$/gi, "$1").replace("_"," ")}`
+        isBeta = true
+      }
+      
       if (gcInput.match(/^devtest\_.*?$/gi))
         currentGame.name = `Dev Test ${gcInput.replace(/^devtest\_(.*?)$/gi, "$1").replace("_"," ")}`    
     }
@@ -238,7 +311,7 @@ module.exports = {
           i--
           continue;
         }
-        if (!playerCustom.includes(role.name) && !currentGame.gameID.toLowerCase().startsWith(`betatest_`)) {
+        if (!isBeta && !playerCustom.includes(role.name) && !currentGame.gameID.toLowerCase().startsWith(`betatest_`)) {
           await message.author.send(
             new Discord.MessageEmbed()
               .setColor("RED")
@@ -517,7 +590,7 @@ module.exports = {
           `**Death Reveal:** ${currentGame.config.deathReveal}\n` +
           `**Talismans:** ${currentGame.config.talismans ? "Enabled" : "Disabled"}\n` +
           `**Private:** ${currentGame.config.private}\n` + 
-          `${currentGame.instructions ? `**Instructions:** true` : ""}`
+          `${currentGame.instructions == "No instructions provided" ? "" : `**Instructions:** true`}`
         )
     )
     
@@ -545,6 +618,8 @@ module.exports = {
         .addField(`Current Players [${currentGame.players.length}]`, currentGame.players.map(player => nicknames.get(player.id)).join("\n"))
         .setFooter(`Custom Game Code: ${currentGame.gameID}`)
     )
+    
+    
     
     
     Games = games.get("quick")
