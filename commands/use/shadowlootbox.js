@@ -33,25 +33,10 @@ module.exports = {
     
     let items = [
       {
-        weight: 10,
-        item: "coin",
-        possibleValues: numArray(10, 10, 15)
-      },
-      {
-        weight: 5,
-        item: "rose",
-        possibleValues: numArray(3, 1, 12)
-      },
-      {
-        weight: 3,
-        item: "bouquet",
-        possibleValues: numArray(1, 1, 3)
-      },
-      {
-        weight: 2,
-        item: "talisman",
-        possibleValues: [3]
-      },
+        weight: 1,
+        item: "shadow lootbox",
+        possibleValues: [1]
+      }
     ]
     let bonusItem = items[wrg(items.map(x => x.weight))]
     let possibleValues = fn.deepClone(bonusItem.possibleValues)
@@ -73,9 +58,9 @@ module.exports = {
           .setThumbnail(`attachment://${talisman.name}`)
           .setDescription(`${nicknames.get(message.author.id)} has received a ${selectedRole} Talisman from a shadow lootbox.`)
         break;
-      case "coin":
-        players.add(message.author.id+".coins", bonusItemAmt)
-        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Coin")} from a shadow lootbox.`)
+      case "shadow lootbox":
+        players.add(message.author.id+".shadow lootbox", bonusItemAmt)
+        embed.setDescription(`${nicknames.get(message.author.id)} has received ${bonusItemAmt} ${fn.getEmoji(client, "Shadow Lootbox")} from a shadow lootbox.`)
         break;
       case "rose":
         players.add(message.author.id+".inventory.rose", bonusItemAmt)

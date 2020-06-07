@@ -16,8 +16,8 @@ const quickGameRoles = [
   //  "Bodyguard", "Gunner", "Junior Werewolf", "Detective", "Arsonist", "Priest", "Wolf Seer", "Aura Seer"],
   ["Aura Seer", "Medium", "Jailer", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
    "Bodyguard", "Gunner", "Wolf Shaman", "Cursed", "Serial Killer", "Mayor", "Wolf Seer", "Avenger"],
-  // ["Aura Seer", "Medium", "Witch", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
-  //  "Beast Hunter", "Gunner", "Wolf Shaman", "Aura Seer", "Bomber", "Priest", "Wolf Seer", "Mayor"]
+  ["Aura Seer", "Medium", "Witch", "Werewolf", "Doctor", "Alpha Werewolf", "Seer", Math.random() < 0.5 ? "Fool" : "Headhunter",
+   "Beast Hunter", "Gunner", "Wolf Shaman", "Aura Seer", "Arsonist", "Priest", "Wolf Seer", "Mayor"]
 ]
 
 module.exports = {
@@ -43,8 +43,6 @@ module.exports = {
     } else {
       let count = games.add("count", 1)
       let roles = quickGameRoles[Math.floor(Math.random()*quickGameRoles.length)]
-      await fn.addLog(count, `New game: ${count}`)
-      await fn.addLog(count, `Game roles: ${roles.join(", ")}`)
       currentGame = {
         mode: "quick",
         gameID: count,
@@ -63,6 +61,9 @@ module.exports = {
           talismans: true
         }
       }
+      await fn.addLog(count, `New game: ${count}`)
+      await fn.addLog(count, `Mode: ${currentGame.mode}`)
+      await fn.addLog(count, `Game roles: ${roles.join(", ")}`)
       Games.push(currentGame)
     }
     
@@ -89,8 +90,13 @@ module.exports = {
       client, currentGame.players.filter(p => p.id !== message.author.id),
       embed
     )
+    let alt = false
+    if (client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => r.name == "Verified Alts")) alt = true
+    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.${alt ? " (Verified Alt)" : ""}`)
     
-    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)
+    
+    if (message.guild) message.channel.send(`**${nicknames.get(message.author.id)}** has now joined **Quick Game #${currentGame.gameID}**.`)
+    
     games.set("quick", Games)
     players.set(`${message.author.id}.currentGame`, currentGame.gameID)
       

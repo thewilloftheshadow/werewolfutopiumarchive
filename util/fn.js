@@ -10,7 +10,8 @@ const db = require("quick.db"),
       logs = new db.table("Logs")
 
 const { defaultPrefix, embedColor } = require('./config'),
-      roles = require('./roles')
+      roles = require('./roles'),
+      tags = require('./tags')
 
 let time = (date = moment()) => {
   return moment(date).utcOffset(8).format("YYYY/MM/DD HH:mm:ss")
@@ -527,31 +528,421 @@ const death = (client, game, killed, suicide = false) => {
       )
     }
   }
+  
+  if (moment(game.nextPhase) <= moment()) return game;
           
-  // game.running = "test for tie after any death"
-  // let alive = game.players.filter(p => p.alive)
-  // if (
-  //   !alive.length
-  // ) {
-  //   game.running = "tie end"
-  //   game.currentPhase = 999
-  //   broadcastTo(
-  //     client,
-  //     game.players.filter(p => !p.left),
-  //     new Discord.MessageEmbed()
-  //       .setTitle("Game has ended.")
-  //       .setThumbnail(getEmoji(client, "Death").url)
-  //       .setDescription(`It was a tie. There are no winners.`)
-  //   )
-  //   game.running = "give tie xp"
-  //   addXP(game, game.players.filter(p => !p.suicide), 15)
-  //   addXP(game, game.players.filter(p => !p.left), 15)
-  //   addWin(game, [])
-  //   addLog(
-  //     game,
-  //     `[RESULT] The game ended in a tie. No one won!`
-  //   )
-  // }
+  let alive = game.players.filter(p => p.alive),
+      aliveRoles = alive.map(p => p.role)
+          
+  game.running = "test for tie"
+  if (
+    game.lastDeath + 9 == game.currentPhase ||
+    !alive.length || alive.length == 0 ||
+    (alive.length == 2 && aliveRoles.includes("Amulet of Protection Holder") &&
+     roles[aliveRoles.filter(r => !r == "Amulet of Protection Holder")[0]].tag & tags.ROLE.SEEN_AS_WEREWOLF)
+  ) {
+    game.running = "tie end"
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Death").url)
+        .setDescription(`It was a tie. There are no winners.`)
+    )
+    game.running = "give tie xp"
+    addXP(game, game.players.filter(p => !p.suicide), 15)
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(game, [])
+    addLog(
+      game,
+      `[RESULT] The game ended in a tie. No one won!`
+    )
+      }
+
+  game.running = "test for kill president win conditions"
+  if (
+    game.players.find(
+      p => p.role == "President" && !p.alive && !p.suicide
+    )
+  ) {
+    let president = game.players.find(p => p.role == "President")
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "President").url)
+        .setDescription(
+          `The President **${president.number} ${nicknames.get(
+            president.id
+          )}** <:President:660497498430767104> was killed! All but the villagers have won!`
+        )
+    )
+    game.running = "give xp and win for pres win cond"
+    addXP(game, game.players.filter(p => p.sect && !p.suicide), 50)
+    addXP(game, 
+      game.players.filter(
+        p =>
+          (roles[p.role].team == "Werewolves" || p.role == "Zombie") &&
+          !p.suicide
+      ),
+      75
+    )
+    addXP(game, 
+      game.players.filter(
+        p =>
+          [
+            "Headhunter",
+            "Fool",
+            "Bomber",
+            "Arsonist",
+            "Corruptor"
+          ].includes(p.role) && !p.suicide
+      ),
+      100
+    )
+    addXP(game, 
+      game.players.filter(p => p.role == "Sect Leader" && !p.suicide),
+      70
+    )
+    addXP(game, game.players.filter(p => p.sect && !p.suicide), 50)
+    addXP(game, 
+      game.players.filter(p => p.role == "Serial Killer" && !p.suicide),
+      250
+    )
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(
+      game,
+      game.players
+        .filter(p => !p.suicide && roles[p.role].team != "Village")
+        .map(p => p.number)
+    )
+    addLog(
+      game,
+      `[RESULT] The President was killed. All but the village win!\n[RESULT] Winners: ${game.players.filter(
+        p => !(roles[p.role].team == "Village" && !p.sect)
+      )}`
+    )
+  }
+
+  game.running = "test for soul collector win conditions"
+  if (
+    alive.find(
+      p =>
+        p.role == "Soul Collector" &&
+        p.alive &&
+        game.players.filter(p => p.boxed).length >=
+          Math.round(game.players.length / 4)
+    )
+  ) {
+    let sc = alive.find(p => p.role == "Soul Collector")
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Soul Collector").url)
+        .setDescription(
+          `Soul Collector **${sc.number} ${nicknames.get(
+            sc.id
+          )} ${getEmoji(client, sc.role)}** win!`
+        )
+    )
+    game.running = "give xp and win for soul collector"
+    addXP(game, [sc], 100)
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(game, alive.filter(p => p.sect).map(p => p.number))
+    addLog(
+      game,
+      `[RESULT] Soul Collector ${sc.number} ${nicknames.get(
+        sc.id
+      )} win.`
+    )
+      }
+
+  game.running = "test for couple win conditions"
+  if (
+    alive.filter(p => p.couple).length == 2 &&
+    alive.filter(p => !p.couple && p.role !== "Cupid").length == 0
+  ) {
+    let lovers = alive.filter(p => p.couple)
+    let cupid = game.players.filter(p => p.role == "Cupid" && !p.suicide)
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Cupid").url)
+        .setDescription(
+          `${
+            game.players.filter(p => p.role == "Cupid" && !p.suicide)
+              ? `Cupid **${cupid.number} ${nicknames.get(cupid.id)}** and the `
+              : ""
+          }Love Couple **${lovers[0].number} ${nicknames.get(
+            lovers[0].id
+          )} ${getEmoji(client, lovers[0].role)}** and **${
+            lovers[1].number
+          } ${nicknames.get(lovers[1].id)} ${getEmoji(
+            client,
+            lovers[1].role
+          )}** win!`
+        )
+    )
+    game.running = "give xp and win for couple"
+    addXP(game, 
+      game.players.filter(
+        p => p.couple || (p.role == "Cupid" && !p.suicide)
+      ),
+      95
+    )
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(game, game.players.filter(p => p.couple || (p.role == "Cupid" && !p.suicide)).map(p => p.number))
+    addLog(
+      game,
+      `[RESULT] The ${
+        game.players.filter(p => p.role == "Cupid" && !p.suicide)
+          ? "Cupid and the "
+          : ""
+      }Love Couple win.\n[RESULT] Winners: ${game.players
+        .filter(p => p.couple || (p.role == "Cupid" && !p.suicide))
+        .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+        .join(", ")}`
+    )
+      }
+
+  game.running = "test for zombie win conditions"
+  if (alive.filter(p => p.role == "Zombie").length == alive.length) {
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Zombie").url)
+        .setDescription(`The zombies wins!`)
+    )
+    game.running = "give xp and win for zombie"
+    addXP(game, 
+      game.players.filter(p => p.role == "Zombie" && !p.suicide),
+      75
+    )
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(game, game.players.filter(p => p.role == "Zombie" && !p.suicide).map(p => p.number))
+    addLog(
+      game,
+      `[RESULT] The zombies win.\n[RESULT] Winners: ${game.players
+        .filter(p => p.role == "Zombie" && !p.suicide)
+        .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+        .join(", ")}`
+    )
+      }
+
+  game.running = "test for sect win conditions"
+  if (
+    aliveRoles.includes("Sect Leader") &&
+    alive.filter(p => !p.sect).length == 0
+  ) {
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Sect Leader").url)
+        .setDescription(`The sect wins!`)
+    )
+    game.running = "give xp and win for sect"
+    addXP(game, game.players.filter(p => p.sect && !p.suicide), 50)
+    addXP(game, 
+      game.players.filter(p => p.role == "Sect Leader" && !p.suicide),
+      70
+    )
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(game, game.players.filter(p => p.sect && !p.suicide).map(p => p.number))
+    addLog(
+      game,
+      `[RESULT] The sect win.\n[RESULT] Winners: ${game.players
+        .filter(p => p.sect && !p.suicide)
+        .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+        .join(", ")}`
+    )
+      }
+
+  game.running = "test for solo killer win conditions"
+  if (
+    (alive.length == 1 &&
+      [
+        "Arsonist",
+        "Bomber",
+        "Cannibal",
+        "Corruptor",
+        "Illusionist",
+        "Serial Killer"
+      ].includes(aliveRoles[0])) ||
+    (alive.length == 2 &&
+      aliveRoles.includes("Jailer") &&
+      aliveRoles.some(
+        r =>
+          [
+            "Arsonist",
+            "Bomber",
+            "Cannibal",
+            "Corruptor",
+            "Illusionist",
+            "Serial Killer"
+          ].indexOf(r) >= 0
+      ))
+  ) {
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(
+          getEmoji(
+            client,
+            alive.find(p => roles[p.role].team == "Solo").role
+          ).url
+        )
+        .setDescription(
+          `${alive.find(p => roles[p.role].team == "Solo").role} **${
+            alive.find(p => roles[p.role].team == "Solo").number
+          } ${nicknames.get(
+            alive.find(p => roles[p.role].team == "Solo").id
+          )}** wins!`
+        )
+    )
+    game.running = "give xp and win for solo killer"
+    addXP(game, [alive.find(p => roles[p.role].team == "Solo")], 250)
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(
+      game,
+      [alive.find(p => roles[p.role].team == "Solo").number],
+      "Solo"
+    )
+    addLog(game, `-divider-`)
+    addLog(game, `[RESULT] ${alive.find(p => roles[p.role].team == "Solo").role} ${
+            alive.find(p => roles[p.role].team == "Solo").number
+          } ${nicknames.get(
+            alive.find(p => roles[p.role].team == "Solo").id
+          )} wins.`)
+      }
+
+  game.running = "test for werewolves win conditions"
+  if (
+    game.players.filter(
+      p => p.alive && (roles[p.role].tag & tags.ROLE.SEEN_AS_WEREWOLF)
+    ).length >=
+      game.players.filter(
+        p => p.alive && (roles[p.role].tag & tags.ROLE.SEEN_AS_VILLAGER)
+      ).length &&
+    !game.players.filter(
+      p =>
+        p.alive &&
+        (roles[p.role].tag & tags.ROLE.SOLO_KILLER)
+    ).length
+  ) {
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left).map(p => p.id),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Werewolf").url)
+        .setDescription(`The werewolves win!`)
+    )
+    game.running = "give xp and win for ww"
+    addXP(game, 
+      game.players.filter(
+        p => !p.suicide && roles[p.role].team == "Werewolves"
+      ),
+      50
+    )
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(
+      game,
+      game.players
+        .filter(p => !p.suicide && roles[p.role].team == "Werewolves")
+        .map(p => p.number),
+      "Werewolves"
+    )
+    addLog(game, `-divider-`)
+    addLog(
+      game,
+      `[RESULT] The werewolves win.\n[RESULT] Winners: ${game.players
+        .filter(p => !p.suicide && roles[p.role].team == "Werewolves")
+        .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+        .join(", ")}`
+    )
+      }
+
+  game.running = "test for village win conditions"
+  if (
+    game.players.filter(
+      p => p.alive && !(roles[p.role].tag & tags.ROLE.SEEN_AS_VILLAGER)
+    ).length == 0
+  ) {
+    game.currentPhase = 999
+    broadcastTo(
+      client,
+      game.players.filter(p => !p.left).map(p => p.id),
+      new Discord.MessageEmbed()
+        .setTitle("Game has ended.")
+        .setThumbnail(getEmoji(client, "Villager").url)
+        .setDescription(`The village wins!`)
+    )
+    game.running = "give xp and win for village"
+    addXP(game, 
+      game.players.filter(
+        p =>
+          !p.suicide &&
+          !p.sect &&
+          (roles[p.role].team == "Village" ||
+            (p.role == "Headhunter" &&
+              !game.players.find(pl => pl.headhunter == p.number)
+                .alive))
+      ),
+      50
+    )
+    addXP(game, game.players.filter(p => !p.left), 15)
+    addWin(
+      game,
+      game.players
+        .filter(
+          p =>
+            !p.suicide &&
+            !p.sect &&
+            (roles[p.role].team == "Village" ||
+              (p.role == "Headhunter" &&
+                !game.players.find(pl => pl.headhunter == p.number)
+                  .alive))
+        )
+        .map(p => p.number),
+      "Village"
+    )
+    addLog(game, `-divider-`)
+    addLog(
+      game,
+      `[RESULT] The villagers win.\n[RESULT] Winners: ${game.players
+        .filter(
+          p =>
+            !p.suicide &&
+            !p.sect &&
+            (roles[p.role].team == "Village" ||
+              (p.role == "Headhunter" &&
+                !game.players.find(pl => pl.headhunter == p.number)
+                  .alive))
+        )
+        .map(p => `${p.number} ${nicknames.get(p.id)} (${p.role})`)
+        .join(", ")}`
+    )
+  }
 
   return game
 }

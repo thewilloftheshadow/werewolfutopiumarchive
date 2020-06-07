@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 
-const gamemodes = ["quick", "custom"/*, "ranked", "sandbox"*/]
+const gamemodes = ["quick", "custom"/*, "ranked"*/, "sandbox"]
 
 module.exports = {
   name: "joingame",
@@ -22,7 +22,7 @@ module.exports = {
           .setTitle(`\`${args[0]}\` is not a valid game mode!`)
           .addField(
             "List of valid game modes",
-            gamemodes.map(g => `\`${g}\``).join(", ")
+            "`quick`,`sandbox`,`custom`"
           )
       )
     

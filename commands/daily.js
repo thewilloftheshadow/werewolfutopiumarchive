@@ -120,8 +120,15 @@ module.exports = {
       )
     }
     
-    if (moment(player.lastDaily || 0).add(48, "h") <= moment())
-      player.streak = 0
+    let consumedSPs = 0
+    if (moment(player.lastDaily || 0).add(48, "h") <= moment()) {
+      if (((player.inventory || {})["streak preserver"] || 0) >= Math.ceil((moment().diff(moment(player.lastDaily || 0), 'hours') - 48)/24)) {
+        consumedSPs = Math.ceil((moment().diff(moment(player.lastDaily || 0), 'hours') - 48)/24)
+        player.inventory["streak preserver"] -= consumedSPs
+      }
+      else player.streak = 0
+    }
+      
     
     let bonusItem = rollBonus(
       Math.round(
@@ -185,6 +192,8 @@ module.exports = {
     else {
       embed.description += `You now have ${players.get(`${message.author.id}.coins`)} ${fn.getEmoji(client, "Coin")}.`
     }
+    
+    if (consumedSPs) embed.description += `\n\n${consumedSPs} Streak Preservers are consumed to save your streak!`
     
     players.set(`${message.author.id}.lastDaily`, moment())
     players.set(`${message.author.id}.streak`, player.streak)

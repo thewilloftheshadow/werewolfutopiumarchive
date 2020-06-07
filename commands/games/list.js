@@ -23,7 +23,7 @@ module.exports = {
           .setTitle("No results found.")
       )
     else for (var game of allGames.filter(g => args[0] && args[0].toLowerCase() == "beta" ? (`${g.gameID}`).toLowerCase().startsWith("betatest_") : args[0] ? (g.mode == args[0].toLowerCase() && !(`${g.gameID}`).toLowerCase().startsWith("betatest_")) : true)) {
-      console.log(game.gameID)
+      // console.log(game.gameID)
       if (i == 6) { i = 0; embeds.push(new Discord.MessageEmbed()) }
       ++i
       embeds[embeds.length-1].addField(

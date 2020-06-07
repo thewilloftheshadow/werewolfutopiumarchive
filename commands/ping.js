@@ -20,6 +20,8 @@ module.exports = {
       .addField("Bot Latency", `${botLatency}ms`, true)
       .addField("Ping", `${Math.round(ping)}ms`, true)
       .addField("Memory Used", `${memory}MB`, true)
+    .setFooter("Werewolf Utopium")
+    .setTimestamp()
     
     m.delete()
     await message.channel.send(embed)

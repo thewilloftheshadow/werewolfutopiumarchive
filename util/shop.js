@@ -108,5 +108,17 @@ module.exports = {
     currency: "roses",
     plural: "es",
     hidden: true
+  },
+  "streak preserver": {
+    price: 20,
+    name: "Streak Preserver",
+    description:
+    "Preserve your daily streak in case you forget to claim!",
+    itemid: "streak preserver",
+    unavailable: false,
+    emoji: "Medium_Revive",
+    currency: "roses",
+    plural: "s",
+    hidden: false
   }
 }

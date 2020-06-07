@@ -42,7 +42,6 @@ module.exports = {
         embed.fields.push({name: "\u200b", value: "\u200b", inline: true})
       }
     })
-    console.log(embed.fields)
     message.channel.send(embed)
   }
 }

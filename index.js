@@ -49,7 +49,7 @@ client.once('ready', async () => {
   console.log(`${fn.time()} | ${client.user.username} is up!`)
   fn.addLog(`MAIN`, `Werewolf Utopium bot is now ready.`)
   
-  client.user.setPresence({ activity: { name: 'Werewolf Online' , type: "PLAYING"}, status: 'idle' })
+  client.user.setPresence({ activity: { name: 'Werewolf Online' , type: "PLAYING"}, status: 'online' })
 
   require('/app/process/game.js')(client)
   
@@ -246,11 +246,11 @@ client.once('ready', async () => {
     serverStats.edit(serverStatsEmbed)
   }, 1000*60*1)
   
-  setInterval(() => {
+ // setInterval(() => {
     // let cpu = process.cpuUsage().system + process.cpuUsage().user
     // let cpupercent = cpu / parseInt(fs.readFileSync('/sys/fs/cgroup/cpu/cpu.cfs_period_us').toString(),10)
     // console.log(cpupercent)
-  }, 10000)
+ // }, 10000)
 })
 
 client.on('inviteCreate', async invite => {
@@ -367,6 +367,19 @@ client.on('message', async message => {
       players.set(message.author.id, player)
     }
     
+    if (players.get(`${message.author.id}.banned`) && !['help','role'].includes(commandName)) {
+      let {reason, until} = players.get(`${message.author.id}.banned`)
+      return await message.author.send(
+        new Discord.MessageEmbed()
+          .setColor("RED")
+          .setTitle("You have been blacklisted from Werewolf Utopium!")
+          .setDescription(
+            `**Reason**: ${reason}\n` +
+            `**Ban expires**: ${fn.utcTime(until)}`
+          )
+          .setFooter(`If you think you are incorrectly blacklisted, please contact Werewolf Utopium moderators.`)
+      )
+    }
     message.delete().catch(error => {})
 		try {
 			await command.run(client, message, args, shared)
@@ -682,6 +695,17 @@ client.on('message', async message => {
         (afkmentions.length > 10 ? `\nand ${afkmentions.length-10} more...` : "")
       )
   )
+})
+
+client.on('message', async message => {
+  if (message.channel.id !== "718418283312840814" && message.author.id !== "718413626079445082") return;
+  let veri = message.content, [ _, code, check ] = veri.match(/(\d{6})\-(\d|A)/), checksum = 0
+  for (var i = 0; i < code.length; i++) checksum += parseInt(code[i])
+  if (check == "A") check = 10
+  else check = parseInt(check)
+  if (10-(checksum%11)!=check) return;
+  // console.log("Received ping from Status bot")
+  message.react("👍")
 })
 
 // SpyFall interaction

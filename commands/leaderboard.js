@@ -55,7 +55,7 @@ module.exports = {
           : i == 2
           ? ":third_place: "
           : `\`${i+1}\` `
-    }${player.nickname}${player.id == message.author.id ? " (**you**)" : ""} [\`${player[args[0].toLowerCase()] || 0}\`]\n`
+    }${player.nickname}${player.id == message.author.id ? " (**you**)" : ""}${args[1] && args[1].toLowerCase() == "debug" ? ` (\`${player.id}\`)` : ""} [\`${player[args[0].toLowerCase()] || 0}\`]\n`
     }
     
     for (var [i, embed] of embeds.entries()) {
@@ -82,30 +82,5 @@ module.exports = {
     let m = await message.channel.send(embeds[0])
     fn.paginator(message.author.id, m, embeds, 0)
     
-    /*
-    for(user in sortedPlayers){
-      let score = lb[user]
-      if(i == 0){
-        embedScore[i] = "**Top Three:**\n:first_place: - "+sortedPlayers.nickname+": "+"`"+sortedPlayers.xp+"`"
-      }
-      if(i == 1){
-        embedScore[i] = ":second_place: - "+userInfo.user.username+"#"+userInfo.user.discriminator+": "+"`"+score+"`"
-      }
-      if(i == 2){
-        embedScore[i] = ":third_place: - "+userInfo.user.username+"#"+userInfo.user.discriminator+": "+"`"+score+"`"
-      }
-      if(i == 3){
-        embedScore[i] = "\n**4th and below:**\n - "+userInfo.user.username+"#"+userInfo.user.discriminator+": "+"`"+score+"`"
-      }
-      if(i > 3){
-        embedScore[i] = " - "+userInfo.user.username+"#"+userInfo.user.discriminator+": "+"`"+score+"`"
-      }
-      i = i + 1
-    }
-    if(embedScore.join("\n") == ""){
-      embedScore = ["Nobody has scored any points yet."]
-    }
-    message.author.send(embedScore.join('\n'))
-    message.author.send(JSON.stringify(lb), {code: "fix", split: {char: ","}})*/
   }
 }

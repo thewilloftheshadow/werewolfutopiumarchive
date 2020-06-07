@@ -50,34 +50,36 @@ module.exports = {
       )
 
     if (gamePlayer.role == "Spirit Seer") {
-      let targetA = parseInt(args[0]),
-        targetB = parseInt(args[1])
+      let targetA = parseInt(args[0]), 
+          targetB = parseInt(args[1])
       if (
-        isNaN(targetA) ||
+        (isNaN(targetA) ||
         targetA > game.players.length ||
-        targetA < 1 ||
-        isNaN(targetB) ||
+        targetA < 1) ||
+        (targetB ? (isNaN(targetB) ||
         targetB > game.players.length ||
-        targetB < 1
+        targetB < 1) : false)
       )
         return await message.author.send("Invalid target.")
-      if (!game.players[targetA - 1].alive || !game.players[targetB - 1].alive)
+      if (!game.players[targetA - 1].alive || (targetB ? !game.players[targetB - 1].alive : false))
         return await message.author.send("You cannot check a dead player.")
-      if (targetA == gamePlayer.number || targetB == gamePlayer.number)
+      if (targetA == gamePlayer.number || (targetB ? targetB == gamePlayer.number : false))
         return await message.react(fn.getEmoji(client, "harold"))
-      if (targetA == targetB)
-        return await message.author.send("You need to select **__two different targets__** for your ability to work!")
+      if (targetB && targetA == targetB)
+        return await message.author.send("You need to select two **__different__** targets for your ability to work!")
 
-      gamePlayer.usedAbilityTonight = [targetA, targetB]
+      gamePlayer.usedAbilityTonight = [targetA]
+      if(targetB) gamePlayer.usedAbilityTonight.push(targetB)
       
-      let targetPlayerA = game.players[targetA-1],
-          targetPlayerB = game.players[targetB-1]
+      let targetPlayerA = game.players[targetA-1]
+      let targetPlayerB
+      if(targetB) targetPlayerB = game.players[targetB-1]
                 
       fn.addLog(
         game,
         `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} wanted to see the spirits of ${
-        targetPlayerA.number} ${nicknames.get(targetPlayerA.id)} (${targetPlayerA.role}) and ${
-        targetPlayerB.number} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role}).`
+        targetPlayerA.number} ${nicknames.get(targetPlayerA.id)} (${targetPlayerA.role}) ${targetB ? `and ${
+        targetPlayerB.number} ${nicknames.get(targetPlayerB.id)} (${targetPlayerB.role})` : ""}.`
       )
     } else {
       if (gamePlayer.usedAbilityTonight)

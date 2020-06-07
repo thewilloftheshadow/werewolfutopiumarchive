@@ -99,7 +99,8 @@ module.exports = client => {
                     "The village cannot decide on who to lynch.", true
                   )
                   fn.addLog(game, "The village cannot decide on who to lynch.")
-                } else {
+                }
+                else {
                   lynched = lynched[0]
                   let lynchedPlayer = game.players[lynched - 1]
 
@@ -140,7 +141,7 @@ module.exports = client => {
                       )} from being lynched.`
                     )
                   }
-                  if (lynchedPlayer.role == "Handsome Prince") {
+                  else if (lynchedPlayer.role == "Handsome Prince") {
                     game.running = "no lynch prince"
                     fn.broadcastTo(
                       client,
@@ -159,7 +160,7 @@ module.exports = client => {
                     lynchedPlayer.roleRevealed = lynchedPlayer.role
                     fn.addLog(
                       game,
-                      `Handsome Prince ${protector.number} ${nicknames.get(protector.id)
+                      `Handsome Prince ${lynchedPlayer.number} ${nicknames.get(lynchedPlayer.id)
                       } revealed themselves as the village tried to lynch him.`
                     )
                   } else {
@@ -375,16 +376,15 @@ module.exports = client => {
             game.running = "find all protectors and assigning protection"
             let protectors = game.players.filter(
               p =>
-                p.alive &&
+                (p.alive &&
                 [
                   "Bodyguard",
                   "Doctor",
                   "Witch",
                   "Tough Guy",
-                  "Beast Hunter",
                   "Jailer",
                   "Red Lady"
-                ].includes(p.role)
+                ].includes(p.role)) || p.role == "Beast Hunter"
             )
             for (var protector of protectors) {
               if (["Bodyguard", "Tough Guy","Red Lady"].includes(protector.role))
@@ -1894,7 +1894,7 @@ module.exports = client => {
               )
               console.log(spz)
               console.log(targets)
-              if (targets[0].killedTonight || targets[1].killedTonight){
+              if (targets[0].killedTonight || (targets[1] && targets[1].killedTonight)){
                 fn.getUser(client, spz.id).send(
                   new Discord.MessageEmbed()
                     .setTitle("They had an evil soul...")
@@ -1902,9 +1902,9 @@ module.exports = client => {
                     .setDescription(
                       `**${targets[0].number} ${nicknames.get(
                         targets[0].id
-                      )}** and/or **${targets[1].number} ${nicknames.get(
+                      )}** ${targets[1] ? `and/or **${targets[1].number} ${nicknames.get(
                         targets[1].id
-                      )}** killed last night!`
+                      )}**` : ""} killed last night!`
                     )
                 )
                 
@@ -1912,11 +1912,11 @@ module.exports = client => {
                   game,
                   `Spirit Seer ${
                     spz.number
-                  } ${nicknames.get(spz.id)} found that either of ${targets[0].number} ${nicknames.get(
+                  } ${nicknames.get(spz.id)} found that ${targets[1] ? "either " : ""}${targets[0].number} ${nicknames.get(
                     targets[0].id
-                  )} or ${targets[1].number} ${nicknames.get(
+                  )} ${targets[1] ? `or ${targets[1].number} ${nicknames.get(
                     targets[1].id
-                  )} killed last night.`
+                  )}` : ""} killed last night.`
                 )
               }
               else {
@@ -1926,24 +1926,25 @@ module.exports = client => {
                     .setThumbnail(
                       fn.getEmoji(client, "Spirit Seer NotKilled").url
                     )
-                    .setDescription(
-                      `Neither of **${targets[0].number} ${nicknames.get(
+                    .setDescription(targets[1] ? `Neither of **${targets[0].number} ${nicknames.get(
                         targets[0].id
                       )}** or **${targets[1].number} ${nicknames.get(
                         targets[1].id
-                      )}** killed last night.`
+                      )}** killed last night.` : `**${targets[0].number} ${nicknames.get(
+                        targets[0].id
+                      )}** did not kill last night.`
                     )
                 )
                 
                 fn.addLog(
-                  game,
+                  game, 
                   `Spirit Seer ${
                     spz.number
-                  } ${nicknames.get(spz.id)} found that neither of ${targets[0].number} ${nicknames.get(
+                  } ${nicknames.get(spz.id)} found that ${targets[1] ? "neither " : ""}${targets[0].number} ${nicknames.get(
                     targets[0].id
-                  )} or ${targets[1].number} ${nicknames.get(
+                  )} ${targets[1] ? `or ${targets[1].number} ${nicknames.get(
                     targets[1].id
-                  )} killed last night.`
+                  )}` : ""} killed last night.`
                 )
               }
             }

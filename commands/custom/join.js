@@ -91,7 +91,11 @@ module.exports = {
       client, currentGame.players.filter(p => p.id !== message.author.id),
       embed
     )
-    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.`)
+    let alt = false
+    if (client.guilds.cache.get("522638136635817986").members.cache.get(message.author.id).roles.cache.find(r => r.name == "Verified Alts")) alt = true
+    fn.addLog(currentGame, `${nicknames.get(message.author.id)} joined the game.${alt ? " (Verified Alt)" : ""}`)
+    
+    if (message.guild) message.channel.send(`**${nicknames.get(message.author.id)}** has now joined **Custom Game ${currentGame.name} ${currentGame.config.private ? "" : `[\`${currentGame.gameID}\`]`}**.`)
     
     games.set("quick", Games)
     players.set(`${message.author.id}.currentGame`, currentGame.gameID)

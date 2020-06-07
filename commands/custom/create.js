@@ -595,6 +595,7 @@ module.exports = {
     )
     
     fn.addLog(currentGame, `New game: ${currentGame.name} - ${currentGame.gameID}`)
+    fn.addLog(currentGame, `Mode: ${currentGame.mode}`)
     fn.addLog(currentGame, `Game roles: ${currentGame.originalRoles.join(", ")}`)
     fn.addLog(currentGame, `-divider-`)
     fn.addLog(currentGame, `Configuration`)

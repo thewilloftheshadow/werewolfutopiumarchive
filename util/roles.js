@@ -78,7 +78,7 @@ let roles = {
     nit1: "Select two players to be a love couple (`w!lovers [player1] [player2]`)." +
           " If you do not select two players, they will be randomly selected.",
     tag : tags.ROLE.VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED | tags.ROLE.ONE_ONLY
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE | tags.ROLE.ONE_ONLY
   },
   "Cursed": {
     desc: "You are a villager until the werewolves try to kill you, at which point you become a werewolf." +
@@ -214,15 +214,15 @@ let roles = {
     team: "Village",
     abbr: ["mm"],
     cat : "Regular Villager",
-    day : "Kill your target (`w!kill`) if you find them suspicious.\n" +
+    day : "Kill your target (`w!shoot`) if you find them suspicious.\n" +
           "**⚠️ If your target is a villager, your shot will backfire and kill you!**",
     nite: "Mark a player as your target (`w!mark [player]`).\n" +
-          "After the next day, you can kill your target (`w!kill`) if you find them suspicious.\n" +
+          "After the next day, you can kill your target (`w!shoot`) if you find them suspicious.\n" +
           "**⚠️ If your target is a villager, your shot will backfire and kill you!**",
     attr: { abil1: 2 },
     cgp : "250c",
     tag : tags.ROLE.VILLAGER | tags.ROLE.REGULAR_VILLAGER | tags.ROLE.SEEN_AS_VILLAGER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
   }, 
   "Mayor": {
   	desc: "Once during the game you can reveal your role which will make your vote count double during the rest of the game.",
@@ -714,7 +714,7 @@ let roles = {
     nite: "Select a player to bite (`w!bite [player]`).",
     cgp : "1000c",
     tag : tags.ROLE.SOLO_KILLER |
-          tags.ROLE.WWO_ROLE | tags.ROLE.TO_BE_TESTED
+          tags.ROLE.WWO_ROLE | tags.ROLE.UNAVAILABLE
   },
   
   // Random Roles
@@ -723,7 +723,7 @@ let roles = {
     desc: "Any role.",
     abbr: ["rdm"],
     cat : "Random",
-    tag : tags.ROLE.TO_BE_TESTED,
+    tag : tags.ROLE.AVAILABLE,
     cgp : "250c",
   },
   "Random Regular Villager": {

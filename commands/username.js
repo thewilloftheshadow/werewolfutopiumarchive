@@ -80,18 +80,26 @@ module.exports = {
       let usedNicknames = nicknames.all().map(x => x.data.toLowerCase())
 
       if (
-        response.match(/^[a-z0-9\_]{3,14}$/i) &&
+        response.match(/^[a-z0-9\_]{3,15}$/i) &&
         !usedNicknames.includes(response.toLowerCase())
       )
         input = response.replace(/_/g, "\\_")
-      else if (response.length > (player.usernameLength || 14))
-        await m.channel.send("This username is too long! The maximum number of characters is " + (player.usernameLength || 15))
-      else if (response.length < 3)
+      else if (response.length > (player.usernameLength || 14)) {
+        await m.channel.send("This username is too long! The maximum number of characters is " + (player.usernameLength || 15) + ".")
+        continue;
+      }
+      else if (response.length < 3) {
         await m.channel.send("This username is too short!")
-      else if (!response.match(/^[a-z0-9\_]{3,14}$/i))
+        continue;
+      }
+      else if (!response.match(/^[a-z0-9\_]{3,14}$/i)) {
         await m.channel.send("This username contains invalid characters! Only alphanumerical characters or underscores are accepted.")
-      else if (usedNicknames.includes(response.toLowerCase()))
+        continue;
+      }
+      else if (usedNicknames.includes(response.toLowerCase())) {
         await m.channel.send("This username has been taken!")
+        continue;
+      }
       else await m.channel.send("Invalid username. Please try again.")
     
       let conf2 = await message.author.send(`Changing your nickname to **${input}**. Proceed?`)

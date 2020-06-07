@@ -426,6 +426,8 @@ module.exports = client => {
       pass.tags = tags
       res.render(__dirname + "/views/roles.ejs", pass)
     })
+    
+    app.get("/coffee", async (req, res) => res.status(418).send("418. I’m a teapot.\n\nThe requested entity body is short and stout.\nTip me over and pour me out."))
 
     // app.get("/status", checkAuth, devonly, statusMonitor.pageRoute)
     

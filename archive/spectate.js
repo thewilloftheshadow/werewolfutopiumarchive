@@ -10,7 +10,8 @@ const fn = require('/app/util/fn'),
       roles = require("/app/util/roles")
 
 module.exports = {
-  name: "spectate",
+  name: "idiotspectate",
+  aliases: ["dontusethislmfao"],
   run: async (client, message, args, shared) => {
     if (
       !client.guilds.cache

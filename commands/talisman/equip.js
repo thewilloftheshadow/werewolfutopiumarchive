@@ -25,6 +25,7 @@ module.exports = {
       )
     
     let targetRole = args.join(' ')
+    if (!targetRole.length) return await message.channel.send("Please specify which talisman you are equipping!")
     let role = Object.values(roles).find(
       data =>
         data.name.toLowerCase().startsWith(targetRole.toLowerCase()) ||

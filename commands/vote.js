@@ -90,43 +90,29 @@ module.exports = {
       if (!args[0]) return await message.author.send("Please select a player, or choose `cancel` to remove your vote!")
       if (args[0].toLowerCase() == "cancel") {
         gamePlayer.vote = null
-        return await message.author.send("You have withdrawn your vote.")
+        await message.author.send("You have withdrawn your vote.")
+        fn.addLog(
+          game,
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(
+            gamePlayer.id
+          )} withdrew their vote.`
+        )
       }
-      
-      if (gamePlayer.mute)
-        return await message.author.send("You cannot vote today!")
-      
-      let vote = parseInt(args[0])
-      if (isNaN(vote) || vote > game.players.length || vote < 1)
-        return await message.author.send("Invalid vote.")
-      if (!game.players[vote-1].alive) 
-        return await message.author.send("You cannot vote a dead player.")
-      if (vote == gamePlayer.number) 
-        return await message.author.send("You cannot vote yourself.")
-      game.players[gamePlayer.number-1].vote = vote
-      
-      message.author.send(
-        `${fn.getEmoji(client, "Voting")} You voted to lynch **${vote} ${
-          nicknames.get(game.players[vote - 1].id)
-        }${
-          game.players[vote - 1].roleRevealed
-            ? ` ${client.emojis.cache.find(
-                e => e.name == game.players[vote - 1].role.replace(/ /g, "_")
-              )}`
-            : ""
-        }**.`
-      )
-      
-      if (!game.shade)
-        fn.broadcastTo(
-          client, game.players.filter(p => !p.left && p.number !== gamePlayer.number),
-          `${fn.getEmoji(client, "Voting")} **${gamePlayer.number} ${nicknames.get(message.author.id)}${
-            gamePlayer.roleRevealed
-              ? ` ${client.emojis.cache.find(
-                  e => e.name == gamePlayer.role.replace(/ /g, "_")
-                )}`
-              : ""
-          }** voted to lynch **${vote} ${
+      else {
+        if (gamePlayer.mute)
+          return await message.author.send("You cannot vote today!")
+
+        let vote = parseInt(args[0])
+        if (isNaN(vote) || vote > game.players.length || vote < 1)
+          return await message.author.send("Invalid vote.")
+        if (!game.players[vote-1].alive) 
+          return await message.author.send("You cannot vote a dead player.")
+        if (vote == gamePlayer.number) 
+          return await message.author.send("You cannot vote yourself.")
+        game.players[gamePlayer.number-1].vote = vote
+
+        message.author.send(
+          `${fn.getEmoji(client, "Voting")} You voted to lynch **${vote} ${
             nicknames.get(game.players[vote - 1].id)
           }${
             game.players[vote - 1].roleRevealed
@@ -136,12 +122,34 @@ module.exports = {
               : ""
           }**.`
         )
-      
-      fn.addLog(
-        game,
-        `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to lynch ${vote} ${
-        nicknames.get(game.players[vote - 1].id)
-        } (${game.players[vote - 1].role}).`)
+
+        if (!game.shade)
+          fn.broadcastTo(
+            client, game.players.filter(p => !p.left && p.number !== gamePlayer.number),
+            `${fn.getEmoji(client, "Voting")} **${gamePlayer.number} ${nicknames.get(message.author.id)}${
+              gamePlayer.roleRevealed
+                ? ` ${client.emojis.cache.find(
+                    e => e.name == gamePlayer.role.replace(/ /g, "_")
+                  )}`
+                : ""
+            }** voted to lynch **${vote} ${
+              nicknames.get(game.players[vote - 1].id)
+            }${
+              game.players[vote - 1].roleRevealed
+                ? ` ${client.emojis.cache.find(
+                    e => e.name == game.players[vote - 1].role.replace(/ /g, "_")
+                  )}`
+                : ""
+            }**.`
+          )
+
+        fn.addLog(
+          game,
+          `[ACTION] ${gamePlayer.role} ${gamePlayer.number} ${nicknames.get(gamePlayer.id)} voted to lynch ${vote} ${
+          nicknames.get(game.players[vote - 1].id)
+          } (${game.players[vote - 1].role}).`
+        )
+      }
     }
     QuickGames[index] = game
     

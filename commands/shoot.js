@@ -76,11 +76,7 @@ module.exports = {
             gamePlayer.number
           } ${nicknames.get(
             message.author.id
-          )}** tried to shoot **${target} ${nicknames.get(targetPlayer.id)}${
-            game.config.deathReveal
-              ? ` ${fn.getEmoji(client, targetPlayer.role)}`
-              : ""
-          }**, but their shot backfired and killed themself!`
+          )}** tried to shoot **${target} ${nicknames.get(targetPlayer.id)}**, but their shot backfired and killed themself!`
         )
         gamePlayer.roleRevealed = gamePlayer.role
 
@@ -101,8 +97,8 @@ module.exports = {
         
         fn.broadcastTo(
           client, game.players.filter(p => !p.left).map(p => p.id), 
-          `${fn.getEmoji(client, "Marksman_Shoot")} Marksman **${gamePlayer.number} ${nicknames.get(message.author.id)}** shot **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
-        gamePlayer.roleRevealed = gamePlayer.role
+          `${fn.getEmoji(client, "Marksman_Shoot")} Marksman shot **${target} ${nicknames.get(targetPlayer.id)}${game.config.deathReveal ? ` ${fn.getEmoji(client, targetPlayer.role)}` : ""}**.`)
+        targetPlayer.roleRevealed = targetPlayer.role
         
         fn.addLog(
           game,

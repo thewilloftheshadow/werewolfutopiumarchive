@@ -249,10 +249,11 @@ module.exports = async (client, game) => { try {
   
   game.startTime = moment()
   
+  let newGames = games.get("quick")
   let thisGame = Games.find(g => g.gameID == game.gameID)
-  Games[Games.indexOf(thisGame)] = game
+  newGames[Games.indexOf(thisGame)] = game
   
-  games.set("quick", Games)
+  games.set("quick", newGames)
 } catch (error) {
   client.channels.cache.get("664285087839420416").send(
     new Discord.MessageEmbed()

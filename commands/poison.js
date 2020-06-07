@@ -47,7 +47,7 @@ module.exports = {
     if (!targetPlayer.alive)
       return await message.author.send("You cannot poison a dead player.")
     if (target == gamePlayer.number)
-      return await message.author.send("**EMMMMMMMMMMMMMMM**")
+      return await message.author.send("**Poof. You died.** no jk, but don't try this at home.")
     
     if (!gamePlayer.sect && targetPlayer.role == "President")
       return await message.author.send("You cannot poison the President!")

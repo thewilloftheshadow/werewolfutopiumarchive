@@ -104,12 +104,14 @@ module.exports = {
       )
       game.noVoting = true
     }
-    else if (gamePlayer.role == "Mayor" && args[0].toLowerCase() == "mayor") {
+    else if (gamePlayer.role == "Mayor" && args[0] && args[0].toLowerCase() == "mayor") {
       if (!gamePlayer.alive)
         return await message.author.send("You are dead. You can no longer reveal yourself.")
     
       if (gamePlayer.roleRevealed == "Mayor")
         return await message.author.send("You have already revealed yourself!")
+      if (game.currentPhase >= 999)
+        return await message.author.send("The game is over! You can no longer use your actions.")
     
       if (game.currentPhase % 3 == 0)
         return await message.author.send("You cannot reveal yourself at night.")

@@ -22,6 +22,7 @@ module.exports = {
           index = QuickGames.indexOf(game),
           gamePlayer = game.players.find(player => player.id == message.author.id)
       let target = parseInt(args[0])
+      if(game.currentPhase < 0) return await message.author.send("You can't send roses until the game starts!")
       if (isNaN(target) || target > game.players.length || target < 1)
         return await message.author.send("Invalid target.") 
       let r = fn.getUser(client, game.players[target-1].id)      
