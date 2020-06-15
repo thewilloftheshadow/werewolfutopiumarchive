@@ -1050,5 +1050,6 @@ module.exports = {
   randomString: randomString,
   addLog: addLog,
   writeLogs: writeLogs,
-  writeLog: writeLogs
+  writeLog: writeLogs,
+  event: require("/app/event.js")
 }

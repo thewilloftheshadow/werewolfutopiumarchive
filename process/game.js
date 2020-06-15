@@ -42,19 +42,20 @@ module.exports = client => {
             m.roles.add(fn.getRole(m.guild, "Player")).catch(() => {})
           )
       
-        if (game.mode == "quick") for (var player of game.players.map(x => x.id)) {
-          // if (!players.get(`${player}.wins`).find(g =>)) return;
-          let rdm = Math.floor(Math.random()*25)
-          if (rdm == 0) {
-            players.add(`${player}.inventory.lootbox`, 1)
-            fn.getUser(client, player).send(
-              new Discord.MessageEmbed()
-                .setTitle("Lootbox")
-                .setThumbnail(fn.getEmoji(client, "Lootbox").url)
-                .setDescription(`Congratulations, you earned a lootbox!`)
-            )
-          }
-        }
+        // if (game.mode == "quick") for (var player of game.players.map(x => x.id)) {
+        //   // if (!players.get(`${player}.wins`).find(g =>)) return;
+        //   let rdm = Math.floor(Math.random()*25)
+        //   if (rdm == 0) {
+        //     players.add(`${player}.inventory.lootbox`, 1)
+        //     fn.getUser(client, player).send(
+        //       new Discord.MessageEmbed()
+        //         .setTitle("Lootbox")
+        //         .setThumbnail(fn.getEmoji(client, "Lootbox").url)
+        //         .setDescription(`Congratulations, you earned a lootbox!`)
+        //     )
+        //   }
+        // }
+        for (var i = 0; i < game.players.length / 4; i++) fn.broadcastTo(client, game.players.filter(p => !p.left), fn.event())
       }
       if (game.currentPhase == -1 || game.currentPhase >= 999) continue;
 

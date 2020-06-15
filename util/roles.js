@@ -542,6 +542,7 @@ let roles = {
   
   // Solo non-killing roles
   
+  
   "Fool": {
     desc: "Your goal is to get lynched by the village. You win if they lynch you.",
     aura: "Unknown",
@@ -655,6 +656,18 @@ let roles = {
     cgp : "1000c",
     tag : tags.ROLE.SOLO_KILLER |
           tags.ROLE.WWO_ROLE | tags.ROLE.AVAILABLE
+  },
+  "Dazzler": {
+  	desc: "Every other night, you can kill two players." +
+    "The next day, you can shine the beam on another player to stop their ability. "+
+    "If their role has the ability to see, you can choose to use their ability once.",
+    aura: "Unknown",
+    team: "Solo",
+    abbr: ["dazz", "dazzle"],
+    cat : "Killer",
+    nite: "Select a player to \"dazzle\" (`w!dazzle [player1]`).",
+    tag : tags.ROLE.SOLO_KILLER |
+          tags.ROLE.OTHER_ROLE | tags.ROLE.UNAVAILABLE
   },
   "Illusionist": {
   	desc: "Each night you can disguise a player." +

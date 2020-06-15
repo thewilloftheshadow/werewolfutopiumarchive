@@ -198,7 +198,7 @@ module.exports = client => {
       }
     })
 
-    app.ws("/ws", (ws, req) => {
+    app.ws("/wsserver", (ws, req) => {
       ws.on('message', function (message) {
         console.log(`New message: ${message}`)
       })

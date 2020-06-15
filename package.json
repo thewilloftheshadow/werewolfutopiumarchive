@@ -6,13 +6,11 @@
   "dependencies": {
     "discord.js": "^12.2.0",
     "fs": "^0.0.2",
-    "discord.js-commando": "^0.10.0",
     "es6-shim": "^0.35.5",
     "moment": "^2.26.0",
     "quick.db": "^7.1.1",
     "express": "^4.17.1",
     "better-sqlite-pool": "^0.3.0",
-    "striptags": "^3.1.1",
     "cookie-parser": "^1.4.5",
     "body-parser": "^1.19.0",
     "node-cmd": "^3.0.0",

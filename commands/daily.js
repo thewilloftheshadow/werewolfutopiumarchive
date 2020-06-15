@@ -199,5 +199,6 @@ module.exports = {
     players.set(`${message.author.id}.streak`, player.streak)
     
     message.channel.send(embed)
+    message.author.send(fn.event())
   }
 }

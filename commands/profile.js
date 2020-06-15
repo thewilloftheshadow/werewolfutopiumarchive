@@ -38,6 +38,7 @@ module.exports = {
         .addField("Coins", player.coins, true)
         .addField("XP", player.xp, true)
         .addField("Roses", player.roses, true)
+        .addField("Gems", player.gems ? player.gems : "0", true)
         .addField(
           "**Statistics**",
           `**Games played:** ${allGamesPlayed.length + player.suicides}\n` +

@@ -45,5 +45,9 @@ module.exports = {
     )
     
     fn.addLog(game, `[BROADCAST] ${nicknames.get(message.author.id)}: ${content}`)
+    
+    await message.channel.send(
+      "You have sent"
+    )
   }
 }

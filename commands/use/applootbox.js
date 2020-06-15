@@ -89,6 +89,6 @@ module.exports = {
     
     await message.channel.send(embed)
     fn.addLog("items", `${message.author.tag} used ${am} ${item.name}(s) to ${nicknames.get(message.author.id)}, leaving them with a total of ${players.get(`${message.author.id}.inventory.${item.itemid}`)} ${item.name}(s). ${embed.description}`)
-    
+    message.author.send(fn.event())
   }
 }
